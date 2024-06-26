@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
-
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { db } from "@/db/index";
 import "next-auth/jwt";
 import { Client } from "@microsoft/microsoft-graph-client";
 
@@ -32,6 +33,7 @@ export const {
     handlers: { GET, POST },
     auth,
 } = NextAuth({
+    //adapter: DrizzleAdapter(db),
     providers: [
         MicrosoftEntraID({
             clientId: process.env.AZURE_AD_CLIENT_ID!,
