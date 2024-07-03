@@ -13,8 +13,7 @@ export function SignIn() {
       }
       return (
         <>
-          Not signed in <br />
-          <Button onClick={() => signIn()}>Sign in</Button>
+          <Button onClick={() => signIn("microsoft-entra-id")}>Sign in</Button>
         </>
       )
     }

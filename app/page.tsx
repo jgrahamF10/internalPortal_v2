@@ -1,10 +1,11 @@
-"use client";
+'use client';
 import Image from "next/image";
 import { SignIn } from "@/components/signIn";
 import CustomLink from "@/components/custom-link";
 import { useSession } from "next-auth/react";
-import { auth } from "@/auth";
+
 import { ModeToggle } from "@/components/themeSwitcher";
+
 
 export default function Home() {
     const { data: session } = useSession();

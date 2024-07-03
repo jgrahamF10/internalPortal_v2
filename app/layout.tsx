@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Providers } from "./provider";
 import { Inter as FontSans } from "next/font/google";
+import { DM_Sans } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
+import SideNav from "@/components/layout/sideNav";
+import SearchBar from "@/components/layout/searchBar";
 
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -9,6 +13,19 @@ import { ThemeProvider } from "@/components/theme-provider";
 const fontSans = FontSans({
     subsets: ["latin"],
     variable: "--font-sans",
+});
+
+const fontHeading = DM_Sans({
+    subsets: ["latin"],
+    display: "swap",
+    variable: "--font-heading",
+});
+
+const fontBody = Poppins({
+    subsets: ["latin"],
+    display: "swap",
+    variable: "--font-body",
+    weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +43,8 @@ export default async function RootLayout({
             <body
                 className={cn(
                     "min-h-screen bg-background font-sans antialiased",
-                    fontSans.variable
+                    fontHeading.variable,
+                    fontBody.variable
                 )}
             >
                 <Providers>
@@ -36,7 +54,17 @@ export default async function RootLayout({
                         enableSystem
                         disableTransitionOnChange
                     >
-                        {children}
+                        <div className="fixed top-0 left-0 w-full z-50">
+                            <SearchBar />
+                        </div>
+                        <div className="fixed left-0 w-72 h-full z-40">
+                            <SideNav />
+                        </div>
+                        <div className="pt-16 md:pl-72 md:pr-2 p-4 flex justify-center md:justify-start">
+                            <div className="w-full max-w-7xl">
+                                {children}
+                            </div>
+                        </div>
                     </ThemeProvider>
                 </Providers>
             </body>

@@ -1,9 +1,11 @@
 import NextAuth from "next-auth";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { db } from "@/db/index";
 import "next-auth/jwt";
 import { Client } from "@microsoft/microsoft-graph-client";
+import type { Provider } from "next-auth/providers"
+import authConfig from "./auth.config"
+import { db } from "@/db/index";
+import { DrizzleAdapter } from "@auth/drizzle-adapter";
 
 async function getUserRoles(accessToken: string) {
     const client = Client.init({
@@ -29,24 +31,37 @@ async function getUserRoles(accessToken: string) {
     }
 }
 
+const providers: Provider[] = [
+    MicrosoftEntraID({
+        clientId: process.env.AZURE_AD_CLIENT_ID!,
+        clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
+        tenantId: process.env.AZURE_AD_TENANT_ID!,
+        authorization: {
+            params: {
+                scope: "openid profile email User.Read Directory.Read.All",
+            },
+        },
+    }),
+];
+
+export const providerMap = providers.map((provider) => {
+    if (typeof provider === "function") {
+      const providerData = provider()
+      return { id: providerData.id, name: providerData.name }
+    } else {
+      return { id: provider.id, name: provider.name }
+    }
+  })
+
 export const {
     handlers: { GET, POST },
     auth,
+    signIn,
 } = NextAuth({
-    //adapter: DrizzleAdapter(db),
-    providers: [
-        MicrosoftEntraID({
-            clientId: process.env.AZURE_AD_CLIENT_ID!,
-            clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
-            tenantId: process.env.AZURE_AD_TENANT_ID!,
-            authorization: {
-                params: {
-                    scope: "openid profile email User.Read Directory.Read.All",
-                },
-            },
-        }),
-    ],
-
+    adapter: DrizzleAdapter(db),
+    pages: {
+        signIn: "/auth/sign-in",
+    },
     callbacks: {
         async jwt({ token, account }) {
             if (account && account.access_token) {
@@ -62,4 +77,9 @@ export const {
             return session;
         },
     },
+    session: {
+       strategy: "jwt"
+    },
+    ...authConfig,
+    
 });
