@@ -40,7 +40,7 @@ import {
     PopoverTrigger,
     PopoverContent,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
 
 interface ModalParams {
     params: { person: string; uploader: string; intakeId: number };
@@ -265,10 +265,10 @@ export default function EditProjectApprovalModal({
                                                 className="w-auto p-0"
                                                 align="start"
                                             >
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={
-                                                        field.value ?? undefined
+                                                <Input
+                                                    type="date"
+                                                    {
+                                                        ...field.value ?? undefined
                                                     }
                                                     onSelect={field.onChange}
                                                 />
