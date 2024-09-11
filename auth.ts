@@ -4,7 +4,9 @@ import "next-auth/jwt";
 import { Client } from "@microsoft/microsoft-graph-client";
 import type { Provider } from "next-auth/providers"
 import authConfig from "./auth.config"
-import { db } from "@/db/index";
+import { db } from "@/db/index"; 
+import { users, accounts, sessions, } from "@/db/schema/auth_db";
+import { eq, ne, and } from "drizzle-orm";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 
 async function getUserRoles(accessToken: string) {
@@ -30,44 +32,35 @@ async function getUserRoles(accessToken: string) {
         return [];
     }
 }
-
-const providers: Provider[] = [
-    MicrosoftEntraID({
-        clientId: process.env.AZURE_AD_CLIENT_ID!,
-        clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
-        tenantId: process.env.AZURE_AD_TENANT_ID!,
-        authorization: {
-            params: {
-                scope: "openid profile email User.Read Directory.Read.All",
-            },
-        },
-    }),
-];
-
-export const providerMap = providers.map((provider) => {
-    if (typeof provider === "function") {
-      const providerData = provider()
-      return { id: providerData.id, name: providerData.name }
-    } else {
-      return { id: provider.id, name: provider.name }
-    }
-  })
+ 
 
 export const {
     handlers: { GET, POST },
     auth,
     signIn,
+    signOut
 } = NextAuth({
-    adapter: DrizzleAdapter(db),
+    adapter: DrizzleAdapter(db, {
+        usersTable: users,
+        accountsTable: accounts,
+        sessionsTable: sessions,
+    }),
     pages: {
         signIn: "/auth/sign-in",
+        signOut: "/auth/sign-out",
     },
     callbacks: {
-        async jwt({ token, account }) {
+        async jwt({ token, account, user }) {
             if (account && account.access_token) {
                 token.accessToken = account.access_token;
                 token.roles = await getUserRoles(account.access_token);
-                //console.log("Fetched roles:", token.roles);
+                //console.log("Fetched User:", user);
+                if (user && user.email) {
+                    await db.update(users)
+                        .set({ last_login: new Date() })
+                        .where(eq(users.email, user.email))
+                        .execute();
+                }
             }
             return token;
         },
@@ -78,7 +71,7 @@ export const {
         },
     },
     session: {
-       strategy: "jwt"
+        strategy: "jwt"
     },
     ...authConfig,
     

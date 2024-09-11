@@ -16,8 +16,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { useSession } from "next-auth/react";
-import { Session } from "next-auth";
+import { useSession, signOut } from "next-auth/react";
 import { ModeToggle } from "@/components/themeSwitcher";
 
 export default function SideNav() {
@@ -60,12 +59,16 @@ export default function SideNav() {
                         </Link>
                     </div>
                     <div className="flex flex-1 flex-col overflow-y-auto">
-                        <Link
+                        {session && session?.user && (
+                            <Link
                             href="/dashboard"
                             className="flex h-12 items-center pl-4  border-b px-4 text-sm font-medium transition-colors hover:bg-gray-700"
                         ><DashboardIcon />
                             <span className="text-center pl-20"> Dashboard</span>
                         </Link>
+
+                        )}
+                        
                         <Accordion type="single" collapsible>
                             {/* <--------- Tech Management --------- */}
                             {session?.roles?.some(role => ["Managers", "Human Resources"].includes(role)) && (
@@ -75,15 +78,15 @@ export default function SideNav() {
                                         Tech Management
                                     </AccordionTrigger>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/hr/techs">Roster</Link>
+                                        <Link href="/hr/roster">Roster</Link>
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/assets/models">
+                                        <Link href="/hr/projects">
                                             Projects
                                         </Link>
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/assets/types">
+                                        <Link href="/hr/types">
                                             Asset Types
                                         </Link>
                                     </AccordionContent>
@@ -106,17 +109,17 @@ export default function SideNav() {
                                        <AppReporting /> Trackers
                                     </AccordionTrigger>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/parts">
+                                        <Link href="/hotels">
                                             Hotel Tracker
                                         </Link>
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/parts">
+                                        <Link href="/flights">
                                              Flight Tracker
                                         </Link>
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/parts">
+                                        <Link href="/rentals">
                                              Rental Tracker
                                         </Link>
                                     </AccordionContent>
@@ -141,6 +144,9 @@ export default function SideNav() {
                                 </AccordionItem>
                             )}
                         </Accordion>
+                        {session && session?.user && (
+                            <button onClick={() => signOut()} className="flex h-32 items-center justify-center">Sign Out</button>
+                        )}
                     </div>
                 </nav>
             </div>

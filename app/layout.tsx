@@ -7,6 +7,7 @@ import "./globals.css";
 import SideNav from "@/components/layout/sideNav";
 import SearchBar from "@/components/layout/searchBar";
 
+
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -60,10 +61,8 @@ export default async function RootLayout({
                         <div className="fixed left-0 w-72 h-full z-40">
                             <SideNav />
                         </div>
-                        <div className="pt-16 md:pl-72 md:pr-2 p-4 flex justify-center md:justify-start">
-                            <div className="w-full max-w-7xl">
-                                {children}
-                            </div>
+                        <div className="pt-16 pl-72 pr-2 py-8">
+                            {children}
                         </div>
                     </ThemeProvider>
                 </Providers>

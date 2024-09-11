@@ -6,7 +6,7 @@ import { signIn, auth } from "@/auth";
 
 export default function Page() {
     return (
-        <div className="flex min-h-screen w-full items-center justify-center bg-background transition-colors">
+        <div className="relative flex min-h-screen w-full items-center justify-center bg-background transition-colors">
             <div className="absolute inset-0 z-0">
                 <Image
                     src={myImage}
