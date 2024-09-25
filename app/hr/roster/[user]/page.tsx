@@ -9,7 +9,7 @@ import Link from "next/link";
 import IntakeModal from "@/components/hr_components/edit_intake";
 import ProjectApprovalModal from "@/components/hr_components/projectApproval";
 import NewNoteModal from "@/components/hr_components/person_note";
-import { EditProjectApproval } from "@/components/hr_components/editProjectApproval";
+import EditProjectApproval from "@/components/hr_components/editProjectApproval";
 
 interface UserName {
     params: { user: string };

@@ -56,7 +56,7 @@ const FormSchema = z.object({
     approvalDate: z.date().nullable(),
 });
 
-export function EditProjectApproval({ errorStatusChange, projectApprovalId, editingUser }: EditProjectFormProps) {
+export default function EditProjectApproval({ errorStatusChange, projectApprovalId, editingUser }: EditProjectFormProps) {
     const { register, handleSubmit, formState: { errors }, reset } = useForm<ProjectBGStatus>();
     
     const [projectApproval, setProjectApproval] = useState<any>(null); // Use null to represent the initial state

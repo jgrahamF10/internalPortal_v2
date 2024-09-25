@@ -1,59 +1,189 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { getMember } from "@/app/hr/hrActions";
-import React, { useState, useEffect } from "react";
-import { EosIconsBubbleLoading } from "@/components/spinner";
-import { useSession } from "next-auth/react";
-import NotAuth from "@/components/auth/notAuth";
-import Link from "next/link";
-import IntakeModal from "@/components/hr_components/edit_intake";
-import ProjectApprovalModal from "@/components/hr_components/projectApproval";
-import NewNoteModal from "@/components/hr_components/person_note";
-import EditProjectApprovalModal from "@/components/hr_components/editProjectApproval";
-import { Suspense } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import DataTable from "react-data-table-component";
+import { getRoster } from "@/app/hr/hrActions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { EosIconsBubbleLoading } from "@/components/spinner";
+import Link from "next/link";
+import styled from "styled-components";
+import { useSession } from "next-auth/react";
 
-interface UserName {
-    params: { user: string };
-}
 
-type SearchParamProps = {
-    searchParams: Record<string, string> | null | undefined;
-};
+const TextField = styled.input`
+    height: 32px;
+    width: 200px;
+    border-radius: 3px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border: 1px solid #e5e5e5;
+    padding: 0 32px 0 16px;
 
-export default function MemberDetails({
-    params,
-    searchParams,
-}: UserName & SearchParamProps) {
-    const [member, setMember] = useState<any>(null);
+    &:hover {
+        cursor: pointer;
+    }
+`;
+
+const FilterComponent = ({
+    filterText,
+    onFilter,
+    onClear,
+}: {
+    filterText: string;
+    onFilter: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onClear: () => void;
+}) => (
+    <div className="flex justify-between items-center mb-4">
+        <TextField
+            id="search"
+            type="text"
+            placeholder="Filter assets"
+            aria-label="Search Input"
+            value={filterText}
+            onChange={onFilter}
+            className="form-input"
+        />
+        <button
+            type="button"
+            onClick={onClear}
+            className="btn btn-secondary bg-red-400 px-1 py-1 rounded-md"
+        >
+            Clear
+        </button>
+    </div>
+);
+
+export default function Page() {
+    const router = useRouter();
+    const [members, setMembers] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [notFound, setNotFound] = useState<boolean>(false);
-    const [auditLogVisible, setAuditLogVisible] = useState<boolean>(false);
-    const [intakeStatus, setIntakeStatus] = useState<any>(null);
+    const [errorStatus, setErrorStatus] = useState<boolean>(false);
+    const [inactives, setInactives] = useState<boolean>(false);
+    const [filterText, setFilterText] = useState<string>("");
+    const [resetPaginationToggle, setResetPaginationToggle] =
+        useState<boolean>(false);
     const { data: session } = useSession();
-    const showIntake = searchParams?.show;
-    const showProjectApproval = searchParams?.showProjectApproval;
-    const newNote = searchParams?.newNote;
-    const editIntake = searchParams?.editIntake;
-    const [upDated, setUpDated] = useState<boolean>(false);
-    const [editIntakeId, setEditIntakeId] = useState<number | null>(null); // Track the currently edited intake
-
-    //console.log("sessionData", session);
+    
 
     useEffect(() => {
         async function fetchData() {
-            const fetchedMember = await getMember(params.user);
-            if (fetchedMember === undefined) {
-                setNotFound(true);
-                setLoading(false);
-            } else {
-                //console.log("fetchedMember", fetchedMember);
-                setMember(fetchedMember);
-                setLoading(false);
-            }
+            const members: any = await getRoster();
+            console.log("members", members);
+            setMembers(members);
+            setLoading(false);
         }
         fetchData();
-    }, [params.user, upDated]);
+    }, []);
+
+    const errorStatusChange = (estatus: boolean) => {
+        setErrorStatus(estatus);
+        if (estatus) {
+            setErrorStatus(true);
+        } else {
+            window.location.reload();
+        }
+    };
+
+    const handleInactive = () => {
+        setInactives(!inactives);
+    };
+
+    const filteredAssets = members.filter((user) => {
+        // Filter by active/inactive status
+        if (inactives) {
+            if (user.status !== "Inactive") return false;
+        } else {
+            if (user.status !== "Active") return false;
+        }
+
+        // If filterText is empty, include all remaining users
+        if (!filterText) return true;
+
+        // Convert filterText to lowercase for case-insensitive matching
+        const lowerFilterText = filterText.toLowerCase();
+
+        // Match against the relevant fields
+        return (
+            user.preferedName.toLowerCase().includes(lowerFilterText) ||
+            user.designation?.toLowerCase().includes(lowerFilterText) || // Assuming you meant designation
+            user.email?.toLowerCase().includes(lowerFilterText) ||
+            user.city?.toLowerCase().includes(lowerFilterText) ||
+            user.state?.toLowerCase().includes(lowerFilterText) ||
+            user.zipcode?.toLowerCase().includes(lowerFilterText)
+        );
+    });
+
+    const subHeaderComponentMemo = useMemo(() => {
+        const handleClear = () => {
+            if (filterText) {
+                setResetPaginationToggle(!resetPaginationToggle);
+                setFilterText("");
+            }
+        };
+
+        return (
+            <FilterComponent
+                onFilter={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFilterText(e.target.value)
+                }
+                onClear={handleClear}
+                filterText={filterText}
+            />
+        );
+    }, [filterText, resetPaginationToggle]);
+
+    const columns = [
+        {
+            name: "Name",
+            selector: (row: any) => row.preferedName,
+            cell: (row: any) => (
+                <Link
+                    href={`/hr/roster/${row.preferedName}-${row.lastname}`}
+                    className="font-medium text-green-700 capitalize hover:underline"
+                >
+                    {row.preferedName} {row.lastname}
+                </Link>
+            ),
+            sortable: true,
+        },
+        {
+            name: "Designation",
+            selector: (row: any) => row.designation,
+            sortable: true,
+        },
+        {
+            name: "Phone",
+            selector: (row: any) => row.phone,
+            sortable: true,
+        },
+        {
+            name: "Email",
+            selector: (row: any) => row.email,
+            sortable: true,
+            cell: (row: any) => <span className="capitalize">{row.email}</span>,
+        },
+        {
+            name: "City",
+            selector: (row: any) => row.city,
+            sortable: true,
+            cell: (row: any) => <span className="capitalize">{row.city}</span>,
+        },
+        {
+            name: "Status",
+            selector: (row: any) => (row.status ? "Active" : "Inactive"),
+            sortable: true,
+            cell: (row: any) => (
+                <span
+                    className={row.status ? "text-green-600" : "text-red-600"}
+                >
+                    {row.status ? "Active" : "Inactive"}
+                </span>
+            ),
+        },
+    ];
 
     if (loading) {
         return (
@@ -70,373 +200,44 @@ export default function MemberDetails({
         );
     }
 
-    if (
-        !session?.roles?.some((role) =>
-            ["Managers", "Human Resources"].includes(role)
-        )
-    ) {
-        return <NotAuth />;
-    }
-
-    if (notFound) {
-        return (
-            <div className="container mx-auto py-8 px-4 md:px-6">
-                <div className="bg-white rounded-lg shadow-md p-6 dark:bg-gray-950">
-                    <h2 className="text-2xl font-bold">
-                        Person Not Found -{" "}
-                        <span className="text-red-600">{params.user}</span>
-                    </h2>
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="p-2">
-            <nav className="flex justify-end space-x-2">
-                <a href="/hr/roster" className="text-muted-foreground">
-                    All Members
-                </a>
-                <span className="text-muted-foreground">/</span>
-                <span className="text-muted-foreground">Details</span>
-            </nav>
-
-            <div className="container mx-auto py-8 px-4 md:px-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="rounded-lg shadow-md p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold">
-                                <span className=" underline">
-                                    {member?.preferedName} {member?.lastname}
-                                </span>
-                            </h2>
-                        </div>
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-bold">
-                                Status:{" "}
-                                <span
-                                    className={
-                                        member?.status === "Do not Contact"
-                                            ? "text-red-500 dark:text-red-400"
-                                            : member?.status === "Active"
-                                            ? "text-green-700"
-                                            : ""
-                                    }
-                                >
-                                    {member?.status}
-                                </span>
-                            </h3>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="block text-sm font-bold">
-                                Classification:{" "}
-                                <span className="font-medium underline">
-                                    {member?.designation}
-                                </span>
-                            </div>
-                            <div className="block text-sm font-bold ">
-                                Email:{" "}
-                                <span className="font-medium underline">
-                                    {member?.email}
-                                </span>
-                            </div>
-                            <div className="block text-sm font-bold">
-                                Actual First Name:{" "}
-                                <span className="font-medium capitalize">
-                                    {member?.firstname}
-                                </span>
-                            </div>
-                            <div className="block text-sm font-bold">
-                                Date Of Birth:{" "}
-                                <span className="font-medium underline">
-                                    {member?.dob.toString()}
-                                </span>
-                            </div>
-                            <div className="block text-sm font-bold">
-                                Phone:{" "}
-                                <span className="font-medium underline">
-                                    {member?.phone}
-                                </span>
-                            </div>
-
-                            <div className="block text-sm font-bold">
-                                Address:{" "}
-                                <span className="font-medium capitalize">
-                                    {member?.address}
-                                </span>
-                            </div>
-                            <div className="block text-sm font-bold">
-                                City:{" "}
-                                <span className="font-medium capitalize">
-                                    {member?.city}
-                                </span>
-                            </div>
-                            <div className="block text-sm font-bold">
-                                State:{" "}
-                                <span className="font-medium capitalize">
-                                    {member?.state}
-                                </span>
-                            </div>
-                            <div className="block text-sm font-bold">
-                                Zip:{" "}
-                                <span className="font-medium capitalize">
-                                    {member?.zipcode}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="rounded-lg shadow-md p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-2xl font-bold mb-4 underline">
-                                Intake Status
-                            </h2>
-                            <Link href={`/hr/roster/${params.user}/?show=true`}>
-                                <Button variant="destructive">
-                                    Add Resume
-                                </Button>
-                            </Link>
-                            {showIntake && (
-                                <IntakeModal params={{ user: params.user }} />
-                            )}
-                        </div>
-                        <div className="overflow-x-auto"></div>
-                        <div className="grid grid-cols-1 gap-4">
-                            <div className="block text-lg font-bold ">
-                                Status:{" "}
-                                <span
-                                    className={
-                                        member?.intakeStatus === "Failed"
-                                            ? "text-red-500 dark:text-red-400 underline"
-                                            : intakeStatus?.intakeStatus ===
-                                              "Approved"
-                                            ? "text-green-700 dark:text-green-400 underline"
-                                            : ""
-                                    }
-                                >
-                                    {member?.intakeStatus}
-                                </span>
-                            </div>
-                            <div className="block text-md font-bold ">
-                                Documents Collected:{" "}
-                                <span
-                                    className={
-                                        member?.documentsCollected === false
-                                            ? "text-red-500 dark:text-red-400 underline"
-                                            : member.documentsCollected === true
-                                            ? "text-green-700 underline"
-                                            : ""
-                                    }
-                                >
-                                    {member?.documentsCollected
-                                        ? " Collected"
-                                        : " Missing"}
-                                </span>
-                            </div>
-                            <div className="block text-md font-bold">
-                                Submission Date:{" "}
-                                <span className="font-medium capitalize">
-                                    {member?.startDate.toString()}
-                                </span>
-                            </div>
-                            <div className="block text-md font-bold">
-                                Approval Date:{" "}
-                                <span className="font-medium capitalize">
-                                    {member?.approvalDate.toString()}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+        <div className="flex justify-center min-h-[90vh]">
+            <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-2xl font-semibold">Tech Roster</h1>
+                    {session?.roles?.some((role) =>
+                        ["Managers", "Human Resources"].includes(role)
+                    ) && (
+                        <button className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-lg">
+                            Create User
+                        </button>
+                    )}
                 </div>
-                <div className=" rounded-lg shadow-md p-6 mt-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold mb-4">
-                            Project Approval Status
-                        </h2>
-                        <Link
-                            href={`/hr/roster/${params.user}/?showProjectApproval=true`}
-                        >
-                            <Button className="bg-green-700">
-                                Add Project Approval
-                            </Button>
-                        </Link>
-                        {showProjectApproval && (
-                            <ProjectApprovalModal
-                                params={{
-                                    person: params.user,
-                                    uploader: session?.user?.name ?? "",
-                                }}
-                                onNoteCreated={() => setUpDated(true)}
-                            />
-                        )}
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full table-auto ">
-                            <thead className="bg-slate-400">
-                                <tr>
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
-                                        Background Status
-                                    </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
-                                        Project Name
-                                    </th>
-
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
-                                        Documents Collected
-                                    </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
-                                        Submission Date
-                                    </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
-                                        Approval Date
-                                    </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
-                                        Updated By
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {member.ProjectIntake.map(
-                                    (projectIntake: any) => (
-                                        <tr
-                                            key={projectIntake.id}
-                                            className="border-b border-gray-200 dark:border-gray-700"
-                                        >
-                                            <td
-                                                className={
-                                                    projectIntake.bgStatus ===
-                                                    "Failed"
-                                                        ? "text-red-500  underline px-8"
-                                                        : projectIntake.bgStatus ===
-                                                          "Completed"
-                                                        ? "text-green-700  underline px-8"
-                                                        : projectIntake.bgStatus ===
-                                                          "In Progress"
-                                                        ? "text-blue-700  underline px-8"
-                                                        : ""
-                                                }
-                                            >
-                                                <Link
-                                                    href="#"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        setEditIntakeId(
-                                                            projectIntake.id
-                                                        ); // Set the specific intake to be edited
-                                                    }}
-                                                >
-                                                    {projectIntake.bgStatus}
-                                                </Link>
-
-                                                {/* Show modal only when the current intake is being edited */}
-                                                {editIntakeId ===
-                                                    projectIntake.id && (
-                                                    <EditProjectApprovalModal
-                                                        params={{
-                                                            person: params.user,
-                                                            uploader:
-                                                                session?.user
-                                                                    ?.name ??
-                                                                "",
-                                                            intakeId:
-                                                                projectIntake.id,
-                                                        }}
-                                                        onNoteCreated={() => {
-                                                            setUpDated(true);
-                                                            setEditIntakeId(
-                                                                null
-                                                            ); // Close modal after submission
-                                                        }}
-                                                    />
-                                                )}
-                                            </td>
-                                            <td className="px-4 py-2 text-sm">
-                                                {
-                                                    projectIntake.project
-                                                        .projectName
-                                                }
-                                            </td>
-                                            <td
-                                                className={`px-4 py-2 text-sm ${
-                                                    projectIntake.documentsCollected
-                                                        ? "text-green-600"
-                                                        : "text-red-600"
-                                                }`}
-                                            >
-                                                {projectIntake.documentsCollected
-                                                    ? "Yes"
-                                                    : "No"}
-                                            </td>
-                                            <td className="px-4 py-2 text-sm">
-                                                {projectIntake.submissionDate.toLocaleDateString()}
-                                            </td>
-                                            <td className="px-4 py-2 text-sm">
-                                                {projectIntake.approvalDate}
-                                            </td>
-                                            <td className="px-4 py-2 text-sm">
-                                                {projectIntake.updatedBy}
-                                            </td>
-                                        </tr>
-                                    )
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                <div className="flex justify-start mb-4">
+                    <h3
+                        className="text-sm font-semibold cursor-pointer"
+                        onClick={handleInactive}
+                    >
+                        <button className="bg-blue-600 text-white py-1 px-2 rounded-sm">
+                            Show inactives
+                        </button>
+                    </h3>
                 </div>
-                <div className=" rounded-lg shadow-md p-6 mt-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold mb-4">Notes</h2>
-                        <Link href={`/hr/roster/${params.user}/?newNote=true`}>
-                            <Button className="bg-blue-600">Add Note</Button>
-                        </Link>
-                        {newNote && (
-                            <NewNoteModal
-                                params={{
-                                    person: params.user,
-                                    uploader: session?.user?.name ?? "",
-                                }}
-                                onNoteCreated={() => setUpDated(true)}
-                            />
-                        )}
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full table-auto">
-                            <thead>
-                                <tr className="bg-slate-400">
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
-                                        Note
-                                    </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
-                                        Created By
-                                    </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
-                                        Created Date
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {member.Notes.map((note: any) => (
-                                    <tr
-                                        className="border-b border-gray-200 dark:border-gray-700"
-                                        key={note.id}
-                                    >
-                                        <td className="px-4 py-2 text-sm">
-                                            {note.note}
-                                        </td>
-                                        <td className="px-4 py-2 text-sm">
-                                            {note.enteredBy}
-                                        </td>
-
-                                        <td className="px-4 py-2 text-sm">
-                                            {note.createdDate.toLocaleDateString()}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                <h3 className="pb-2">Displaying {filteredAssets.length} Technicians</h3>
+                <div className="overflow-auto">
+                    <DataTable
+                        columns={columns}
+                        data={filteredAssets}
+                        pagination
+                        paginationResetDefaultPage={resetPaginationToggle}
+                        paginationPerPage={20}
+                        paginationRowsPerPageOptions={[10, 25, 50, 100]}
+                        subHeader
+                        subHeaderComponent={subHeaderComponentMemo}
+                        persistTableHead
+                    />
                 </div>
-
-                {/* Alert component for error handling 
                 <Alert
                     variant="destructive"
                     className={errorStatus ? "" : "hidden"}
@@ -444,10 +245,9 @@ export default function MemberDetails({
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Error</AlertTitle>
                     <AlertDescription>
-                        {errorMsg ? errorMsg : "Error editing member."}
+                        That manufacturer already exists.
                     </AlertDescription>
                 </Alert>
-                */}
             </div>
         </div>
     );
