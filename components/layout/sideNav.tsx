@@ -61,17 +61,22 @@ export default function SideNav() {
                     <div className="flex flex-1 flex-col overflow-y-auto">
                         {session && session?.user && (
                             <Link
-                            href="/dashboard"
-                            className="flex h-12 items-center pl-4  border-b px-4 text-sm font-medium transition-colors hover:bg-gray-700"
-                        ><DashboardIcon />
-                            <span className="text-center pl-20"> Dashboard</span>
-                        </Link>
-
+                                href="/dashboard"
+                                className="flex h-12 items-center pl-4  border-b px-4 text-sm font-medium transition-colors hover:bg-gray-700"
+                            >
+                                <DashboardIcon />
+                                <span className="text-center pl-20">
+                                    {" "}
+                                    Dashboard
+                                </span>
+                            </Link>
                         )}
-                        
+
                         <Accordion type="single" collapsible>
                             {/* <--------- Tech Management --------- */}
-                            {session?.roles?.some(role => ["Managers", "Human Resources"].includes(role)) && (
+                            {session?.roles?.some((role) =>
+                                ["Managers", "Human Resources"].includes(role)
+                            ) && (
                                 <AccordionItem value="item-1">
                                     <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
                                         <RiTeamFill />
@@ -85,28 +90,15 @@ export default function SideNav() {
                                             Projects
                                         </Link>
                                     </AccordionContent>
-                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/hr/types">
-                                            Asset Types
-                                        </Link>
-                                    </AccordionContent>
-                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/assets/makes">
-                                            Manufactuers
-                                        </Link>
-                                    </AccordionContent>
-                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/assets/makes">
-                                            Purchase Orders
-                                        </Link>
-                                    </AccordionContent>
                                 </AccordionItem>
                             )}
                             {/* <--------- Trackers --------- */}
-                            {session?.roles?.some(role => ["Managers", "Human Resources"].includes(role)) && (
+                            {session?.roles?.some((role) =>
+                                ["Managers", "Human Resources"].includes(role)
+                            ) && (
                                 <AccordionItem value="item-2">
                                     <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
-                                       <AppReporting /> Trackers
+                                        <AppReporting /> Trackers
                                     </AccordionTrigger>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
                                         <Link href="/hotels">
@@ -115,12 +107,12 @@ export default function SideNav() {
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
                                         <Link href="/flights">
-                                             Flight Tracker
+                                            Flight Tracker
                                         </Link>
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
                                         <Link href="/rentals">
-                                             Rental Tracker
+                                            Rental Tracker
                                         </Link>
                                     </AccordionContent>
                                 </AccordionItem>
@@ -129,23 +121,21 @@ export default function SideNav() {
                             {session?.roles?.includes("Managers") && (
                                 <AccordionItem value="item-3">
                                     <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
-                                        <GraphIcon /> Project Reporting
+                                        <GraphIcon /> Manager Tools
                                     </AccordionTrigger>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/locations">
-                                            Location Groups
-                                        </Link>
-                                    </AccordionContent>
-                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/locations/sites">
-                                            Sites
-                                        </Link>
+                                        <Link href="/locations">TBD</Link>
                                     </AccordionContent>
                                 </AccordionItem>
                             )}
                         </Accordion>
                         {session && session?.user && (
-                            <button onClick={() => signOut()} className="flex h-32 items-center justify-center">Sign Out</button>
+                            <button
+                                onClick={() => signOut()}
+                                className="flex h-32 items-center justify-center"
+                            >
+                                Sign Out
+                            </button>
                         )}
                     </div>
                 </nav>
@@ -295,5 +285,25 @@ export function PlaneIcon(props: SVGProps<SVGSVGElement>) {
 }
 
 export function DashboardIcon(props: SVGProps<SVGSVGElement>) {
-	return (<svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 36 36" {...props}><path fill="currentColor" d="m25.18 12.32l-5.91 5.81a3 3 0 1 0 1.41 1.42l5.92-5.81Z" className="clr-i-outline clr-i-outline-path-1"></path><path fill="currentColor" d="M18 4.25A16.49 16.49 0 0 0 5.4 31.4l.3.35h24.6l.3-.35A16.49 16.49 0 0 0 18 4.25m11.34 25.5H6.66a14.43 14.43 0 0 1-3.11-7.84H7v-2H3.55A14.4 14.4 0 0 1 7 11.29l2.45 2.45l1.41-1.41l-2.43-2.46A14.4 14.4 0 0 1 17 6.29v3.5h2V6.3a14.47 14.47 0 0 1 13.4 13.61h-3.48v2h3.53a14.43 14.43 0 0 1-3.11 7.84" className="clr-i-outline clr-i-outline-path-2"></path><path fill="none" d="M0 0h36v36H0z"></path></svg>);
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={16}
+            height={16}
+            viewBox="0 0 36 36"
+            {...props}
+        >
+            <path
+                fill="currentColor"
+                d="m25.18 12.32l-5.91 5.81a3 3 0 1 0 1.41 1.42l5.92-5.81Z"
+                className="clr-i-outline clr-i-outline-path-1"
+            ></path>
+            <path
+                fill="currentColor"
+                d="M18 4.25A16.49 16.49 0 0 0 5.4 31.4l.3.35h24.6l.3-.35A16.49 16.49 0 0 0 18 4.25m11.34 25.5H6.66a14.43 14.43 0 0 1-3.11-7.84H7v-2H3.55A14.4 14.4 0 0 1 7 11.29l2.45 2.45l1.41-1.41l-2.43-2.46A14.4 14.4 0 0 1 17 6.29v3.5h2V6.3a14.47 14.47 0 0 1 13.4 13.61h-3.48v2h3.53a14.43 14.43 0 0 1-3.11 7.84"
+                className="clr-i-outline clr-i-outline-path-2"
+            ></path>
+            <path fill="none" d="M0 0h36v36H0z"></path>
+        </svg>
+    );
 }

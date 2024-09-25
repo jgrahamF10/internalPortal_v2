@@ -94,7 +94,7 @@ export function EditProjectApproval({ errorStatusChange, projectApprovalId, edit
         fetchData();
     }, [projectApprovalId, form, editingUser]);
 
-    //console.log("fetchedProject", projectApproval);
+    console.log("fetchedProject", projectApproval);
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             const updatedValues = {

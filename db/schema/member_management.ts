@@ -80,7 +80,7 @@ export const projectBGStatus = pgTable(
         memberId: integer("memberId").notNull(),
         bgStatus: bgStatus("bgStatus").notNull(),
         documentsCollected: boolean("documentsCollected").default(false),
-        submissionDate: timestamp("submissionDate").notNull(),
+        submissionDate: date("submissionDate").notNull(),
         approvalDate: date("approvalDate"),
         updatedBy: varchar("updatedBy", { length: 20 }).notNull(),
     },

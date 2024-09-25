@@ -70,11 +70,12 @@ export default function NewNoteModal({ params, onNoteCreated }: UserName) {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
             <div className="p-8 border w-96 shadow-lg rounded-md bg-white">
                 <div className="text-right px-2 rounded-md">
-                    <Link href={`/hr/roster/${params.person}`}>
-                        <Button variant="destructive">
-                            <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+                <Button variant="ghost" className="ml-auto pb-2">
+                            <Link href={`/hr/roster/${params.person}`}>
+                                <XIcon className="w-4 h-4" />
+                                <span className="sr-only">Close</span>
+                            </Link>
                         </Button>
-                    </Link>
                     
                 </div>
                 <div className="text-center">
@@ -118,5 +119,28 @@ export default function NewNoteModal({ params, onNoteCreated }: UserName) {
                 </div>
             </div>
         </div>
+    );
+}
+
+
+function XIcon(
+    props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>
+) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+        </svg>
     );
 }

@@ -1,14 +1,16 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import { getRoster } from "../hrActions";
+import { getProjects } from "../hrActions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { EosIconsBubbleLoading } from "@/components/spinner";
 import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
+import { NewProjecForm } from "@/components/hr_components/newProject";
+import { EditProjectForm } from "@/components/hr_components/editProject";
 
 
 const TextField = styled.input`
@@ -56,9 +58,15 @@ const FilterComponent = ({
     </div>
 );
 
-export default function Page() {
+type SearchParamProps = {
+    searchParams: Record<string, string> | null | undefined;
+};
+
+export default function Page(
+    { searchParams }: SearchParamProps
+) {
     const router = useRouter();
-    const [members, setMembers] = useState<any[]>([]);
+    const [projects, setProjects] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
     const [inactives, setInactives] = useState<boolean>(false);
@@ -70,9 +78,9 @@ export default function Page() {
 
     useEffect(() => {
         async function fetchData() {
-            const members: any = await getRoster();
-            console.log("members", members);
-            setMembers(members);
+            const projects = await getProjects();
+            console.log("projects", projects);
+            setProjects(projects);
             setLoading(false);
         }
         fetchData();
@@ -91,12 +99,12 @@ export default function Page() {
         setInactives(!inactives);
     };
 
-    const filteredAssets = members.filter((user) => {
+    const filteredAssets = projects.filter((project) => {
         // Filter by active/inactive status
         if (inactives) {
-            if (user.status !== "Inactive") return false;
+            if (project.inactive !== true) return false;
         } else {
-            if (user.status !== "Active") return false;
+            if (project.inactive !== false) return false;
         }
 
         // If filterText is empty, include all remaining users
@@ -107,12 +115,7 @@ export default function Page() {
 
         // Match against the relevant fields
         return (
-            user.preferedName.toLowerCase().includes(lowerFilterText) ||
-            user.designation?.toLowerCase().includes(lowerFilterText) || // Assuming you meant designation
-            user.email?.toLowerCase().includes(lowerFilterText) ||
-            user.city?.toLowerCase().includes(lowerFilterText) ||
-            user.state?.toLowerCase().includes(lowerFilterText) ||
-            user.zipcode?.toLowerCase().includes(lowerFilterText)
+            project.projectName.toLowerCase().includes(lowerFilterText)
         );
     });
 
@@ -137,49 +140,24 @@ export default function Page() {
 
     const columns = [
         {
-            name: "Name",
-            selector: (row: any) => row.preferedName,
+            name: "ProjectName",
+            selector: (row: any) => row.projectName,
             cell: (row: any) => (
-                <Link
-                    href={`/hr/roster/${row.preferedName}-${row.lastname}`}
-                    className="font-medium text-green-700 capitalize hover:underline"
-                >
-                    {row.preferedName} {row.lastname}
+                <Link href={`/hr/projects/${row.projectName}`}>
+                    <span className="text-blue-600 font-semibold">{row.projectName}</span>
                 </Link>
             ),
             sortable: true,
         },
         {
-            name: "Designation",
-            selector: (row: any) => row.designation,
-            sortable: true,
-        },
-        {
-            name: "Phone",
-            selector: (row: any) => row.phone,
-            sortable: true,
-        },
-        {
-            name: "Email",
-            selector: (row: any) => row.email,
-            sortable: true,
-            cell: (row: any) => <span className="capitalize">{row.email}</span>,
-        },
-        {
-            name: "City",
-            selector: (row: any) => row.city,
-            sortable: true,
-            cell: (row: any) => <span className="capitalize">{row.city}</span>,
-        },
-        {
             name: "Status",
-            selector: (row: any) => (row.status ? "Active" : "Inactive"),
+            selector: (row: any) => (row.status ? "Inactive" : "Active" ),
             sortable: true,
             cell: (row: any) => (
                 <span
-                    className={row.status ? "text-green-600" : "text-red-600"}
+                    className={row.status ? "text-red-600" : "text-green-700 font-medium"  }
                 >
-                    {row.status ? "Active" : "Inactive"}
+                    {row.status ? "Inactive" : "Active" }
                 </span>
             ),
         },
@@ -205,14 +183,13 @@ export default function Page() {
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold">Tech Roster</h1>
+                    <h1 className="text-2xl font-semibold">All Assets</h1>
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (
-                        <button className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-lg">
-                            Create User
-                        </button>
-                    )}
+                        <NewProjecForm errorStatusChange={errorStatusChange} />
+                        )}
+
                 </div>
                 <div className="flex justify-start mb-4">
                     <h3
@@ -224,8 +201,8 @@ export default function Page() {
                         </button>
                     </h3>
                 </div>
-                <h3 className="pb-2">Displaying {filteredAssets.length} Technicians</h3>
-                <div className="overflow-auto">
+                <h3>Displaying {filteredAssets.length} Assets</h3>
+                <div className="overflow-auto rounded-md">
                     <DataTable
                         columns={columns}
                         data={filteredAssets}

@@ -10,9 +10,11 @@ import { and, eq, sql, asc } from "drizzle-orm";
 import {
     NewMemberNotes,
     NewProjectBGStatus,
+    NewProject
 } from "@/db/schema/member_management";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import exp from "constants";
 
 export async function getProjects() {
     const fetchedProjects = await db.query.projects.findMany({
@@ -101,7 +103,7 @@ export async function createNote(data: NewMemberNotes) {
 }
 
 export async function NewProjectApproval(data: NewProjectBGStatus) {
-    const userName = await getMemberUserName(data.memberId);
+    //const userName = await getMemberUserName(data.memberId);
     //console.log("userName", userName);
     try {
         await db.insert(projectBGStatus).values(data);
@@ -110,15 +112,16 @@ export async function NewProjectApproval(data: NewProjectBGStatus) {
     }
 }
 
-export async function updateProjectApproval(data: NewProjectBGStatus) {
-    //console.log("userName", userName);
+export async function updateProjectApproval(data: any) {
     try {
         await db
             .update(projectBGStatus)
             .set(data)
-            .where(eq(projectBGStatus.memberId, data.memberId));
+            .where(eq(projectBGStatus.id, data.intakeId));
+        return true;
     } catch (error) {
         console.error("Error creating note:", error);
+        return false;
     }
 }
 
@@ -135,3 +138,60 @@ export async function getProjectIntake(id: number) {
         return null;
     }
 }
+
+export async function createProject(data: NewProject) {
+    try {
+        await db.insert(projects).values(data);
+        return true;
+    } catch (error) {
+        console.error("Error creating note:", error);
+        return false;
+    }
+}
+
+export async function updateProject(data: NewProject) {
+    console.log("updating project data", data);
+    try {
+        await db
+            .update(projects)
+            .set(data)
+            .where(eq(projects.projectName, data.projectName));
+        return true;
+    } catch (error) {
+        console.error("Error updating project:", error);
+        return false;
+    }
+}
+
+export async function getProject(projectName: string) {
+    const result = await db.query.projects.findFirst({
+        where: eq(projects.projectName, projectName),
+    });
+    //console.log("results", results);
+    if (result) {
+        return result;
+    } else {
+        return null;
+    }
+}
+
+export async function getApprovedTechs(projectName: string) {
+    const projectData = await db.query.projects.findFirst({
+        where: eq(projects.projectName, projectName)   
+    });
+    if (!projectData) {
+        return [];
+    }
+    const results = await db.query.projectBGStatus.findMany({
+        where: and(
+            eq(projectBGStatus.projectId, projectData.id),
+            eq(projectBGStatus.bgStatus, "Completed")
+        ),
+        with: {
+            member: true,
+        },
+    });
+    //console.log("results", results);
+    return { project: projectData, technicians: results };
+}
+

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { getFile } from "@/lib/aws";
 
+
 export default function Page() {
     const fileKey = "attachments/2023_06_24_12_20_PM_pickup_2.jpg";
     const [imageUrl, setImageUrl] = useState("");

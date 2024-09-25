@@ -9,9 +9,7 @@ import Link from "next/link";
 import IntakeModal from "@/components/hr_components/edit_intake";
 import ProjectApprovalModal from "@/components/hr_components/projectApproval";
 import NewNoteModal from "@/components/hr_components/person_note";
-import EditProjectApprovalModal from "@/components/hr_components/editProjectApproval";
-import { Suspense } from "react";
-import { useRouter } from "next/navigation";
+import { EditProjectApproval } from "@/components/hr_components/editProjectApproval";
 
 interface UserName {
     params: { user: string };
@@ -34,9 +32,8 @@ export default function MemberDetails({
     const showIntake = searchParams?.show;
     const showProjectApproval = searchParams?.showProjectApproval;
     const newNote = searchParams?.newNote;
-    const editIntake = searchParams?.editIntake;
     const [upDated, setUpDated] = useState<boolean>(false);
-    const [editIntakeId, setEditIntakeId] = useState<number | null>(null); // Track the currently edited intake
+    const [errorStatus, setErrorStatus] = useState<boolean>(false);
 
     //console.log("sessionData", session);
 
@@ -54,6 +51,15 @@ export default function MemberDetails({
         }
         fetchData();
     }, [params.user, upDated]);
+
+    const errorStatusChange = (estatus: boolean) => {
+        setErrorStatus(estatus);
+        if (estatus) {
+            setErrorStatus(true);
+        } else {
+            window.location.reload();
+        }
+    };
 
     if (loading) {
         return (
@@ -235,7 +241,9 @@ export default function MemberDetails({
                             <div className="block text-md font-bold">
                                 Submission Date:{" "}
                                 <span className="font-medium capitalize">
-                                    {member?.startDate.toString()}
+                                    {member?.startDate
+                                        ? member.startDate.toString()
+                                        : "N/A"}
                                 </span>
                             </div>
                             <div className="block text-md font-bold">
@@ -292,6 +300,9 @@ export default function MemberDetails({
                                     <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
                                         Updated By
                                     </th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
+                                        Edit
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -315,39 +326,7 @@ export default function MemberDetails({
                                                         : ""
                                                 }
                                             >
-                                                <Link
-                                                    href="#"
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        setEditIntakeId(
-                                                            projectIntake.id
-                                                        ); // Set the specific intake to be edited
-                                                    }}
-                                                >
-                                                    {projectIntake.bgStatus}
-                                                </Link>
-
-                                                {/* Show modal only when the current intake is being edited */}
-                                                {editIntakeId ===
-                                                    projectIntake.id && (
-                                                    <EditProjectApprovalModal
-                                                        params={{
-                                                            person: params.user,
-                                                            uploader:
-                                                                session?.user
-                                                                    ?.name ??
-                                                                "",
-                                                            intakeId:
-                                                                projectIntake.id,
-                                                        }}
-                                                        onNoteCreated={() => {
-                                                            setUpDated(true);
-                                                            setEditIntakeId(
-                                                                null
-                                                            ); // Close modal after submission
-                                                        }}
-                                                    />
-                                                )}
+                                                {projectIntake.bgStatus}
                                             </td>
                                             <td className="px-4 py-2 text-sm">
                                                 {
@@ -367,13 +346,27 @@ export default function MemberDetails({
                                                     : "No"}
                                             </td>
                                             <td className="px-4 py-2 text-sm">
-                                                {projectIntake.submissionDate.toLocaleDateString()}
+                                                {projectIntake.submissionDate}
                                             </td>
                                             <td className="px-4 py-2 text-sm">
                                                 {projectIntake.approvalDate}
                                             </td>
                                             <td className="px-4 py-2 text-sm">
                                                 {projectIntake.updatedBy}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm">
+                                                <EditProjectApproval
+                                                    errorStatusChange={
+                                                        errorStatusChange
+                                                    }
+                                                    projectApprovalId={
+                                                        projectIntake.id
+                                                    }
+                                                    editingUser={
+                                                        session?.user?.name ??
+                                                        ""
+                                                    }
+                                                />
                                             </td>
                                         </tr>
                                     )

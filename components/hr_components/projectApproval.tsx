@@ -63,6 +63,32 @@ export default function ProjectApprovalModal({
 }: UserName) {
     const router = useRouter();
     const [projects, setProjects] = useState<any>([]);
+    console.log("updater", params.uploader);
+
+    // Access errors from the form state
+    const {
+        handleSubmit,
+        control,
+        formState: { errors },
+        reset,
+    } = useForm<z.infer<typeof FormSchema>>({
+        resolver: zodResolver(FormSchema),
+        defaultValues: async () => {
+            const memberId = await getMemberId(params.person);
+            const projectId = projects.find(
+                (project: { projectName: string }) =>
+                    project.projectName === params.person
+            )?.id;
+            return {
+                projectId: projectId ?? 1,
+                memberId: memberId ?? 0,
+                bgStatus: "In Progress",
+                documentsCollected: false,
+                updatedBy: params.uploader,
+                approvalDate: new Date(),
+            };
+        },
+    });
 
     useEffect(() => {
         async function fetchData() {
@@ -87,7 +113,7 @@ export default function ProjectApprovalModal({
                 bgStatus: "In Progress",
                 documentsCollected: false,
                 updatedBy: params.uploader,
-                approvalDate: new Date(),
+                approvalDate: new Date() ?? null,
             };
         },
     });
@@ -96,7 +122,7 @@ export default function ProjectApprovalModal({
         try {
             const updatedValues = {
                 ...values,
-                submissionDate: new Date(),
+                submissionDate: new Date().toISOString(),
                 approvalDate: values.approvalDate
                     ? values.approvalDate.toISOString()
                     : null,
@@ -107,7 +133,7 @@ export default function ProjectApprovalModal({
         } catch (error) {
             console.error("Error creating note:", error);
         } finally {
-            form.reset();
+            reset();
             router.push(`/hr/roster/${params.person}`);
         }
     }
@@ -132,11 +158,10 @@ export default function ProjectApprovalModal({
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)}>
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            {/* Project Field */}
                             <FormField
-                                control={
-                                    form.control as unknown as Control<FieldValues>
-                                }
+                                control={control}
                                 name="projectId"
                                 render={({ field }) => (
                                     <FormItem>
@@ -167,13 +192,18 @@ export default function ProjectApprovalModal({
                                                 )}
                                             </SelectContent>
                                         </Select>
-                                        <FormMessage />
+                                        {errors.projectId && (
+                                            <FormMessage>
+                                                {errors.projectId.message}
+                                            </FormMessage>
+                                        )}
                                     </FormItem>
                                 )}
                             />
 
+                            {/* Intake Status Field */}
                             <FormField
-                                control={form.control}
+                                control={control}
                                 name="bgStatus"
                                 render={({ field }) => (
                                     <FormItem>
@@ -201,13 +231,18 @@ export default function ProjectApprovalModal({
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
-                                        <FormMessage />
+                                        {errors.bgStatus && (
+                                            <FormMessage>
+                                                {errors.bgStatus.message}
+                                            </FormMessage>
+                                        )}
                                     </FormItem>
                                 )}
                             />
 
+                            {/* Documents Collected Field */}
                             <FormField
-                                control={form.control}
+                                control={control}
                                 name="documentsCollected"
                                 render={({ field }) => (
                                     <FormItem>
@@ -223,12 +258,21 @@ export default function ProjectApprovalModal({
                                                 </div>
                                             </Label>
                                         </div>
+                                        {errors.documentsCollected && (
+                                            <FormMessage>
+                                                {
+                                                    errors.documentsCollected
+                                                        .message
+                                                }
+                                            </FormMessage>
+                                        )}
                                     </FormItem>
                                 )}
                             />
 
+                            {/* Approval Date Field */}
                             <FormField
-                                control={form.control}
+                                control={control}
                                 name="approvalDate"
                                 render={({ field }) => (
                                     <FormItem>
@@ -237,34 +281,22 @@ export default function ProjectApprovalModal({
                                                 Approval Date
                                             </div>
                                         </FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <Button
-                                                    variant="outline"
-                                                    className="w-full justify-start"
-                                                >
-                                                    <CalendarDaysIcon className="mr-1 h-4 w-4" />
-                                                    {field.value
-                                                        ? field.value.toDateString()
-                                                        : "Pick a date"}
-                                                </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent
-                                                className="w-auto p-0"
-                                                align="start"
-                                            >
-                                                <Input
-                                                    type="date"
-                                                    {
-                                                        ...field.value ?? undefined
-                                                    }
-                                                    onSelect={field.onChange}
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
+                                        <Input
+                                            type="date"
+                                            {...field}
+                                            value={field.value ? field.value.toISOString().split('T')[0] : ''}
+                                            onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : null)}
+                                        />
+                                        {errors.approvalDate && (
+                                            <FormMessage>
+                                                {errors.approvalDate.message}
+                                            </FormMessage>
+                                        )}
                                     </FormItem>
                                 )}
                             />
+
+                            {/* Submit Button */}
                             <div className="flex justify-center pt-4">
                                 <Button type="submit" className="w-half">
                                     Submit

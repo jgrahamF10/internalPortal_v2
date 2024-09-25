@@ -7,6 +7,7 @@ import Link from "next/link";
 import Modal from "@/components/test";
 import { Button } from "@/components/ui/button";
 
+
 type SearchParamProps = {
   searchParams: Record<string, string> | null | undefined;
 };
@@ -31,7 +32,7 @@ export default function Page({ searchParams }: SearchParamProps) {
         <Button>SUMMON THE MODAL</Button>
       </Link>
 
-
+      
     </div>
   )
 }
