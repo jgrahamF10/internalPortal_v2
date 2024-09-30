@@ -21,12 +21,12 @@ export const vendors = pgEnum('vendors', ['Hertz', 'Enterprise', 'Uhaul', 'Other
 
 export const rentals = pgTable("rental", {
     id: bigserial("id", { mode: "number" }).primaryKey(),
-    projectId: integer("projectId").notNull(),
+    projectId: integer("projectId"),
     memberId: integer("memberId").notNull(),
     rentalAgreement: varchar("rentalAgreement", { length: 20 }).unique('rentalAgreement').notNull(),
     reservation: varchar("reservation", { length: 20 }).notNull(),
     pickUpDate: date("rentalStartDate").notNull(),
-    vehicleType: varchar("vehicleType",{ length: 20 }).notNull(),
+    vehicleType: varchar("vehicleType",{ length: 20 }),
     vendors: vendors("vendors").notNull(),
     dueDate: date("dueDate").notNull(),
     returnDate: date("returnDate"),

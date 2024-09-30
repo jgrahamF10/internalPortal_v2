@@ -54,10 +54,10 @@ export const members = pgTable(
         startDate: date("startDate"),
         status: status("status").default('Active').notNull(),
         enteredBy: varchar("enteredBy", { length: 20 }),
-        intakeStatus: intakeStatus("intakeStatus").notNull(),
+        intakeStatus: intakeStatus("intakeStatus").default('In Progress'),
         documentsCollected: boolean("documentsCollected").default(false),
         approvalDate: date("approvalDate").notNull(),
-        updatedBy: varchar("updatedBy", { length: 20 }).notNull(),
+        updatedBy: varchar("updatedBy", { length: 20 }),
     },
     //(member) => ({
     //    compositePK: primaryKey({

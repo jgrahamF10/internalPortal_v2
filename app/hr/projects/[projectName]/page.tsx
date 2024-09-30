@@ -23,6 +23,7 @@ import { getApprovedTechs } from "../../hrActions";
 import { EditProjectForm } from "@/components/hr_components/editProject";
 import Link from "next/link";
 import NotAuth from "@/components/auth/notAuth";
+import { EosIconsBubbleLoading } from "@/components/spinner";
 
 interface Project {
     params: {
@@ -35,6 +36,7 @@ export default function ProjectPage({ params }: Project) {
     const { projectName } = params;
     const [technicians, setTechnicians] = useState<any[]>([]);
     const [project, setProject] = useState<any>(null);
+    const [loading, setLoading] = useState<boolean>(true);
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
 
     useEffect(() => {
@@ -45,8 +47,10 @@ export default function ProjectPage({ params }: Project) {
 
             if (Array.isArray(response)) {
                 setTechnicians(response);
+                
             } else if (response && "technicians" in response) {
                 setTechnicians(response.technicians);
+                setLoading(false);
             }
 
             if (response && "project" in response) {
@@ -65,6 +69,21 @@ export default function ProjectPage({ params }: Project) {
         }
     };
 
+    if (loading) {
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100vh",
+                }}
+            >
+                <EosIconsBubbleLoading />
+            </div>
+        );
+    }
+
     if (
         !session?.roles?.some((role) =>
             ["Managers", "Human Resources"].includes(role)
@@ -72,6 +91,7 @@ export default function ProjectPage({ params }: Project) {
     ) {
         return <NotAuth />;
     }
+
 
     return (
         <div className="container mx-auto p-4">
@@ -82,14 +102,16 @@ export default function ProjectPage({ params }: Project) {
                         <CardDescription>
                             Total of approved technicians -{" "}
                             <span className="font-semibold text-green-700">
-                                {technicians.length}
+                                {technicians.length} - {project?.projectName}
                             </span>
                         </CardDescription>
                     </div>
                     <EditProjectForm
                         errorStatusChange={errorStatusChange}
-                        projectName={projectName}
+                        projectName={project?.projectName}
                     />
+
+                    
                 </CardHeader>
                 <CardContent>
                     <div className="flex items-center gap-4">

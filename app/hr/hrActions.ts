@@ -10,7 +10,8 @@ import { and, eq, sql, asc } from "drizzle-orm";
 import {
     NewMemberNotes,
     NewProjectBGStatus,
-    NewProject
+    NewProject,
+    NewMember
 } from "@/db/schema/member_management";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
@@ -78,6 +79,14 @@ export async function getMemberId(username: string) {
         return results[0].id;
     } else {
         return null;
+    }
+}
+
+export async function createMember(data: NewMember) {
+    try {
+        await db.insert(members).values(data);
+    } catch (error) {
+        console.error("Error creating member:", error);
     }
 }
 
@@ -150,7 +159,7 @@ export async function createProject(data: NewProject) {
 }
 
 export async function updateProject(data: NewProject) {
-    console.log("updating project data", data);
+    console.log("updating project", data.projectName);
     try {
         await db
             .update(projects)

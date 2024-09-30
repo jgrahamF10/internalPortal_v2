@@ -183,7 +183,7 @@ export default function Page(
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold">All Assets</h1>
+                    <h1 className="text-2xl font-semibold">All Projects</h1>
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (

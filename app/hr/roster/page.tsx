@@ -9,7 +9,7 @@ import { EosIconsBubbleLoading } from "@/components/spinner";
 import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
-
+import CreateUserForm from "@/components/hr_components/createMember";
 
 const TextField = styled.input`
     height: 32px;
@@ -66,12 +66,11 @@ export default function Page() {
     const [resetPaginationToggle, setResetPaginationToggle] =
         useState<boolean>(false);
     const { data: session } = useSession();
-    
 
     useEffect(() => {
         async function fetchData() {
             const members: any = await getRoster();
-            console.log("members", members);
+            // console.log("members", members);
             setMembers(members);
             setLoading(false);
         }
@@ -172,6 +171,12 @@ export default function Page() {
             cell: (row: any) => <span className="capitalize">{row.city}</span>,
         },
         {
+            name: "State",
+            selector: (row: any) => row.state,
+            sortable: true,
+            cell: (row: any) => <span className="capitalize">{row.state}</span>,
+        },
+        {
             name: "Status",
             selector: (row: any) => (row.status ? "Active" : "Inactive"),
             sortable: true,
@@ -209,9 +214,10 @@ export default function Page() {
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (
-                        <button className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-lg">
-                            Create User
-                        </button>
+                        <CreateUserForm
+                            errorStatusChange={errorStatusChange}
+                            creatingUser={session?.user?.name ?? ""}
+                        />
                     )}
                 </div>
                 <div className="flex justify-start mb-4">
@@ -219,12 +225,14 @@ export default function Page() {
                         className="text-sm font-semibold cursor-pointer"
                         onClick={handleInactive}
                     >
-                        <button className="bg-blue-600 text-white py-1 px-2 rounded-sm">
+                        <button className="bg-blue-600 text-white py-1 px-2 rounded-sm hover:bg-blue-700">
                             Show inactives
                         </button>
                     </h3>
                 </div>
-                <h3 className="pb-2">Displaying {filteredAssets.length} Technicians</h3>
+                <h3 className="pb-2">
+                    Displaying {filteredAssets.length} Technicians
+                </h3>
                 <div className="overflow-auto">
                     <DataTable
                         columns={columns}

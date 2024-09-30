@@ -63,7 +63,7 @@ export default function ProjectApprovalModal({
 }: UserName) {
     const router = useRouter();
     const [projects, setProjects] = useState<any>([]);
-    console.log("updater", params.uploader);
+    //console.log("updater", params.uploader);
 
     // Access errors from the form state
     const {
