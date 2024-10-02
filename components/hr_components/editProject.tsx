@@ -75,6 +75,23 @@ export function EditProjectForm({
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
+                            <Label
+                                className="text-right"
+                                htmlFor="requiredTechnians"
+                            >
+                                Required Techs
+                            </Label>
+                            <input
+                                {...register("requiredTechnians", {
+                                    valueAsNumber: true,
+                                })} // Ensures value is treated as a number
+                                type="number" // Specifies that the input is for numbers
+                                className="col-span-1"
+                                id="requiredTechnians"
+                                defaultValue={project?.requiredTechnians || 0} // Set default value as a number
+                            />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
                             <Label className="text-right" htmlFor="inactive">
                                 Inactive
                             </Label>

@@ -62,6 +62,18 @@ export function NewProjecForm({ errorStatusChange }: any) {
                                 placeholder="Enter a project name"
                             />
                         </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right" htmlFor="requiredTechnians">
+                                Required Technicians 
+                            </Label>
+                            <Input
+                                {...register("requiredTechnians", { required: true })}
+                                className="col-span-2"
+                                id="requiredTechnians"
+                                type="number"
+                                placeholder="How many technicians are required for this project"
+                            />
+                        </div>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>

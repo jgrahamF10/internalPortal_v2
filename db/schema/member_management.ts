@@ -18,6 +18,7 @@ import type { AdapterAccountType } from "next-auth/adapters";
 export const projects = pgTable("project", {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     projectName: varchar("projectName", { length: 40 }).unique('projectName').notNull(),
+    requiredTechnians: integer("requiredTechnians").default(1),
     inactive: boolean("inactive").default(false),
 });
 

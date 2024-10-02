@@ -150,6 +150,12 @@ export default function Page(
             sortable: true,
         },
         {
+            name: "Required Technicians",
+            selector: (row: any) => (row.requiredTechnians),
+            sortable: true,
+           
+        },
+        {
             name: "Status",
             selector: (row: any) => (row.status ? "Inactive" : "Active" ),
             sortable: true,

@@ -47,7 +47,6 @@ export default function ProjectPage({ params }: Project) {
 
             if (Array.isArray(response)) {
                 setTechnicians(response);
-                
             } else if (response && "technicians" in response) {
                 setTechnicians(response.technicians);
                 setLoading(false);
@@ -92,35 +91,28 @@ export default function ProjectPage({ params }: Project) {
         return <NotAuth />;
     }
 
-
     return (
         <div className="container mx-auto p-4">
             <Card className="mb-8">
                 <CardHeader className="flex flex-row items-start justify-between">
                     <div>
-                        <CardTitle>{project?.projectName}</CardTitle>
-                        <CardDescription>
-                            Total of approved technicians -{" "}
-                            <span className="font-semibold text-green-700">
-                                {technicians.length} - {project?.projectName}
+                        <CardTitle>
+                            <span className="font-semibold text-lg underline underline-offset-2">
+                                {project?.projectName}
                             </span>
-                        </CardDescription>
+                        </CardTitle>
+                        <CardDescription></CardDescription>
                     </div>
                     <EditProjectForm
                         errorStatusChange={errorStatusChange}
                         projectName={project?.projectName}
                     />
-
-                    
                 </CardHeader>
                 <CardContent>
                     <div className="flex items-center gap-4">
-                        <div className="bg-muted rounded-md flex items-center justify-center aspect-square w-12">
-                            <CodeIcon className="w-6 h-6" />
-                        </div>
                         <div>
-                            <p className="text-sm font-medium">Status</p>
-                            <p className="text-xs">
+                            <p className="text-md font-medium">
+                                Status - {" "}
                                 <span
                                     className={
                                         project?.inactive === false
@@ -135,6 +127,16 @@ export default function ProjectPage({ params }: Project) {
                                         : project?.inactive === true
                                         ? "Inactive"
                                         : ""}
+                                </span>
+                            </p>
+                            <p>
+                                Required for the project - {" "}
+                                {project?.requiredTechnians}
+                            </p>
+                            <p>
+                                Total of approved technicians -{" "}
+                                <span className="font-semibold text-green-700">
+                                    {technicians.length}
                                 </span>
                             </p>
                         </div>

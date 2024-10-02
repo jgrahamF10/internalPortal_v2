@@ -112,7 +112,7 @@ export default function SideNav() {
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
                                         <Link href="/rentals">
-                                            Rental Tracker
+                                            Rental Car Tracker
                                         </Link>
                                     </AccordionContent>
                                 </AccordionItem>
