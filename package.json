@@ -50,6 +50,7 @@
     "react-day-picker": "^9.0.9",
     "react-dom": "^18",
     "react-hook-form": "^7.53.0",
+    "react-input-mask": "^2.0.4",
     "shadcn-ui": "latest",
     "styled-components": "^6.1.12",
     "tailwind-merge": "^2.3.0",

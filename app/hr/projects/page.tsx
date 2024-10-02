@@ -184,6 +184,44 @@ export default function Page(
         );
     }
 
+    const customStyles = {
+        rows: {
+            style: {
+                minHeight: '72px', // override the row height
+            },
+        },
+        headCells: {
+            style: {
+                paddingLeft: '8px', // override the cell padding for head cells
+                paddingRight: '8px',
+                color: '#073642',
+                fontWeight: 'bold',
+                fontSize: '16px',
+                backgroundColor: '#f1f2f3'
+            },
+        },
+        subHeader: {
+            style: {
+                backgroundColor: '#f1f2f3',
+                color: '#073642',
+            },
+        },
+        cells: {
+            style: {
+                paddingLeft: '6px', // override the cell padding for data cells
+                paddingRight: '4px',
+                fontSize: '14px',
+                backgroundColor: '#f1f2f3',
+            },
+        },
+        pagination: {
+            style: {
+                backgroundColor: '#f1f2f3',
+            },
+            
+        },
+    };
+
     return (
         <div className="flex justify-center min-h-[90vh]">
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">
@@ -207,7 +245,7 @@ export default function Page(
                         </button>
                     </h3>
                 </div>
-                <h3>Displaying {filteredAssets.length} Assets</h3>
+                <h3 className="pb-4">Displaying {filteredAssets.length} Projects</h3>
                 <div className="overflow-auto rounded-md">
                     <DataTable
                         columns={columns}
@@ -219,6 +257,7 @@ export default function Page(
                         subHeader
                         subHeaderComponent={subHeaderComponentMemo}
                         persistTableHead
+                        customStyles={customStyles}
                     />
                 </div>
                 <Alert

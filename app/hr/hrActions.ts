@@ -25,8 +25,10 @@ export async function getProjects() {
 }
 
 export async function getRoster() {
-    const members = await db.query.members.findMany({});
-    return members;
+    const allMembers = await db.query.members.findMany({
+        orderBy: asc(members.preferedName),
+    });
+    return allMembers;
 }
 
 export async function getMemberUserName(memberId: number) {

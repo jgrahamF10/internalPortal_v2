@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import DataTable from "react-data-table-component";
+import DataTable, { createTheme } from "react-data-table-component";
 import { getRoster } from "../hrActions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -10,6 +10,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import CreateUserForm from "@/components/hr_components/createMember";
+import { headers } from "next/headers";
 
 const TextField = styled.input`
     height: 32px;
@@ -162,7 +163,6 @@ export default function Page() {
             name: "Email",
             selector: (row: any) => row.email,
             sortable: true,
-            cell: (row: any) => <span className="capitalize">{row.email}</span>,
         },
         {
             name: "City",
@@ -205,6 +205,43 @@ export default function Page() {
         );
     }
 
+    const customStyles = {
+        rows: {
+            style: {
+                minHeight: '72px', // override the row height
+            },
+        },
+        headCells: {
+            style: {
+                paddingLeft: '8px', // override the cell padding for head cells
+                paddingRight: '8px',
+                color: '#073642',
+                fontWeight: 'bold',
+                fontSize: '16px',
+                backgroundColor: '#f1f2f3'
+            },
+        },
+        subHeader: {
+            style: {
+                backgroundColor: '#f1f2f3',
+                color: '#073642',
+            },
+        },
+        cells: {
+            style: {
+                paddingLeft: '6px', // override the cell padding for data cells
+                paddingRight: '4px',
+                fontSize: '14px',
+                backgroundColor: '#f1f2f3',
+            },
+        },
+        pagination: {
+            style: {
+                backgroundColor: '#f1f2f3',
+            },
+        },
+    };
+
     return (
         <div className="flex justify-center min-h-[90vh]">
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">
@@ -233,7 +270,7 @@ export default function Page() {
                 <h3 className="pb-2">
                     Displaying {filteredAssets.length} Technicians
                 </h3>
-                <div className="overflow-auto">
+                <div className="overflow-auto rounded-md w-full">
                     <DataTable
                         columns={columns}
                         data={filteredAssets}
@@ -243,7 +280,7 @@ export default function Page() {
                         paginationRowsPerPageOptions={[10, 25, 50, 100]}
                         subHeader
                         subHeaderComponent={subHeaderComponentMemo}
-                        persistTableHead
+                        customStyles={customStyles}
                     />
                 </div>
                 <Alert

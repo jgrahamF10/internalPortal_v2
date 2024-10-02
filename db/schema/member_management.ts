@@ -48,7 +48,7 @@ export const members = pgTable(
         dob: date("dob"),
         email: varchar("email", { length: 50 }).unique('email').notNull(),
         phone: varchar("phone", { length: 12 }).notNull(),
-        address: varchar("address", { length: 40 }).notNull(),
+        address: varchar("address", { length: 40 }),
         city: varchar("city", { length: 40 }).notNull(),
         state: stateChoice("state").notNull(),
         zipcode: varchar("zipcode", { length: 10 }).notNull(),
