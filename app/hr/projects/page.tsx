@@ -11,7 +11,7 @@ import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import { NewProjecForm } from "@/components/hr_components/newProject";
 import { EditProjectForm } from "@/components/hr_components/editProject";
-
+import { ThemeColors } from "@/lib/utils";
 
 const TextField = styled.input`
     height: 32px;
@@ -74,6 +74,7 @@ export default function Page(
     const [resetPaginationToggle, setResetPaginationToggle] =
         useState<boolean>(false);
     const { data: session } = useSession();
+    const { backgroundColor, fontColor, mutedColor } = ThemeColors();
     
 
     useEffect(() => {
@@ -187,38 +188,56 @@ export default function Page(
     const customStyles = {
         rows: {
             style: {
-                minHeight: '72px', // override the row height
+                minHeight: "72px", // override the row height
             },
         },
         headCells: {
             style: {
-                paddingLeft: '8px', // override the cell padding for head cells
-                paddingRight: '8px',
-                color: '#073642',
-                fontWeight: 'bold',
-                fontSize: '16px',
-                backgroundColor: '#f1f2f3'
+                paddingLeft: "8px", // override the cell padding for head cells
+                paddingRight: "8px",
+                color: fontColor,
+                fontWeight: "bold",
+                fontSize: "16px",
+                backgroundColor: backgroundColor,
             },
         },
         subHeader: {
             style: {
-                backgroundColor: '#f1f2f3',
-                color: '#073642',
+                backgroundColor: backgroundColor,
+                color: fontColor,
             },
         },
         cells: {
             style: {
-                paddingLeft: '6px', // override the cell padding for data cells
-                paddingRight: '4px',
-                fontSize: '14px',
-                backgroundColor: '#f1f2f3',
+                paddingLeft: "6px", // override the cell padding for data cells
+                paddingRight: "4px",
+                fontSize: "14px",
+                backgroundColor: backgroundColor,
+                color: fontColor,
             },
         },
         pagination: {
             style: {
-                backgroundColor: '#f1f2f3',
+                backgroundColor: backgroundColor,
+                color: fontColor,
             },
-            
+            pageButtonsStyle: {
+                color: fontColor,
+                fill: fontColor,
+                backgroundColor: "transparent",
+                '&:disabled': {
+				cursor: 'unset',
+				color: fontColor,
+				fill: mutedColor,
+			},
+			'&:hover:not(:disabled)': {
+				backgroundColor: '#c1f2f3',
+			},
+			'&:focus': {
+				outline: 'none',
+				backgroundColor: '#aa82f3',
+			},
+            },
         },
     };
 

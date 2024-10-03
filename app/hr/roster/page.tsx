@@ -10,10 +10,8 @@ import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import CreateUserForm from "@/components/hr_components/newMember";
-import resolveConfig from "tailwindcss/resolveConfig";
+import { ThemeColors } from "@/lib/utils";
 
-import tailwindConfig from "@/tailwind.config";
-import { Config } from "tailwindcss/types/config";
 
 const TextField = styled.input`
     height: 32px;
@@ -70,7 +68,8 @@ export default function Page() {
     const [resetPaginationToggle, setResetPaginationToggle] =
         useState<boolean>(false);
     const { data: session } = useSession();
-
+    const { backgroundColor, fontColor, mutedColor } = ThemeColors();
+    
     useEffect(() => {
         async function fetchData() {
             const members: any = await getRoster();
@@ -207,12 +206,6 @@ export default function Page() {
             </div>
         );
     }
-
-    // Use a type assertion to treat tailwindConfig as Config type
-    const fullConfig = resolveConfig(tailwindConfig as any);
-    const backgroundColor = fullConfig.theme?.colors?.background;
-    const fontColor = fullConfig.theme?.colors?.primary?.foreground;
-    const mutedColor = fullConfig.theme?.colors?.muted?.foreground;
 
     const customStyles = {
         rows: {
