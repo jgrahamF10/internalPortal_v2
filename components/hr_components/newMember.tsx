@@ -248,6 +248,7 @@ export default function CreateUserForm({
                                                     {...field}
                                                     type="text"
                                                     placeholder="Enter First Name"
+                                                    onChange={(e) => field.onChange(e.target.value.trim())}
                                                 />
                                                 <FormMessage />
                                             </FormItem>
@@ -267,6 +268,7 @@ export default function CreateUserForm({
                                                     {...field}
                                                     type="text"
                                                     placeholder="Enter Last Name"
+                                                    onChange={(e) => field.onChange(e.target.value.trim())}
                                                 />
                                                 <FormMessage />
                                             </FormItem>
@@ -287,6 +289,7 @@ export default function CreateUserForm({
                                                     {...field}
                                                     type="text"
                                                     placeholder="Enter Prefered Name"
+                                                    onChange={(e) => field.onChange(e.target.value.trim())}
                                                 />
                                                 <FormMessage />
                                             </FormItem>
