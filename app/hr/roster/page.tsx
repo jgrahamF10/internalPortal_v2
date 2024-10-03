@@ -9,8 +9,11 @@ import { EosIconsBubbleLoading } from "@/components/spinner";
 import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
-import CreateUserForm from "@/components/hr_components/createMember";
-import { headers } from "next/headers";
+import CreateUserForm from "@/components/hr_components/newMember";
+import resolveConfig from "tailwindcss/resolveConfig";
+
+import tailwindConfig from "@/tailwind.config";
+import { Config } from "tailwindcss/types/config";
 
 const TextField = styled.input`
     height: 32px;
@@ -205,39 +208,64 @@ export default function Page() {
         );
     }
 
+    // Use a type assertion to treat tailwindConfig as Config type
+    const fullConfig = resolveConfig(tailwindConfig as any);
+    const backgroundColor = fullConfig.theme?.colors?.background;
+    const fontColor = fullConfig.theme?.colors?.primary?.foreground;
+    const mutedColor = fullConfig.theme?.colors?.muted?.foreground;
+
     const customStyles = {
         rows: {
             style: {
-                minHeight: '72px', // override the row height
+                minHeight: "72px", // override the row height
             },
         },
         headCells: {
             style: {
-                paddingLeft: '8px', // override the cell padding for head cells
-                paddingRight: '8px',
-                color: '#073642',
-                fontWeight: 'bold',
-                fontSize: '16px',
-                backgroundColor: '#f1f2f3'
+                paddingLeft: "8px", // override the cell padding for head cells
+                paddingRight: "8px",
+                color: fontColor,
+                fontWeight: "bold",
+                fontSize: "16px",
+                backgroundColor: backgroundColor,
             },
         },
         subHeader: {
             style: {
-                backgroundColor: '#f1f2f3',
-                color: '#073642',
+                backgroundColor: backgroundColor,
+                color: fontColor,
             },
         },
         cells: {
             style: {
-                paddingLeft: '6px', // override the cell padding for data cells
-                paddingRight: '4px',
-                fontSize: '14px',
-                backgroundColor: '#f1f2f3',
+                paddingLeft: "6px", // override the cell padding for data cells
+                paddingRight: "4px",
+                fontSize: "14px",
+                backgroundColor: backgroundColor,
+                color: fontColor,
             },
         },
         pagination: {
             style: {
-                backgroundColor: '#f1f2f3',
+                backgroundColor: backgroundColor,
+                color: fontColor,
+            },
+            pageButtonsStyle: {
+                color: fontColor,
+                fill: fontColor,
+                backgroundColor: "transparent",
+                '&:disabled': {
+				cursor: 'unset',
+				color: fontColor,
+				fill: mutedColor,
+			},
+			'&:hover:not(:disabled)': {
+				backgroundColor: '#c1f2f3',
+			},
+			'&:focus': {
+				outline: 'none',
+				backgroundColor: '#aa82f3',
+			},
             },
         },
     };
@@ -281,6 +309,7 @@ export default function Page() {
                         subHeader
                         subHeaderComponent={subHeaderComponentMemo}
                         customStyles={customStyles}
+                        //theme="solarized"
                     />
                 </div>
                 <Alert

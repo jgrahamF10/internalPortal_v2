@@ -29,16 +29,16 @@
 .dark  {
   --background: 224 10% 10%;
   --foreground: 224 5% 90%;
-  --card: 224 9% 10%;
+  --card: 224 9% 10%;   
   --card-foreground: 224 5% 90%;
   --popover: 224 10% 5%;
   --popover-foreground: 224 5% 90%;
   --primary: 224 100% 64%;
-  --primary-foreground: 0 0% 0%;
+  --primary-foreground: 0 0% 100%;
   --secondary: 224 10% 20%;
   --secondary-foreground: 0 0% 100%;
   --muted: 186 10% 25%;
-  --muted-foreground: 224 5% 60%;
+  --muted-foreground: 0 0% 50%;
   --accent: 186 10% 25%;
   --accent-foreground: 224 5% 90%;
   --destructive: 0 50% 48%;

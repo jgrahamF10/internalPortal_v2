@@ -53,7 +53,12 @@ const FormSchema = z.object({
     preferedName: z.string(),
     dob: z.date(),
     email: z.string(),
-    phone: z.string(),
+    phone: z
+        .string()
+        .regex(
+            /^\d{3}-\d{3}-\d{4}$/,
+            "Phone number must be in the format XXX-XXX-XXXX"
+        ),
     address: z.string(),
     city: z.string(),
     state: z.string(),
@@ -96,32 +101,7 @@ export default function CreateUserForm({
             approvalDate: new Date(),
         },
         mode: "onTouched",
-        resolver: zodResolver(
-            z.object({
-                designation: z.string(),
-                firstname: z.string().min(1),
-                lastname: z.string().min(1),
-                preferedName: z.string().min(1),
-                address: z.string().optional(),
-                email: z.string().min(1),                
-                dob: z.date().optional(),
-                city: z.string().min(1),
-                state: z.string().min(1),
-                zipcode: z.string(),
-                startDate: z.date().optional(),
-                intakeStatus: z.string(),
-                documentsCollected: z.boolean(),
-                enteredBy: z.string(),
-                approvalDate: z.date(),
-                phone: z
-                    .string()
-                    .regex(
-                        /^\d{3}-\d{3}-\d{4}$/,
-                        "Phone number must be in the format XXX-XXX-XXXX"
-                    ),
-            
-            })
-        ),
+        resolver: zodResolver(FormSchema),
     });
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
