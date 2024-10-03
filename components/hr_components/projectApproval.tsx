@@ -140,7 +140,7 @@ export default function ProjectApprovalModal({
 
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-            <Card className="w-full max-w-xl bg-white">
+            <Card className="w-full max-w-xl bg-white dark:bg-gray-800">
                 <CardHeader>
                     <CardTitle className="flex flex-row justify-between ">
                         <div className="pt-4">Project Intake Form</div>

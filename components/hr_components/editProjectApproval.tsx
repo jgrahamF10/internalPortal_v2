@@ -127,7 +127,7 @@ export default function EditProjectApproval({ errorStatusChange, projectApproval
             <DialogHeader>
                 <DialogTitle>Make an edit to this approval</DialogTitle>
             </DialogHeader>
-            <Card className="w-full max-w-xl bg-white">
+            <Card className="w-full max-w-xl bg-white dark:bg-gray-800">
                 
                 <CardContent>
                     <Form {...form}>

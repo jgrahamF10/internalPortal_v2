@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import DataTable, { createTheme } from "react-data-table-component";
+import DataTable from "react-data-table-component";
 import { getRentals } from "./rentalActions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -10,8 +10,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import CreateUserForm from "@/components/hr_components/newMember";
-import { headers } from "next/headers";
-import { get } from "http";
+import { ThemeColors } from "@/lib/utils";
 
 const TextField = styled.input`
     height: 32px;
@@ -68,12 +67,13 @@ export default function Page() {
     const [resetPaginationToggle, setResetPaginationToggle] =
         useState<boolean>(false);
     const { data: session } = useSession();
+    const { backgroundColor, fontColor, mutedColor } = ThemeColors();
 
     useEffect(() => {
         async function fetchData() {
-            const members: any = await getRentals();
-            // console.log("members", members);
-            setMembers(members);
+            const rentals: any = await getRentals();
+            console.log("members", rentals);
+            setMembers(rentals);
             setLoading(false);
         }
         fetchData();
@@ -92,12 +92,12 @@ export default function Page() {
         setInactives(!inactives);
     };
 
-    const filteredAssets = members.filter((user) => {
+    const filteredAssets = members.filter((rental) => {
         // Filter by active/inactive status
         if (inactives) {
-            if (user.status !== "Inactive") return false;
+            if (rental.archived !== false) return false;
         } else {
-            if (user.status !== "Active") return false;
+            if (rental.verified !== false) return false;
         }
 
         // If filterText is empty, include all remaining users
@@ -108,12 +108,10 @@ export default function Page() {
 
         // Match against the relevant fields
         return (
-            user.preferedName.toLowerCase().includes(lowerFilterText) ||
-            user.designation?.toLowerCase().includes(lowerFilterText) || // Assuming you meant designation
-            user.email?.toLowerCase().includes(lowerFilterText) ||
-            user.city?.toLowerCase().includes(lowerFilterText) ||
-            user.state?.toLowerCase().includes(lowerFilterText) ||
-            user.zipcode?.toLowerCase().includes(lowerFilterText)
+            rental.rentalAgreement.toLowerCase().includes(lowerFilterText) ||
+            rental.member.firstname.toLowerCase().includes(lowerFilterText) ||
+            rental.member.lastname.toLowerCase().includes(lowerFilterText) ||
+            rental.pickUpLocation.toLowerCase().includes(lowerFilterText)
         );
     });
 
@@ -138,38 +136,45 @@ export default function Page() {
 
     const columns = [
         {
-            name: "Name",
-            selector: (row: any) => row.preferedName,
+            name: "Rental Agreement",
+            selector: (row: any) => row.rentalAgreement,
             cell: (row: any) => (
                 <Link
                     href={`/hr/roster/${row.preferedName}-${row.lastname}`}
                     className="font-medium text-green-700 capitalize hover:underline"
                 >
-                    {row.preferedName} {row.lastname}
+                    {row.rentalAgreement}
                 </Link>
             ),
             sortable: true,
         },
         {
-            name: "Designation",
-            selector: (row: any) => row.designation,
+            name: "Driver",
+            selector: (row: any) => row.memberID?.firstname,
+            sortable: true,
+            cell: (row: any) => (
+                <span className=" capitalize">
+                    {row.memberID?.firstname} {row.memberID?.lastname}
+                </span>
+            ),
+        },
+        {
+            name: "Pick Up Date",
+            selector: (row: any) => row.pickUpDate,
             sortable: true,
         },
         {
-            name: "Phone",
-            selector: (row: any) => row.phone,
+            name: "Due Date",
+            selector: (row: any) => row.dueDate,
             sortable: true,
         },
         {
-            name: "Email",
-            selector: (row: any) => row.email,
-            sortable: true,
-        },
-        {
-            name: "City",
+            name: "Drop Off Location",
             selector: (row: any) => row.city,
             sortable: true,
-            cell: (row: any) => <span className="capitalize">{row.city}</span>,
+            cell: (row: any) => (
+                <span className="capitalize">{row.returnLocation}</span>
+            ),
         },
         {
             name: "State",
@@ -178,7 +183,19 @@ export default function Page() {
             cell: (row: any) => <span className="capitalize">{row.state}</span>,
         },
         {
-            name: "Status",
+            name: "Rental Company",
+            selector: (row: any) => (row.status ? "Active" : "Inactive"),
+            sortable: true,
+            cell: (row: any) => (
+                <span
+                    className={row.status ? "text-green-600" : "text-red-600"}
+                >
+                    {row.status ? "Active" : "Inactive"}
+                </span>
+            ),
+        },
+        {
+            name: "Final Charges",
             selector: (row: any) => (row.status ? "Active" : "Inactive"),
             sortable: true,
             cell: (row: any) => (
@@ -209,36 +226,55 @@ export default function Page() {
     const customStyles = {
         rows: {
             style: {
-                minHeight: '72px', // override the row height
+                minHeight: "72px", // override the row height
             },
         },
         headCells: {
             style: {
-                paddingLeft: '8px', // override the cell padding for head cells
-                paddingRight: '8px',
-                color: '#073642',
-                fontWeight: 'bold',
-                fontSize: '16px',
-                backgroundColor: '#f1f2f3'
+                paddingLeft: "8px", // override the cell padding for head cells
+                paddingRight: "8px",
+                color: fontColor,
+                fontWeight: "bold",
+                fontSize: "16px",
+                backgroundColor: backgroundColor,
             },
         },
         subHeader: {
             style: {
-                backgroundColor: '#f1f2f3',
-                color: '#073642',
+                backgroundColor: backgroundColor,
+                color: fontColor,
             },
         },
         cells: {
             style: {
-                paddingLeft: '6px', // override the cell padding for data cells
-                paddingRight: '4px',
-                fontSize: '14px',
-                backgroundColor: '#f1f2f3',
+                paddingLeft: "6px", // override the cell padding for data cells
+                paddingRight: "4px",
+                fontSize: "14px",
+                backgroundColor: backgroundColor,
+                color: fontColor,
             },
         },
         pagination: {
             style: {
-                backgroundColor: '#f1f2f3',
+                backgroundColor: backgroundColor,
+                color: fontColor,
+            },
+            pageButtonsStyle: {
+                color: fontColor,
+                fill: fontColor,
+                backgroundColor: "transparent",
+                "&:disabled": {
+                    cursor: "unset",
+                    color: fontColor,
+                    fill: mutedColor,
+                },
+                "&:hover:not(:disabled)": {
+                    backgroundColor: "#c1f2f3",
+                },
+                "&:focus": {
+                    outline: "none",
+                    backgroundColor: "#aa82f3",
+                },
             },
         },
     };
@@ -269,7 +305,7 @@ export default function Page() {
                     </h3>
                 </div>
                 <h3 className="pb-2">
-                    Displaying {filteredAssets.length} Technicians
+                    Displaying {filteredAssets.length} Rentals
                 </h3>
                 <div className="overflow-auto rounded-md w-full">
                     <DataTable
@@ -282,6 +318,7 @@ export default function Page() {
                         subHeader
                         subHeaderComponent={subHeaderComponentMemo}
                         customStyles={customStyles}
+                        //theme="solarized"
                     />
                 </div>
                 <Alert

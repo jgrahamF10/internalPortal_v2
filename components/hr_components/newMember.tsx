@@ -195,7 +195,7 @@ export default function CreateUserForm({
                 <DialogHeader>
                     <DialogTitle>Create A New Person</DialogTitle>
                 </DialogHeader>
-                <Card className="w-full max-w-xl bg-white">
+                <Card className="w-full max-w-xl bg-white dark:bg-gray-800">
                     <CardContent className="grid gap-4">
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>

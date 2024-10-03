@@ -41,7 +41,7 @@ export function NewProjecForm({ errorStatusChange }: any) {
     return (
         <Dialog key="1">
             <DialogTrigger asChild>
-                <Button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-800">
+                <Button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-800 dark:bg-green-400">
                     New Project
                 </Button>
             </DialogTrigger>
