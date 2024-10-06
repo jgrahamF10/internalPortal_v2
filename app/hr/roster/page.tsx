@@ -11,6 +11,7 @@ import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import CreateUserForm from "@/components/hr_components/newMember";
 import { ThemeColors } from "@/lib/utils";
+import NotAuth from "@/components/auth/notAuth";
 
 
 const TextField = styled.input`
@@ -262,6 +263,14 @@ export default function Page() {
             },
         },
     };
+
+    if (
+        !session?.roles?.some((role) =>
+            ["Managers", "Human Resources"].includes(role)
+        )
+    ) {
+        return <NotAuth />;
+    }
 
     return (
         <div className="flex justify-center min-h-[90vh]">

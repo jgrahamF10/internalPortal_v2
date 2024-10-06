@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import { NewProjecForm } from "@/components/hr_components/newProject";
 import { EditProjectForm } from "@/components/hr_components/editProject";
 import { ThemeColors } from "@/lib/utils";
+import NotAuth from "@/components/auth/notAuth";
 
 const TextField = styled.input`
     height: 32px;
@@ -76,7 +77,6 @@ export default function Page(
     const { data: session } = useSession();
     const { backgroundColor, fontColor, mutedColor } = ThemeColors();
     
-
     useEffect(() => {
         async function fetchData() {
             const projects = await getProjects();
@@ -99,6 +99,7 @@ export default function Page(
     const handleInactive = () => {
         setInactives(!inactives);
     };
+    
 
     const filteredAssets = projects.filter((project) => {
         // Filter by active/inactive status
@@ -240,6 +241,14 @@ export default function Page(
             },
         },
     };
+
+    if (
+        !session?.roles?.some((role) =>
+            ["Managers", "Human Resources"].includes(role)
+        )
+    ) {
+        return <NotAuth />;
+    }
 
     return (
         <div className="flex justify-center min-h-[90vh]">
