@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { getFile } from "@/lib/aws";
+import Image from "next/image";
 
 
 export default function Page() {
@@ -65,7 +66,7 @@ export default function Page() {
             <input type="file" onChange={handleFileChange} />
             <button onClick={handleUpload}>Upload</button>
               {uploadStatus && <p>{uploadStatus}</p>}
-              <div>{imageUrl ? <img src={imageUrl} alt="S3 File" /> : <p>Loading...</p>}</div>
+              <div>{imageUrl ? <Image src={imageUrl} width={600} height={600} alt="S3 File" /> : <p>Loading...</p>}</div>
           </div>
           
     );

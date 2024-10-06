@@ -46,6 +46,16 @@ const config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
         },
+        ShadowRoot: {
+          DEFAULT: 'hsl(var(--shadow-root))',
+          foreground: 'hsl(var(--shadow-root-foreground))'
+        },
+        tableBoarder: 'hsl(var(--table-boarder))',
+        "tableBoarder-foreground": 'hsl(var(--table-boarder-foreground))',
+          
+        warning: "hsl(var(--warning))",
+        "warning-foreground": "hsl(var(--warning-foreground))",
+        
       },
       borderRadius: {
         xl: `calc(var(--radius) + 4px)`,

@@ -5,6 +5,7 @@ import {
     projectBGStatus,
     projects,
     memberNotes,
+    user_Attachments
 } from "@/db/schema/member_management";
 import { and, eq, sql, asc } from "drizzle-orm";
 import {
@@ -16,6 +17,7 @@ import {
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import exp from "constants";
+import { attachments } from "@/db/schema/tracker_db";
 
 export async function getProjects() {
     const fetchedProjects = await db.query.projects.findMany({
@@ -58,6 +60,7 @@ export async function getMember(id: string) {
                     project: true,
                 },
             },
+            attachment: true,
         },
     });
     //console.log("results", results);
@@ -78,6 +81,7 @@ export async function getMemberId(username: string) {
         ),
     });
     if (results) {
+        // console.log("results", results);
         return results[0].id;
     } else {
         return null;
@@ -105,7 +109,7 @@ export async function getMemberNotes(memberId: number) {
 
 export async function createNote(data: NewMemberNotes) {
     const userName = await getMemberUserName(data.memberId);
-    //console.log("userName", userName);
+    console.log("userName", userName);
     try {
         await db.insert(memberNotes).values(data);
     } catch (error) {
@@ -206,3 +210,36 @@ export async function getApprovedTechs(projectName: string) {
     return { project: projectData, technicians: results };
 }
 
+export async function editMember(data: NewMember) {
+    try {
+        await db
+            .update(members)
+            .set(data)
+            .where(eq(members.preferedName, data.preferedName));
+        return true;
+    } catch (error) {
+        console.error("Error updating member:", error);
+        return false;
+    }
+}
+
+export async function deleteProjectApproval(projectId: number) {
+    try {
+        await db.delete(projectBGStatus).where(eq(projectBGStatus.id, projectId));
+        return true;
+    } catch (error) {
+        console.error("Error deleting project approval:", error);
+        return false;
+    }
+}
+
+export async function deleteAttachment(resumeId: number) {
+    console.log("resumeId", resumeId);
+    try {
+        await db.delete(user_Attachments).where(eq(user_Attachments.id, resumeId));
+        return true;
+    } catch (error) {
+        console.error("Error deleting resume:", error);
+        return false;
+    }
+}

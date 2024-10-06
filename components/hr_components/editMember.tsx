@@ -1,5 +1,5 @@
 "use client";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     DialogTrigger,
@@ -37,13 +37,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm, Control, FieldValues } from "react-hook-form";
 import { Label } from "@/components/ui/label";
-import { Input, InputProps } from "@/components/ui/input";
-import { createMember } from "@/app/hr/hrActions"; // Add updateProject and getProject functions
+import { Input } from "@/components/ui/input";
+import { editMember, getMember } from "@/app/hr/hrActions"; // Add updateProject and getProject functions
 import { NewMember } from "@/db/schema/member_management";
+import { on } from "events";
 
-interface NewUserFormProps {
-    errorStatusChange: (status: boolean) => void;
-    creatingUser: string;
+interface MemmberFormProps {
+    params: { person: string; editingUser: string };
+    onNoteCreated: () => void;
 }
 
 const FormSchema = z.object({
@@ -70,16 +71,19 @@ const FormSchema = z.object({
     enteredBy: z.string(),
 });
 
-export default function CreateUserForm({
-    errorStatusChange,
-    creatingUser,
-}: NewUserFormProps) {
+export default function EditMember({
+    params,
+    onNoteCreated,
+}: MemmberFormProps) {
     const {
         register,
         handleSubmit,
         formState: { errors },
         reset,
     } = useForm<NewMember>();
+
+
+    const [member, setMember] = useState<any>(null); // Use null to represent the initial state
 
     const form = useForm<z.infer<typeof FormSchema>>({
         defaultValues: {
@@ -97,13 +101,42 @@ export default function CreateUserForm({
             startDate: new Date(),
             intakeStatus: "In Progress",
             documentsCollected: false,
-            enteredBy: creatingUser,
+            enteredBy: params.editingUser,
             approvalDate: new Date(),
         },
         mode: "onTouched",
         resolver: zodResolver(FormSchema),
     });
 
+    useEffect(() => {
+        async function fetchData() {
+            const fetchedMember = await getMember(params.person);
+            if (fetchedMember) {
+                setMember(fetchedMember);
+                form.reset({
+                    designation: fetchedMember.designation,
+                    firstname: fetchedMember.firstname,
+                    lastname: fetchedMember.lastname,
+                    preferedName: fetchedMember.preferedName,
+                    dob: fetchedMember.dob ? new Date(fetchedMember.dob) : new Date(),
+                    email: fetchedMember.email,
+                    phone: fetchedMember.phone,
+                    address: fetchedMember.address || "",
+                    city: fetchedMember.city,
+                    state: fetchedMember.state,
+                    zipcode: fetchedMember.zipcode,
+                    startDate: fetchedMember.startDate ? new Date(fetchedMember.startDate) : new Date(),
+                    intakeStatus: fetchedMember.intakeStatus || "In Progress",
+                    documentsCollected: fetchedMember.documentsCollected ?? false,
+                    approvalDate: fetchedMember.approvalDate ? new Date(fetchedMember.approvalDate) : null,
+                    enteredBy: params.editingUser,
+                });
+            }
+        }
+        fetchData();
+    }, [params.person, form, params.editingUser]);
+
+    //console.log("fetchedProject", projectApproval);
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             const updatedValues = {
@@ -174,21 +207,20 @@ export default function CreateUserForm({
                     | null
                     | undefined,
             };
-            await createMember(updatedValues);
-            errorStatusChange(false);
+            await editMember(updatedValues);
         } catch (error) {
             console.error("Error creating member:", error);
-            errorStatusChange(true);
         } finally {
             form.reset();
+            onNoteCreated();
         }
     }
 
     return (
         <Dialog key="1">
             <DialogTrigger asChild>
-                <Button className="bg-green-700 text-white hover:bg-green-800 hover:text-black">
-                    Create Person
+                <Button className="bg-red-700 text-white hover:bg-red-800 hover:text-black">
+                    Edit
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[640px]">
@@ -248,7 +280,11 @@ export default function CreateUserForm({
                                                     {...field}
                                                     type="text"
                                                     placeholder="Enter First Name"
-                                                    onChange={(e) => field.onChange(e.target.value.trim())}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.value.trim()
+                                                        )
+                                                    }
                                                 />
                                                 <FormMessage />
                                             </FormItem>
@@ -268,7 +304,11 @@ export default function CreateUserForm({
                                                     {...field}
                                                     type="text"
                                                     placeholder="Enter Last Name"
-                                                    onChange={(e) => field.onChange(e.target.value.trim())}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.value.trim()
+                                                        )
+                                                    }
                                                 />
                                                 <FormMessage />
                                             </FormItem>
@@ -289,7 +329,11 @@ export default function CreateUserForm({
                                                     {...field}
                                                     type="text"
                                                     placeholder="Enter Prefered Name"
-                                                    onChange={(e) => field.onChange(e.target.value.trim())}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.value.trim()
+                                                        )
+                                                    }
                                                 />
                                                 <FormMessage />
                                             </FormItem>
@@ -624,7 +668,7 @@ export default function CreateUserForm({
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Onboarding Status
+                                                        Intake Status
                                                     </div>
                                                 </FormLabel>
                                                 <Select

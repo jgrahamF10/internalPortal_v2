@@ -25,6 +25,8 @@
   --input: 224 20% 48%;
   --ring: 224 100% 64%;
   --radius: 0.75rem;
+  --shadow-root: 100 0% 50%;
+  --table-boarder: 215 20% 65%;
 }
 .dark  {
   --background: 224 10% 10%;
@@ -47,6 +49,11 @@
   --input: 224 20% 48%;
   --ring: 224 100% 64%;
   --radius: 0.75rem;
+  --shadow-root: 100 0% 50%;
+  --table-boarder: 217 33% 17%;
+  --warning: 0 0% 100%;
+  --warning-foreground: 200 0% 100%;
+  
 }
 
   }

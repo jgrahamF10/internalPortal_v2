@@ -1,34 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-    S3Client,
-    PutObjectCommand,
-} from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { db } from "@/db/index";
 import { user_Attachments } from "@/db/schema/member_management";
-import { auth } from "@/auth";
-import { Session } from "next-auth";
-
 
 const Bucket = process.env.S3_BUCKET_NAME as string;
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
     credentials: {
-      accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
-      secretAccessKey: process.env.S3_SECRET_ACCESS as string,
+        accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
+        secretAccessKey: process.env.S3_SECRET_ACCESS as string,
     },
 });
-  
+
 export async function POST(request: NextRequest) {
     const formData = await request.formData();
-    //console.log("formData", formData);
+    console.log("formData", formData);
     const memberId = formData.get('memberId');
     const uploader = formData.get('uploader');
-    const file = formData.get('file');
+    const file = formData.get("file");
     if (!file || !(file instanceof Blob)) {
-        return NextResponse.json({ error: "Invalid file upload" }, { status: 400 });
+        return NextResponse.json(
+            { error: "Invalid file upload" },
+            { status: 400 }
+        );
     }
 
-    const key = `resumes/${(file as File).name}`;
+    const key = `userAttachments/${(file as File).name}`;
 
     // Convert Blob/File to ArrayBuffer and then to Buffer
     const arrayBuffer = await (file as Blob).arrayBuffer();
@@ -43,7 +40,9 @@ export async function POST(request: NextRequest) {
 
     try {
         await s3.send(command);
-        const memberIdNumber = memberId ? parseInt(memberId.toString(), 10) : null;
+        const memberIdNumber = memberId
+            ? parseInt(memberId.toString(), 10)
+            : null;
         if (memberIdNumber === null || isNaN(memberIdNumber)) {
             throw new Error("Invalid memberId");
         }
@@ -52,11 +51,15 @@ export async function POST(request: NextRequest) {
             description: key,
             uploadDate: new Date(),
             uploader: uploader ? uploader.toString() : "",
-            resume: true,
+            resume: false,
         });
+        console.log("file uploaded successfully!");
         return NextResponse.json({ message: "File uploaded successfully!" });
     } catch (error) {
         console.error("S3 upload error:", error);
-        return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Failed to upload file" },
+            { status: 500 }
+        );
     }
 }

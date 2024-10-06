@@ -113,8 +113,8 @@ export const member2ProjectIntake = relations(projectBGStatus, ({ one }) => ({
 }));
 
 
-export const user_Attatchments = pgTable(
-    "user_Attatchments",
+export const user_Attachments = pgTable(
+    "user_Attachments",
     {
         id: bigserial("id", { mode: "number" }).primaryKey(),
         memberId: integer("memberId").notNull(),
@@ -125,18 +125,18 @@ export const user_Attatchments = pgTable(
     },
 );
 
-export type User_Attatchments = typeof user_Attatchments.$inferSelect;
-export type NewUser_Attatchments = typeof user_Attatchments.$inferInsert;
+export type User_Attatchments = typeof user_Attachments.$inferSelect;
+export type NewUser_Attatchments = typeof user_Attachments.$inferInsert;
 
-export const member2attachment = relations(user_Attatchments, ({ one }) => ({
+export const member2attachment = relations(user_Attachments, ({ one }) => ({
     memberAttachment: one(members, {
-        fields: [user_Attatchments.memberId],
+        fields: [user_Attachments.memberId],
         references: [members.id],
     })
 }));
 
 export const attatchments2members = relations(members, ({ many }) => ({
-    attachment: many(user_Attatchments)
+    attachment: many(user_Attachments)
 }));
 
 export const memberNotes = pgTable(

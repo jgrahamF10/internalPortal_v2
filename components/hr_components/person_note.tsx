@@ -70,13 +70,12 @@ export default function NewNoteModal({ params, onNoteCreated }: UserName) {
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
             <div className="p-8 border w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
                 <div className="text-right px-2 rounded-md">
-                <Button variant="ghost" className="ml-auto pb-2">
-                            <Link href={`/hr/roster/${params.person}`}>
-                                <XIcon className="w-4 h-4" />
-                                <span className="sr-only">Close</span>
-                            </Link>
-                        </Button>
-                    
+                    <Button variant="ghost" className="ml-auto pb-2">
+                        <Link href={`/hr/roster/${params.person}`}>
+                            <XIcon className="w-4 h-4" />
+                            <span className="sr-only">Close</span>
+                        </Link>
+                    </Button>
                 </div>
                 <div className="text-center">
                     <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -121,7 +120,6 @@ export default function NewNoteModal({ params, onNoteCreated }: UserName) {
         </div>
     );
 }
-
 
 function XIcon(
     props: React.JSX.IntrinsicAttributes & React.SVGProps<SVGSVGElement>
