@@ -227,7 +227,7 @@ export default function EditMember({
                 <DialogHeader>
                     <DialogTitle>Create A New Person</DialogTitle>
                 </DialogHeader>
-                <Card className="w-full max-w-xl bg-white dark:bg-gray-800">
+                <Card className="w-full max-w-xl bg-background">
                     <CardContent className="grid gap-4">
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>

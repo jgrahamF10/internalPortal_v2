@@ -28,6 +28,7 @@ interface UploadProps {
 export default function MemberAttatchment({ params }: UploadProps) {
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadStatus, setUploadStatus] = useState("");
+    console.log("params", params);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {
@@ -45,6 +46,7 @@ export default function MemberAttatchment({ params }: UploadProps) {
             const formData = new FormData();
             formData.append("file", selectedFile);
             formData.append("memberId", params.person);
+            formData.append("uploader", params.uploader);
 
             const response = await fetch("/api/upload/userAttachment", {
                 method: "POST",

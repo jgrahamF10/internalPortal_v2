@@ -339,7 +339,7 @@ export default function MemberDetails({
                                             {/* Trash Icon */}
                                             <span className="ml-4">
                                                 <AttachmentDelete
-                                                    resumeId={item.id}
+                                                    attachmentId={item.id}
                                                 />
                                             </span>
                                         </span>
@@ -544,6 +544,9 @@ export default function MemberDetails({
                                     <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
                                         Upload Date
                                     </th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
+                                        Delete
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -587,6 +590,12 @@ export default function MemberDetails({
 
                                             <td className="px-4 py-2 text-sm">
                                                 {attachment.uploadDate.toLocaleDateString()}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm">
+                                                {/* Delete button */}
+                                                <AttachmentDelete
+                                                    attachmentId={attachment.id}
+                                                />
                                             </td>
                                         </tr>
                                     ))}

@@ -13,11 +13,11 @@ import {
 import { deleteAttachment } from "@/app/hr/hrActions";
 import { TrashOutline } from "@/components/icons/trash";
   
-export function AttachmentDelete({ resumeId }: { resumeId: number }) {
+export function AttachmentDelete({ attachmentId }: { attachmentId: number }) {
       
     async function confirmDelete() {
         try {
-            await deleteAttachment(resumeId);
+            await deleteAttachment(attachmentId);
         } catch (error) {
             console.error("Error deleting project approval:", error);
         } finally {

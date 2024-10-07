@@ -10,7 +10,16 @@ import {
     Dialog,
     DialogClose,
 } from "@/components/ui/dialog";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardDescription,
+    CardContent,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface ResumeUploadProps {
     params: { person: string; uploader: string };
@@ -36,6 +45,7 @@ export default function ResumeUpload({params}: ResumeUploadProps) {
             const formData = new FormData();
             formData.append("file", selectedFile);
             formData.append("memberId", params.person);
+            formData.append("uploader", params.uploader);
 
 
             const response = await fetch("/api/upload/resume", {
@@ -56,18 +66,32 @@ export default function ResumeUpload({params}: ResumeUploadProps) {
         }
     };
 
+    
     return (
         <Dialog key="1">
             <DialogTrigger asChild>
                 <Button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-800 dark:bg-green-700">
-                    Upload Resume
+                    Add Attachment
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
-                <div>
-                    <h2>Upload a File</h2>
-                    <input type="file" onChange={handleFileChange} />
-                </div>
+                <Card className="w-full max-w-md p-6 grid gap-6">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-primary rounded-md p-3 flex items-center justify-center">
+                            <UploadIcon className="w-6 h-6 text-primary-foreground" />
+                        </div>
+                        <h3 className="text-xl font-semibold">Upload Files</h3>
+                    </div>
+                    <div className="text-muted-foreground">
+                        Upload your files here.
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="file-upload">
+                            Choose files to upload
+                        </Label>
+                        <Input id="file-upload" type="file" multiple  onChange={handleFileChange} />
+                    </div>
+                </Card>
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button onClick={handleUpload}>Submit</Button>
@@ -75,5 +99,26 @@ export default function ResumeUpload({params}: ResumeUploadProps) {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+    );
+}
+
+function UploadIcon(props: React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            {...props}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" x2="12" y1="3" y2="15" />
+        </svg>
     );
 }
