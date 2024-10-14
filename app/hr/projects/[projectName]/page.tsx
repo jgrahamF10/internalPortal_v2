@@ -152,6 +152,7 @@ export default function ProjectPage({ params }: Project) {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Name</TableHead>
+                                <TableHead>Phone</TableHead>
                                 <TableHead>Location</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -173,6 +174,11 @@ export default function ProjectPage({ params }: Project) {
                                                 </Link>
                                             </p>
                                         </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <p className="text-md">
+                                            {technician.member.phone}
+                                        </p>
                                     </TableCell>
                                     <TableCell>
                                         <p className="text-md">

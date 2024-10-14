@@ -140,7 +140,7 @@ export default function Page() {
             selector: (row: any) => row.rentalAgreement,
             cell: (row: any) => (
                 <Link
-                    href={`/hr/roster/${row.preferedName}-${row.lastname}`}
+                    href={`/rentals/${row.rentalAgreement}`}
                     className="font-medium text-green-700 capitalize hover:underline"
                 >
                     {row.rentalAgreement}
@@ -164,48 +164,36 @@ export default function Page() {
             sortable: true,
         },
         {
+            name: "Final Charges",
+            selector: (row: any) => row.finalCharges,
+            sortable: true,
+        },
+        {
             name: "Due Date",
             selector: (row: any) => row.dueDate,
             sortable: true,
         },
         {
             name: "Drop Off Location",
-            selector: (row: any) => row.city,
+            selector: (row: any) => row.returnLocation,
             sortable: true,
             cell: (row: any) => (
                 <span className="capitalize">{row.returnLocation}</span>
             ),
         },
         {
-            name: "State",
-            selector: (row: any) => row.state,
+            name: "Actual Return Date",
+            selector: (row: any) => row.returnDate,
             sortable: true,
-            cell: (row: any) => <span className="capitalize">{row.state}</span>,
+            
         },
         {
             name: "Rental Company",
-            selector: (row: any) => (row.status ? "Active" : "Inactive"),
+            selector: (row: any) => row.vendors,
             sortable: true,
-            cell: (row: any) => (
-                <span
-                    className={row.status ? "text-green-600" : "text-red-600"}
-                >
-                    {row.status ? "Active" : "Inactive"}
-                </span>
-            ),
+            
         },
-        {
-            name: "Final Charges",
-            selector: (row: any) => (row.status ? "Active" : "Inactive"),
-            sortable: true,
-            cell: (row: any) => (
-                <span
-                    className={row.status ? "text-green-600" : "text-red-600"}
-                >
-                    {row.status ? "Active" : "Inactive"}
-                </span>
-            ),
-        },
+       
     ];
 
     if (loading) {
@@ -231,8 +219,8 @@ export default function Page() {
         },
         headCells: {
             style: {
-                paddingLeft: "8px", // override the cell padding for head cells
-                paddingRight: "8px",
+                paddingLeft: "2px", // override the cell padding for head cells
+                paddingRight: "2px",
                 color: fontColor,
                 fontWeight: "bold",
                 fontSize: "16px",
@@ -247,7 +235,7 @@ export default function Page() {
         },
         cells: {
             style: {
-                paddingLeft: "6px", // override the cell padding for data cells
+                paddingLeft: "4px", // override the cell padding for data cells
                 paddingRight: "4px",
                 fontSize: "14px",
                 backgroundColor: backgroundColor,
@@ -279,9 +267,11 @@ export default function Page() {
         },
     };
 
+    
+
     return (
         <div className="flex justify-center min-h-[90vh]">
-            <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">
+            <div className="shadow-xl p-6 rounded-md max-w-screen-xl min-w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-semibold">Tech Roster</h1>

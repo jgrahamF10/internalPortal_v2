@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
     boolean,
     timestamp,
@@ -11,11 +11,13 @@ import {
     varchar,
     date,
     real,
-    index
+    index,
+    unique
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 import { arch } from "os";
 import { projects, members } from "./member_management";
+
 
 export const vendors = pgEnum('vendors', ['Hertz', 'Enterprise', 'Uhaul', 'Other']);
 
@@ -49,11 +51,11 @@ export const rentals = pgTable("rental", {
 }));
 
 export const rentals2projects = relations(projects, ({ many }) => ({
-    projectId: many(rentals)
+    project: many(rentals)
 }));
 
 export const projects2rentals = relations(rentals, ({ one }) => ({
-    projectID: one(projects, {
+    project: one(projects, {
         fields: [rentals.projectId],
         references: [projects.id],
     })
@@ -225,49 +227,59 @@ export const notes = pgTable(
     "note",
     {
         id: bigserial("id", { mode: "number" }).primaryKey(),
-        parentId: integer("rentalId").notNull(),
+        parentId: integer("parentId").notNull(),
         noteType: NoteType("noteType").notNull(),
         note: varchar("note", { length: 100 }).notNull(),
         noteAuthor: varchar("noteAuthor", { length: 20 }).notNull(),
-        uploadDate: timestamp("uploadDate", { mode: "date" }).notNull(),
-    },
+        createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
+    }, 
+    (table) => {
+        return {
+            indexParentNoteType: index("idx_parent_note_type").on(
+                table.parentId,
+                table.noteType
+            ),
+            unq: unique("unq_parent_note_type").on(table.parentId, table.noteType, table.id),
+
+        };
+    }
 );
 
 export const notes2Rental = relations(notes, ({ one }) => ({
-    rentalId: one(rentals, {
+    remtal: one(rentals, {
         fields: [notes.parentId],
         references: [rentals.id],
     })
 }));
 
 export const rental2Notes = relations(rentals, ({ many }) => ({
-    parentId: many(notes)
-}));
-
-export const hotel2Notes = relations(hotelRezervations, ({ many }) => ({
-    parentId: many(notes)
+    rentalNotes: many(notes)
 }));
 
 export const note2Hotels = relations(notes, ({ one }) => ({
-    parentId: one(hotelRezervations, {
+    hotel: one(hotelRezervations, {
         fields: [notes.parentId],
         references: [hotelRezervations.id],
     })
 }));
 
-export const flight2Notes = relations(notes, ({ many }) => ({
-    parentId: many(notes)
-}));    
+export const hotel2Notes = relations(hotelRezervations, ({ many }) => ({
+    hotelNotes: many(notes)
+}));
 
 export const note2Flights = relations(notes, ({ one }) => ({
-    parentId: one(flights, {
+    flight: one(flights, {
         fields: [notes.parentId],
         references: [flights.id],
     })
 }));
 
+export const flight2Notes = relations(flights, ({ many }) => ({
+    flightNotes: many(notes)
+}));
+
 export type Notes = typeof notes.$inferSelect;
-export type NewNotes = typeof notes.$inferInsert;
+export type NewNote = typeof notes.$inferInsert;
 
 export const AttachmentType = pgEnum('AttatchmentType', ['Rental', 'Flight', 'Hotel']);
 

@@ -242,13 +242,7 @@ export default function Page(
         },
     };
 
-    if (
-        !session?.roles?.some((role) =>
-            ["Managers", "Human Resources"].includes(role)
-        )
-    ) {
-        return <NotAuth />;
-    }
+    
 
     return (
         <div className="flex justify-center min-h-[90vh]">

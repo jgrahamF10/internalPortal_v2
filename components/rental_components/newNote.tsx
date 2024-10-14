@@ -1,10 +1,9 @@
 "use client";
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { SubmitHandler, useForm, Control, FieldValues } from "react-hook-form";
-import { createNote, getMemberId } from "@/app/hr/hrActions";
-import { NewMemberNotes } from "@/db/schema/member_management";
+import { createRentalNote } from "@/app/rentals/rentalActions";
+import { NewNote } from "@/db/schema/tracker_db";
 import {
     DialogTrigger,
     DialogTitle,
@@ -15,18 +14,16 @@ import {
     DialogClose,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useRouter } from "next/navigation";
-import { on } from "events";
 
-interface UserName {
-    params: { person: string; uploader: string }; 
+interface NoteFormProps {
+    params: { rentalId: number; uploader: string }; 
     onNoteCreated: () => void;
 }
 
 const FormSchema = z.object({
+    noteType: z.enum(["Rental", "Flight", "Hotel"]),
     note: z
         .string()
         .min(5, {
@@ -35,43 +32,31 @@ const FormSchema = z.object({
         .max(250, {
             message: "Note must not be longer than 250 characters.",
         }),
-    enteredBy: z.string(),
-    memberId: z.number(),
+    parentId: z.number(),
+    noteAuthor: z.string(),
     createdDate: z.date(),
+    
 });
 
-export default function NewNoteModal({ params, onNoteCreated }: UserName) {
+export default function RentalNoteModal({ params, onNoteCreated }: NoteFormProps) {
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<NewMemberNotes>();
+    } = useForm<NewNote>();
 
     //console.log("params", params);
 
-    const form = useForm<z.infer<typeof FormSchema>>({
-        resolver: zodResolver(FormSchema),
-        defaultValues: async () => {
-            const memberId = await getMemberId(params.person);
-            return {
-                note: "",
-                enteredBy: params.uploader,
-                memberId: memberId ?? 0,
-                createdDate: new Date(),
-            };
-        },
-    });
-
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
-            const memberId = await getMemberId(params.person);
             const updatedValues = {
                 ...values,
-                enteredBy: params.uploader,
-                memberId: memberId ?? 0,
+                noteAuthor: params.uploader,
+                parentId: params.rentalId,
                 createdDate: new Date(),
+                noteType: "Rental" as const
             };
-            await createNote(updatedValues);
+            await createRentalNote(updatedValues);
             onNoteCreated(); 
         } catch (error) {
             console.error("Error submitting form:", error);
