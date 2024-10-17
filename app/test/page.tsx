@@ -5,7 +5,7 @@ import Image from "next/image";
 
 
 export default function Page() {
-    const fileKey = "attachments/2023_06_24_12_20_PM_pickup_2.jpg";
+    const fileKey = "attachments/Dezmond_Pascua_NA23D60_16387708_US_USD_37082638_20240929_EMAIL.pdf";
     const [imageUrl, setImageUrl] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadStatus, setUploadStatus] = useState("");

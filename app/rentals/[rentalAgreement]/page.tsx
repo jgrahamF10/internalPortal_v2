@@ -8,22 +8,16 @@ import NotAuth from "@/components/auth/notAuth";
 import Link from "next/link";
 import ProjectApprovalModal from "@/components/hr_components/projectApproval";
 import RentalNoteModal from "@/components/rental_components/newNote";
-import EditProjectApproval from "@/components/hr_components/editProjectApproval";
-import EditMember from "@/components/hr_components/editMember";
+import EditRentalForm from "@/components/rental_components/editRental";
 import ResumeUpload from "@/components/hr_components/uploadResume";
 import { getFile } from "@/lib/aws";
 
-import { AttachmentDelete } from "@/components/hr_components/deleteResume";
-import MemberAttatchment from "@/components/hr_components/memberAttachment";
-
+import { AttachmentDelete } from "@/components/rental_components/deleteAttachment";
+import RentalAttatchment from "@/components/rental_components/rentalAttachment";
 
 interface RentalAgreement {
     params: { rentalAgreement: string };
 }
-
-type SearchParamProps = {
-    searchParams: Record<string, string> | null | undefined;
-};
 
 export default function MemberDetails({ params }: RentalAgreement) {
     const [data, setData] = useState<any>(null);
@@ -43,37 +37,23 @@ export default function MemberDetails({ params }: RentalAgreement) {
         async function fetchData() {
             const fetchRental: any = await getRental(params.rentalAgreement);
             if (!fetchRental) {
-                
                 // Check for null or undefined
                 setNotFound(true);
                 setLoading(false);
                 return;
             }
-            console.log("RentalData", fetchRental)
+            console.log("RentalData", fetchRental);
             setData(fetchRental);
 
             // Ensure 'attachment' exists and is an array before processing
-            const attachments = fetchRental.attachment || [];
-
-            // Filter out resumes
-            const resumeDescriptions = attachments
-                .filter((item: any) => item.resume === true)
-                .map((item: any) => item.description);
-
-            // Set the resume descriptions
-            setResume(resumeDescriptions);
-
-            // Now fetch URLs for non-resume attachments asynchronously
-            const nonResumeAttachments = attachments.filter(
-                (attachment: any) => attachment.resume === false
-            );
+            const attachments = fetchRental.attachments || [];
 
             // Store the URLs in an object
             const urlMap: { [key: string]: string } = {};
 
             // Iterate over the non-resume attachments and fetch the URLs
             await Promise.all(
-                nonResumeAttachments.map(async (attachment: any) => {
+                attachments.map(async (attachment: any) => {
                     try {
                         const url = await getFile(attachment.description);
                         urlMap[attachment.description] = url; // Map the URL to the description
@@ -121,7 +101,7 @@ export default function MemberDetails({ params }: RentalAgreement) {
 
     if (
         !session?.roles?.some((role) =>
-            ["Managers", "Human Resources"].includes(role)
+            ["Managers", "Human Resources", "Finance"].includes(role)
         )
     ) {
         return <NotAuth />;
@@ -161,15 +141,14 @@ export default function MemberDetails({ params }: RentalAgreement) {
                     <div className="rounded-lg shadow-md dark:shadow-slate-700 p-6">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-bold">
-                                <span className=" underline">
-                                    Rental Agreement -  {data?.rentalAgreement}
+                                Rental Agreement -{" "}
+                                <span className="font-semibold text-green-700">
+                                    {data?.rentalAgreement}
                                 </span>
                             </h2>
-                            <EditMember
-                                params={{
-                                    person: params.rentalAgreement,
-                                    editingUser: session?.user?.name ?? "",
-                                }}
+                            <EditRentalForm
+                                rentalData={data}
+                                updatingUser={session?.user?.name ?? ""}
                                 onNoteCreated={() => refresh()}
                             />
                         </div>
@@ -178,21 +157,23 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                 Status:{" "}
                                 <span
                                     className={
-                                        data?.dropOffMileage === 0
+                                        data?.canceled === true
+                                            ? "text-red-500 dark:text-red-400" // Red for canceled
+                                            : data?.dropOffMileage === 0
                                             ? "text-green-700"
-                                            : data?.verified != 0
-                                            ? "text-red-500 dark:text-red-400"
-                                            : ""
+                                            : "text-red-500 dark:text-red-400"
                                     }
                                 >
-                                    {data?.dropOffMileage === 0? "Active" : "Returned"}
+                                    {data?.canceled === true
+                                        ? "Canceled"
+                                        : data?.dropOffMileage === 0
+                                        ? "Active"
+                                        : "Returned"}
                                 </span>
                             </h3>
                             <h3 className="block text-lg font-bold pr-[11.3rem]">
                                 Final Charges:{" "}
-                                <span>
-                                    ${data?.finalCharges + data.tolls}
-                                </span>
+                                <span>${data?.finalCharges + data.tolls}</span>
                             </h3>
                         </div>
 
@@ -200,7 +181,8 @@ export default function MemberDetails({ params }: RentalAgreement) {
                             <div className="block text-sm font-bold">
                                 Driver:{" "}
                                 <span className="font-medium underline">
-                                    {data?.memberID?.firstname} {data?.memberID?.lastname}
+                                    {data?.memberID?.firstname}{" "}
+                                    {data?.memberID?.lastname}
                                 </span>
                             </div>
                             <div className="block text-sm font-bold ">
@@ -246,8 +228,6 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                     {data?.returnDate}
                                 </span>
                             </div>
-                           
-                            
                         </div>
                     </div>
                     <div className="rounded-lg shadow-md dark:shadow-slate-700 p-6">
@@ -256,39 +236,57 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                 Vehicle Info
                             </h2>
                         </div>
-                        <div className="overflow-x-auto"></div>
-                        <div className="grid grid-cols-1 gap-4">
-                        <div className="block text-md font-bold">
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="block text-md font-bold">
                                 Vendor:{" "}
                                 <span className="font-medium capitalize">
                                     {data?.vendors}
                                 </span>
                             </div>
-                        <div className="block text-md font-bold">
+                            <div className="block text-md font-bold">
                                 Vehicle Type:{" "}
                                 <span className="font-medium capitalize">
                                     {data?.vehicleType}
                                 </span>
                             </div>
-                           
+
                             <div className="block text-md font-bold ">
                                 Vin Number:{" "}
                                 <span>
                                     {data?.vehicleVIN ? data.vehicleVIN : "N/A"}
                                 </span>
                             </div>
-                        
+
                             <div className="block text-md font-bold">
                                 License Plate:{" "}
                                 <span className="font-medium capitalize">
-                                    {data?.LicensePlate ? data.LicensePlate : "N/A"}
+                                    {data?.LicensePlate
+                                        ? data.LicensePlate
+                                        : "N/A"}
+                                </span>
+                            </div>
+                            <div className="block text-md font-bold">
+                                Pick Up Milage:{" "}
+                                <span className="font-medium capitalize">
+                                    {data?.pickUpMilage
+                                        ? data.pickUpMilage
+                                        : "N/A"}
+                                </span>
+                            </div>
+                            <div className="block text-md font-bold">
+                                Drop Off Milage:{" "}
+                                <span className="font-medium capitalize">
+                                    {data?.dropOffMileage
+                                        ? data.dropOffMileage
+                                        : "N/A"}
                                 </span>
                             </div>
                             <div className="flex items-center text-md font-bold">
                                 {/* Resume label */}
                                 Tolls:{" "}
-                               <span className="font-medium underline pl-2">
-                                   ${data?.tolls ? data.tolls : "0"}
+                                <span className="font-medium underline pl-2">
+                                    ${data?.tolls ? data.tolls : "0"}
                                 </span>
                             </div>
                         </div>
@@ -297,7 +295,6 @@ export default function MemberDetails({ params }: RentalAgreement) {
                 <div className=" rounded-lg shadow-md dark:shadow-slate-700 p-6 mt-8">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold mb-4">Notes</h2>
-
                         <RentalNoteModal
                             params={{
                                 rentalId: data.id,
@@ -349,10 +346,11 @@ export default function MemberDetails({ params }: RentalAgreement) {
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold mb-4">Attachments</h2>
 
-                        <MemberAttatchment
+                        <RentalAttatchment
                             params={{
-                                person: data.id,
+                                rental: data.id,
                                 uploader: session?.user?.name ?? "",
+                                fileSuffix: `-${data?.rentalAgreement}-${data?.memberID?.firstname}-${data?.memberID?.lastname}`,
                             }}
                         />
                     </div>
@@ -376,12 +374,8 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* 
-                                {member?.attachment
-                                    .filter(
-                                        (attachment: any) =>
-                                            attachment.resume === false
-                                    )
+                                
+                                {data?.attachments
                                     .map((attachment: any) => (
                                         <tr
                                             className="border-b border-gray-200 dark:border-gray-700"
@@ -419,13 +413,13 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                                 {attachment.uploadDate.toLocaleDateString()}
                                             </td>
                                             <td className="px-4 py-2 text-sm">
-                                                {/* Delete button 
+                                                {/* Delete button */}
                                                 <AttachmentDelete
                                                     attachmentId={attachment.id}
                                                 />
                                             </td>
                                         </tr>
-                                    ))}*/}
+                                    ))}
                             </tbody>
                         </table>
                     </div>

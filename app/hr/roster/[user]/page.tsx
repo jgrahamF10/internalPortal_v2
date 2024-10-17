@@ -424,7 +424,7 @@ export default function MemberDetails({
                                             <td className="px-4 py-2 text-sm">
                                                 {
                                                     projectIntake.project
-                                                        .projectName
+                                                        ?.projectName
                                                 }
                                             </td>
                                             <td

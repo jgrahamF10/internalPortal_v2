@@ -38,7 +38,7 @@ import { z } from "zod";
 import { useForm, Control, FieldValues } from "react-hook-form";
 import { Label } from "@/components/ui/label";
 import { Input, InputProps } from "@/components/ui/input";
-import { createMember } from "@/app/hr/hrActions"; // Add updateProject and getProject functions
+import { createMember } from "@/app/hr/hrActions"; 
 import { NewMember } from "@/db/schema/member_management";
 
 interface NewUserFormProps {
@@ -195,7 +195,7 @@ export default function CreateUserForm({
                 <DialogHeader>
                     <DialogTitle>Create A New Person</DialogTitle>
                 </DialogHeader>
-                <Card className="w-full max-w-xl bg-white dark:bg-gray-800">
+                <Card className="w-full max-w-xl bg-background">
                     <CardContent className="grid gap-4">
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -724,7 +724,7 @@ export default function CreateUserForm({
                                             className="bg-green-700 text-white hover:bg-green-800 hover:text-black"
                                             type="submit"
                                         >
-                                            Update
+                                            Submit
                                         </Button>
                                     </DialogClose>
                                 </DialogFooter>

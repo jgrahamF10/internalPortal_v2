@@ -9,7 +9,7 @@ import { EosIconsBubbleLoading } from "@/components/spinner";
 import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
-import CreateUserForm from "@/components/hr_components/newMember";
+import NewRentalForm from "@/components/rental_components/newRental";
 import { ThemeColors } from "@/lib/utils";
 
 const TextField = styled.input`
@@ -185,15 +185,12 @@ export default function Page() {
             name: "Actual Return Date",
             selector: (row: any) => row.returnDate,
             sortable: true,
-            
         },
         {
             name: "Rental Company",
             selector: (row: any) => row.vendors,
             sortable: true,
-            
         },
-       
     ];
 
     if (loading) {
@@ -267,7 +264,9 @@ export default function Page() {
         },
     };
 
-    
+    const refresh = () => {
+        window.location.reload();
+    };
 
     return (
         <div className="flex justify-center min-h-[90vh]">
@@ -278,8 +277,8 @@ export default function Page() {
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (
-                        <CreateUserForm
-                            errorStatusChange={errorStatusChange}
+                        <NewRentalForm
+                            onNoteCreated={() => refresh()}
                             creatingUser={session?.user?.name ?? ""}
                         />
                     )}

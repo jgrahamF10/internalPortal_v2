@@ -84,6 +84,7 @@ export const projectBGStatus = pgTable(
         submissionDate: date("submissionDate").notNull(),
         approvalDate: date("approvalDate"),
         updatedBy: varchar("updatedBy", { length: 20 }).notNull(),
+        //active: boolean("active").default(false),
     },
 );
 

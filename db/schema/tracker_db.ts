@@ -44,6 +44,8 @@ export const rentals = pgTable("rental", {
     verified: boolean("verified").default(false),
     archived: boolean("archived").default(false),
     createdDate: timestamp("createdAt", { mode: "date" }).notNull(),
+    lastUpdated: timestamp("lastUpdated", { mode: "date" }),
+    lastUpdatedBy: varchar("lastUpdatedBy", { length: 20 }),
 }, (table) => ({
     idxRentalProjectId: index("idx_rental_projectId").on(table.projectId), 
     idxRentalMemberId: index("idx_rental_memberId").on(table.memberId),
@@ -297,7 +299,7 @@ export const attachments = pgTable(
         // Define indexes
         idxParentId: index("idx_parentId").on(table.parentId),
         idxAttachmentType: index("idx_attachmentType").on(table.attachmentType),
-        idxParentAndType: index("idx_parentId_attachmentType").on(table.parentId, table.attachmentType),
+        idxParentAndType: index("idx_parentId_attachmentType").on(table.id, table.parentId, table.attachmentType),
     })
 );
 

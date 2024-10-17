@@ -130,6 +130,7 @@ export default function ProjectApprovalModal({
             };
             await NewProjectApproval(updatedValues);
             onNoteCreated();
+            reset();
         } catch (error) {
             console.error("Error creating note:", error);
         } finally {

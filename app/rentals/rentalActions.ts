@@ -1,13 +1,13 @@
 "use server";
 import { db } from "@/db";
 import { members } from "@/db/schema/member_management";
-import { notes, rentals, NewNote } from "@/db/schema/tracker_db";
+import { notes, rentals, NewNote, NewAttatchment, NewRentals, attachments } from "@/db/schema/tracker_db";
 import { eq, ne, desc } from "drizzle-orm/expressions";
 
 export async function getRentals() {
     const rentalData = await db.query.rentals.findMany({
         where: ne(rentals.archived, true),
-        //orderBy: [desc(rentals.createdDate)],
+        orderBy: [desc(rentals.createdDate)],
         with: {
             memberID: true,
         },
@@ -22,6 +22,7 @@ export async function getRental(rentalAgreement: string) {
             memberID: true,
             rentalNotes: true,
             project: true,
+            attachments: true,
         },
     });
     if (rentalData) {
@@ -37,5 +38,36 @@ export async function createRentalNote(data: NewNote) {
         await db.insert(notes).values(data);
     } catch (error) {
         console.error("Error creating note:", error);
+    }
+}
+
+export async function createRental(data: NewRentals) {
+    try {
+        await db.insert(rentals).values(data);
+    } catch (error) {
+        console.error("Error creating rental:", error);
+    }
+}
+
+export async function updateRental(data: NewRentals) {
+    //console.log("createRental data", data);
+    try {
+        await db
+            .update(rentals)
+            .set(data)
+            .where(eq(rentals.rentalAgreement, data.rentalAgreement));
+    } catch (error) {
+        console.error("Error updating rental:", error);
+    }
+}
+
+export async function deleteAttachment(attachmentId: number) {
+    console.log("attachmentId", attachmentId);
+    try {
+        await db.delete(attachments).where(eq(attachments.id, attachmentId));
+        return true;
+    } catch (error) {
+        console.error("Error deleting resume:", error);
+        return false;
     }
 }
