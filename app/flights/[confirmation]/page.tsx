@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { getRental } from "../Actions";
+import { getRental } from "../actions";
 import React, { useState, useEffect } from "react";
 import { EosIconsBubbleLoading } from "@/components/spinner";
 import { useSession } from "next-auth/react";
