@@ -17,12 +17,12 @@ export default function Page() {
                 />
                 
             </div>
-            <div className="relative z-10 w-full max-w-md rounded-lg border bg-card p-4 shadow-lg dark:border-muted">
+            <div className="relative z-10 w-full max-w-sm rounded-lg border bg-card p-4 shadow-lg dark:border-muted">
                 <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Login</h1>
                     <ModeToggle />
                 </div>
-                <div className="mt-6 space-y-4">
+                <div className="mt-6">
                     <form
                         action={async () => {
                             "use server";

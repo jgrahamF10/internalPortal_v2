@@ -31,7 +31,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { createRez } from "@/app/hotels/actions";
+import { createRez, getHotelChains } from "@/app/hotels/actions";
 import { getProjects, getApprovedTechs } from "@/app/hr/hrActions";
 
 // Zod schema to validate the form
@@ -56,7 +56,7 @@ interface NewRentalProps {
     creatingUser: string;
 }
 
-function ProjectWatch({
+function FormWatch({
     control,
 }: {
     control: Control<z.infer<typeof FormSchema>>;
@@ -74,6 +74,7 @@ export default function NewHotelForm({
 }: NewRentalProps) {
     const [projects, setProjects] = useState<any[]>([]);
     const [technicians, setTechnicians] = useState<string[]>([]);
+    const [hotels, setHotels] = useState<any[]>([]);
 
     // Remove these lines
     const {
@@ -109,8 +110,8 @@ export default function NewHotelForm({
 
     const { control: formControl } = form;
 
-    const selectedProject = ProjectWatch({ control: formControl });
-    //console.log("selectedProject", selectedProject);
+    const selectedProject = FormWatch({ control: formControl });
+    console.log("selectedProject", selectedProject);
 
     useEffect(() => {
         async function fetchData() {
@@ -118,6 +119,8 @@ export default function NewHotelForm({
             setProjects(
                 fetchProject.filter((project: any) => !project.inactive)
             );
+            const fetchHotels = await getHotelChains();
+            setHotels(fetchHotels);
         }
         fetchData();
     }, []);
@@ -135,6 +138,7 @@ export default function NewHotelForm({
                             techName: `${technician.member.firstname} ${technician.member.lastname}`,
                         })
                     );
+                    techs.sort((a: { techName: string; }, b: { techName: any; }) => a.techName.localeCompare(b.techName));
                     setTechnicians(techs);
                 } catch (error) {
                     console.error("Error fetching drivers:", error);
@@ -154,18 +158,17 @@ export default function NewHotelForm({
                 (project: { projectName: string }) =>
                     project.projectName === values.project
             ).id;
-
+            const hotelId = hotels.find(
+                (hotel: { hotelName: string }) =>
+                    hotel.hotelName === values.hotelChain
+            ).id;
             const currentDate = new Date();
             const rezData = {
                 ...values,
                 projectId: projectId,
                 memberId: parseInt(values.technician, 10),
                 createdDate: currentDate,
-                hotelChain: values.hotelChain as
-                    | "Hilton"
-                    | "Marriott"
-                    | "Holiday Inn"
-                    | "Other",
+                hotelChainId: hotelId,
                 lastUpdated: currentDate,
                 finalcharges: values.finalCharges || 0, 
                 arrivalDate: values.arrivalDate.toISOString(),
@@ -301,21 +304,25 @@ export default function NewHotelForm({
                                                     value={field.value}
                                                 >
                                                     <SelectTrigger id="vendor">
-                                                        <SelectValue placeholder="Select Company" />
+                                                        <SelectValue placeholder="Select Hotel Chain" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="Hilton">
-                                                            Hilton
-                                                        </SelectItem>
-                                                        <SelectItem value="Holiday Inn">
-                                                            Holiday Inn
-                                                        </SelectItem>
-                                                        <SelectItem value="Marriott">
-                                                            Marriott
-                                                        </SelectItem>
-                                                        <SelectItem value="Other">
-                                                            Other
-                                                        </SelectItem>
+                                                        {hotels.map(
+                                                            (hotel: any) => (
+                                                                <SelectItem
+                                                                    key={
+                                                                        hotel.id
+                                                                    }
+                                                                    value={
+                                                                        hotel.hotelName
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        hotel.hotelName
+                                                                    }
+                                                                </SelectItem>
+                                                            )
+                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />

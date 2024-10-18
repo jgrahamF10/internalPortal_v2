@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { Button } from "@/components/ui/button";
 import {
     DialogTrigger,
@@ -32,11 +32,13 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { updateRez } from "@/app/hotels/actions";
+import { getHotelChains } from "@/app/hotels/actions";
 
 
 // Zod schema to validate the form
 const FormSchema = z.object({
     hotelConfirmationNumber: z.string().min(1, "Rental Agreement is required."),
+    hotelChainId: z.number(),
     hotelChain: z.string().min(1, "Hotel Chain is required."),
     arrivalDate: z.date(),
     departureDate: z.date(),
@@ -72,22 +74,32 @@ export default function EditHotelRezForm({
     } = useForm({
         resolver: zodResolver(FormSchema),
     });
+    const [hotels, setHotels] = useState<any[]>([]);
 
     //console.log("rentalData", rentalData);
+
+    useEffect(() => {
+        async function fetchData() {
+            const fetchHotels = await getHotelChains();
+            setHotels(fetchHotels);
+        }
+        fetchData();
+    }, []);
 
     const form = useForm<z.infer<typeof FormSchema>>({
         defaultValues: {
             projectId: hotelData?.projectId,
             technician: hotelData?.memberId,
             hotelConfirmationNumber: hotelData?.hotelConfirmationNumber,
-            hotelChain: hotelData?.hotelChain,
+            hotelChainId: hotelData?.hotelChainId,
+            hotelChain: hotelData?.hotelChain.hotelName,
             arrivalDate: hotelData?.arrivalDate
                 ? new Date(hotelData?.arrivalDate)
                 : new Date(),
                 departureDate: hotelData?.departureDate
                 ? new Date(hotelData?.departureDate)
                 : new Date(),
-            finalCharges: hotelData?.finalCharges,
+            finalCharges: hotelData?.finalcharges,
             hotelCity: hotelData?.hotelCity,
             hotelState: hotelData?.hotelState,
             canceled: hotelData?.canceled,
@@ -100,23 +112,25 @@ export default function EditHotelRezForm({
         resolver: zodResolver(FormSchema),
     });
 
+    
+
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         console.log("form Values", values);
         try {
             const currentDate = new Date();
+            const hotelId = hotels.find(
+                (hotel: { hotelName: string }) =>
+                    hotel.hotelName === values.hotelChain
+            ).id;
             const rezData = {
                 ...values,
                 memberId: values.technician,
                 createdDate: currentDate,
-                hotelChain: values.hotelChain as
-                    | "Hilton"
-                    | "Marriott"
-                    | "Holiday Inn"
-                    | "Other",
                 lastUpdated: currentDate,
                 finalcharges: values.finalCharges || 0, 
                 arrivalDate: values.arrivalDate.toISOString(),
                 departureDate: values.departureDate.toISOString(),
+                hotelChainId: hotelId,
             };
             console.log("rentalData", rezData);
             await updateRez(rezData);
@@ -145,7 +159,7 @@ export default function EditHotelRezForm({
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <FormField
+                                <FormField
                                         control={form.control}
                                         name="hotelChain"
                                         render={({ field }) => (
@@ -162,21 +176,25 @@ export default function EditHotelRezForm({
                                                     value={field.value}
                                                 >
                                                     <SelectTrigger id="vendor">
-                                                        <SelectValue placeholder="Select Company" />
+                                                        <SelectValue placeholder="Select Hotel Chain" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="Hilton">
-                                                            Hilton
-                                                        </SelectItem>
-                                                        <SelectItem value="Holiday Inn">
-                                                            Holiday Inn
-                                                        </SelectItem>
-                                                        <SelectItem value="Marriott">
-                                                            Marriott
-                                                        </SelectItem>
-                                                        <SelectItem value="Other">
-                                                            Other
-                                                        </SelectItem>
+                                                        {hotels.map(
+                                                            (hotel: any) => (
+                                                                <SelectItem
+                                                                    key={
+                                                                        hotel.id
+                                                                    }
+                                                                    value={
+                                                                        hotel.hotelName
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        hotel.hotelName
+                                                                    }
+                                                                </SelectItem>
+                                                            )
+                                                        )}
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
@@ -501,6 +519,74 @@ export default function EditHotelRezForm({
                                                     }}
                                                 />
                                                 <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                                <div className="grid gap-2 pt-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="canceled"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <FormLabel>
+                                                        <span className="font-bold text-red-500">
+                                                            Rental Canceled:{" "}
+                                                        </span>
+                                                    </FormLabel>
+                                                    <Switch
+                                                        id="canceled"
+                                                        onCheckedChange={
+                                                            field.onChange
+                                                        }
+                                                        checked={field.value}
+                                                    />
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="verified"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <FormLabel>
+                                                        <span className="font-bold text-green-600">
+                                                            Rental Verified:{" "}
+                                                        </span>
+                                                    </FormLabel>
+                                                    <Switch
+                                                        id="verified"
+                                                        onCheckedChange={
+                                                            field.onChange
+                                                        }
+                                                        checked={field.value}
+                                                    />
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="archived"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <FormLabel>
+                                                        <span className="font-bold">
+                                                            Archive:{" "}
+                                                        </span>
+                                                    </FormLabel>
+                                                    <Switch
+                                                        id="archived"
+                                                        onCheckedChange={
+                                                            field.onChange
+                                                        }
+                                                        checked={field.value}
+                                                    />
+                                                </div>
                                             </FormItem>
                                         )}
                                     />

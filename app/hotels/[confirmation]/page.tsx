@@ -160,16 +160,18 @@ export default function MemberDetails({ params }: HotelRez) {
                                             : "text-red-500 dark:text-red-400"
                                     }
                                 >
-                                    {data?.verified === false
+                                    {data?.canceled === true
+                                        ? "Canceled"
+                                        : data?.verified === false
                                         ? "Unverified"
                                         : data?.verified === true
                                         ? "Verified"
-                                        : "Canceled"}
+                                        : "Active"}
                                 </span>
                             </h3>
                             <h3 className="block text-lg font-bold pr-[11.3rem]">
                                 Final Charges:{" "}
-                                <span>${data?.finalCharges}</span>
+                                <span>${data?.finalcharges}</span>
                             </h3>
                         </div>
 
@@ -225,7 +227,7 @@ export default function MemberDetails({ params }: HotelRez) {
                             <div className="block text-md font-bold">
                                 Hotel Chain:{" "}
                                 <span className="font-medium capitalize">
-                                    {data?.hotelChain}
+                                    {data?.hotelChain.hotelName}
                                 </span>
                             </div>
                             <div className="block text-md font-bold">

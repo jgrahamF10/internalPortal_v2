@@ -26,19 +26,19 @@ export const rentals = pgTable("rental", {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     projectId: integer("projectId"),
     memberId: integer("memberId").notNull(),
-    rentalAgreement: varchar("rentalAgreement", { length: 20 }).unique('rentalAgreement').notNull(),
-    reservation: varchar("reservation", { length: 20 }).notNull(),
+    rentalAgreement: varchar("rentalAgreement", { length: 40 }).unique('rentalAgreement').notNull(),
+    reservation: varchar("reservation", { length: 40 }).notNull(),
     pickUpDate: date("rentalStartDate").notNull(),
-    vehicleType: varchar("vehicleType",{ length: 20 }),
+    vehicleType: varchar("vehicleType",{ length: 30 }),
     vendors: vendors("vendors").notNull(),
     dueDate: date("dueDate").notNull(),
     returnDate: date("returnDate"),
-    vehicleVin: varchar("vehicleVin", { length: 20 }),
+    vehicleVin: varchar("vehicleVin", { length: 40 }),
     licensePlate: varchar("licensePlate", { length: 20 }),
     pickUpMileage: integer("pickUpMileage"),
     dropOffMileage: integer("dropOffMileage"),
-    pickUpLocation: varchar("pickUpLocation", { length: 20 }).notNull(),
-    returnLocation: varchar("returnLocation", { length: 20 }),
+    pickUpLocation: varchar("pickUpLocation", { length: 40 }).notNull(),
+    returnLocation: varchar("returnLocation", { length: 40 }),
     canceled: boolean("canceled").default(false),
     tolls: real("tolls"),
     finalCharges: real("finalCharges"),
@@ -183,14 +183,22 @@ export const flightCredits2members = relations(members, ({ many }) => ({
     memberId: many(flightCredits)
 }));
 
-export const hotelChains = pgEnum('hotelChains', ['Hilton', 'Marriott', 'Holiday Inn', 'Other']);
+export const hotelBrands = pgTable("hotelBrands", {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    hotelName: varchar("hotelName", { length: 50 }).unique('hotelName').notNull(),
+    inactive: boolean("inactive").default(false),
+});
+
+export type HotelChains = typeof hotelBrands.$inferSelect;
+export type NewHotelChains = typeof hotelBrands.$inferInsert;
+
 
 export const hotelRezervations = pgTable("hotelRezervation", {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     projectId: integer("projectId").notNull(),
     memberId: integer("memberId").notNull(),
     hotelConfirmationNumber: varchar("confirmationNumber", { length: 50 }).unique('hotelConfirmationNumber').notNull(),
-    hotelChain: hotelChains("hotelChain").notNull(),
+    hotelChainId: integer("hotelChainId").notNull(),
     arrivalDate: date("arrivalDate").notNull(),
     departureDate: date("departureDate").notNull(),
     hotelCity: varchar("hotelCity", { length: 100 }),
@@ -230,6 +238,17 @@ export const members2hotelRezervations = relations(hotelRezervations, ({ one }) 
         fields: [hotelRezervations.memberId],
         references: [members.id],
     })
+}));
+
+export const hotelChains2hotelRezervations = relations(hotelRezervations, ({ one }) => ({
+    hotelChain: one(hotelBrands, {
+        fields: [hotelRezervations.hotelChainId],
+        references: [hotelBrands.id],
+    })
+}));
+
+export const hotelReservations2hotelChains = relations(hotelBrands, ({ many }) => ({
+    hotelRez: many(hotelRezervations)
 }));
 
 export const NoteType = pgEnum('AttatchmentType', ['Rental', 'Flight', 'Hotel']);

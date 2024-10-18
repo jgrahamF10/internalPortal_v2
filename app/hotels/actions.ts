@@ -1,8 +1,8 @@
 "use server";
 import { db } from "@/db";
 import { members } from "@/db/schema/member_management";
-import { notes, hotelRezervations, NewNote, NewAttatchment, NewHotel, attachments } from "@/db/schema/tracker_db";
-import { eq, ne, desc } from "drizzle-orm/expressions";
+import { notes, hotelRezervations, NewNote, NewAttatchment, NewHotel, attachments, hotelBrands} from "@/db/schema/tracker_db";
+import { eq, ne, desc, asc } from "drizzle-orm/expressions";
 
 export async function getReservations() {
     const rentalData = await db.query.hotelRezervations.findMany({
@@ -15,11 +15,13 @@ export async function getReservations() {
     return rentalData;
 }
 
+
 export async function getRez(hotelConfirmationNumber: string) {
-    const newRez = await db.query.hotelRezervations.findFirst({
+    const rezData = await db.query.hotelRezervations.findFirst({
         where: eq(hotelRezervations.hotelConfirmationNumber, hotelConfirmationNumber),
         with: {
             memberID: true,
+            hotelChain: true,
             hotelNotes: true,
             project: true,
             attachments: {
@@ -27,12 +29,20 @@ export async function getRez(hotelConfirmationNumber: string) {
             },
         },
     });
-    if (newRez) {
-        return newRez;
+    if (rezData) {
+        return rezData;
     }
     else
     { return null; }
     
+}
+
+export async function getHotelChains() {
+    const chains = await db.query.hotelBrands.findMany({
+        where: ne(hotelBrands.inactive, true),
+        orderBy: [asc(hotelBrands.hotelName)],
+    });
+    return chains;
 }
 
 export async function createRezNote(data: NewNote) {
@@ -53,7 +63,7 @@ export async function createRez(data: NewHotel) {
 }
 
 export async function updateRez(data: NewHotel) {
-    //console.log("createRental data", data);
+    console.log("createRental data", data);
     try {
         await db
             .update(hotelRezervations)
