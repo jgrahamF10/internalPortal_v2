@@ -1,110 +1,343 @@
-"use client"
+"use client";
+import React, { useState, useEffect, useMemo } from "react";
+import DataTable from "react-data-table-component";
+import { getReservations } from "./actions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { EosIconsBubbleLoading } from "@/components/spinner";
+import Link from "next/link";
+import styled from "styled-components";
+import { useSession } from "next-auth/react";
+import NewHotelForm from "@/components/hotel_components/newHotel";
+import { ThemeColors } from "@/lib/utils";
 
-import { SetStateAction, useState } from "react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+const TextField = styled.input`
+    height: 32px;
+    width: 200px;
+    border-radius: 3px;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border: 1px solid #e5e5e5;
+    padding: 0 32px 0 16px;
 
-export default function Component() {
-  const [filterTerm, setFilterTerm] = useState("")
-  const handleFilterChange = (event: { target: { value: SetStateAction<string> } }) => {
-    setFilterTerm(event.target.value)
-  }
-  const filteredData = [
-    {
-      reservationNumber: "12345",
-      pickUpDate: "2023-06-01",
-      vehicleType: "Sedan",
-      vendor: "Acme Car Rentals",
-      returnDate: "2023-06-08",
-      vehicleVIN: "1HGCM82633A123456",
-      pickUpLocation: "123 Main St, Anytown USA",
-      returnLocation: "456 Oak Rd, Anytown USA",
-    },
-    {
-      reservationNumber: "67890",
-      pickUpDate: "2023-07-15",
-      vehicleType: "SUV",
-      vendor: "XYZ Car Rentals",
-      returnDate: "2023-07-22",
-      vehicleVIN: "2HKRW2H33H4567890",
-      pickUpLocation: "789 Elm St, Othertown USA",
-      returnLocation: "321 Pine Rd, Othertown USA",
-    },
-    {
-      reservationNumber: "54321",
-      pickUpDate: "2023-08-01",
-      vehicleType: "Minivan",
-      vendor: "Mega Car Rentals",
-      returnDate: "2023-08-08",
-      vehicleVIN: "3GKALMEV4HG123456",
-      pickUpLocation: "159 Oak St, Somewhere USA",
-      returnLocation: "753 Maple Rd, Somewhere USA",
-    },
-    {
-      reservationNumber: "98765",
-      pickUpDate: "2023-09-01",
-      vehicleType: "Pickup Truck",
-      vendor: "Big Car Rentals",
-      returnDate: "2023-09-08",
-      vehicleVIN: "4JGDA5HB1HA123456",
-      pickUpLocation: "357 Elm St, Elsewhere USA",
-      returnLocation: "951 Pine Rd, Elsewhere USA",
-    },
-  ].filter(
-    (item) =>
-      item.reservationNumber.includes(filterTerm) ||
-      item.pickUpDate.includes(filterTerm) ||
-      item.vehicleType.toLowerCase().includes(filterTerm.toLowerCase()) ||
-      item.vendor.toLowerCase().includes(filterTerm.toLowerCase()) ||
-      item.returnDate.includes(filterTerm) ||
-      item.vehicleVIN.includes(filterTerm) ||
-      item.pickUpLocation.toLowerCase().includes(filterTerm.toLowerCase()) ||
-      item.returnLocation.toLowerCase().includes(filterTerm.toLowerCase()),
-  )
-  return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Car Rental Information</CardTitle>
-        <CardDescription>View details of your car rental reservations.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Input
-          type="text"
-          placeholder="Filter reservations..."
-          value={filterTerm}
-          onChange={handleFilterChange}
-          className="mb-4"
+    &:hover {
+        cursor: pointer;
+    }
+`;
+
+const FilterComponent = ({
+    filterText,
+    onFilter,
+    onClear,
+}: {
+    filterText: string;
+    onFilter: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onClear: () => void;
+}) => (
+    <div className="flex justify-between items-center mb-4">
+        <TextField
+            id="search"
+            type="text"
+            placeholder="Filter assets"
+            aria-label="Search Input"
+            value={filterText}
+            onChange={onFilter}
+            className="form-input"
         />
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Reservation #</TableHead>
-              <TableHead>Pick Up Date</TableHead>
-              <TableHead>Vehicle Type</TableHead>
-              <TableHead>Vendor</TableHead>
-              <TableHead>Return Date</TableHead>
-              <TableHead>Vehicle VIN</TableHead>
-              <TableHead>Pick Up Location</TableHead>
-              <TableHead>Return Location</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredData.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell>{item.reservationNumber}</TableCell>
-                <TableCell>{item.pickUpDate}</TableCell>
-                <TableCell>{item.vehicleType}</TableCell>
-                <TableCell>{item.vendor}</TableCell>
-                <TableCell>{item.returnDate}</TableCell>
-                <TableCell>{item.vehicleVIN}</TableCell>
-                <TableCell>{item.pickUpLocation}</TableCell>
-                <TableCell>{item.returnLocation}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  )
+        <button
+            type="button"
+            onClick={onClear}
+            className="btn btn-secondary bg-red-400 px-1 py-1 rounded-md"
+        >
+            Clear
+        </button>
+    </div>
+);
+
+export default function Page() {
+    const router = useRouter();
+    const [data, setData] = useState<any[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [errorStatus, setErrorStatus] = useState<boolean>(false);
+    const [inactives, setInactives] = useState<boolean>(false);
+    const [filterText, setFilterText] = useState<string>("");
+    const [resetPaginationToggle, setResetPaginationToggle] =
+        useState<boolean>(false);
+    const { data: session } = useSession();
+    const { backgroundColor, fontColor, mutedColor } = ThemeColors();
+
+    useEffect(() => {
+        async function fetchData() {
+            const rezervations: any = await getReservations();
+            console.log("rezervations", rezervations);
+            setData(rezervations);
+            setLoading(false);
+        }
+        fetchData();
+    }, []);
+
+    const errorStatusChange = (estatus: boolean) => {
+        setErrorStatus(estatus);
+        if (estatus) {
+            setErrorStatus(true);
+        } else {
+            window.location.reload();
+        }
+    };
+
+    const handleInactive = () => {
+        setInactives(!inactives);
+    };
+
+    const filteredAssets = data.filter((rental) => {
+        // Filter by active/inactive status
+        if (inactives) {
+            if (rental.archived !== false) return false;
+        } else {
+            if (rental.verified !== false) return false;
+        }
+
+        // If filterText is empty, include all remaining users
+        if (!filterText) return true;
+
+        // Convert filterText to lowercase for case-insensitive matching
+        const lowerFilterText = filterText.toLowerCase();
+
+        // Match against the relevant fields
+        return (
+            rental.rentalAgreement.toLowerCase().includes(lowerFilterText) ||
+            rental.member.firstname.toLowerCase().includes(lowerFilterText) ||
+            rental.member.lastname.toLowerCase().includes(lowerFilterText) ||
+            rental.pickUpLocation.toLowerCase().includes(lowerFilterText)
+        );
+    });
+
+    const subHeaderComponentMemo = useMemo(() => {
+        const handleClear = () => {
+            if (filterText) {
+                setResetPaginationToggle(!resetPaginationToggle);
+                setFilterText("");
+            }
+        };
+
+        return (
+            <FilterComponent
+                onFilter={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setFilterText(e.target.value)
+                }
+                onClear={handleClear}
+                filterText={filterText}
+            />
+        );
+    }, [filterText, resetPaginationToggle]);
+
+    const columns = [
+        {
+            name: "Rental Agreement",
+            selector: (row: any) => row.hotelConfirmationNumber,
+            cell: (row: any) => (
+                <Link
+                    href={`/hotels/${row.hotelConfirmationNumber}`}
+                    className="font-bold text-lg text-green-700 capitalize hover:underline pl-4"
+                >
+                    {row.hotelConfirmationNumber}
+                </Link>
+            ),
+            sortable: true,
+            center: true,
+        },
+        {
+            name: "Technician",
+            selector: (row: any) => row.memberID?.firstname,
+            sortable: true,
+            center: true,
+            cell: (row: any) => (
+                <span className="capitalize">
+                    {row.memberID?.firstname} {row.memberID?.lastname}
+                </span>
+            ),
+        },
+        {
+            name: "Check In Date",
+            selector: (row: any) => row.arrivalDate,
+            sortable: true,
+            center: true,
+        },
+        {
+            name: "Final Charges",
+            selector: (row: any) => row.finalcharges,
+            sortable: true,
+            center: true,
+        },
+        {
+            name: "Check Out Date",
+            selector: (row: any) => row.departureDate,
+            sortable: true,
+            center: true,
+        },
+        {
+            name: "Hotel Chain",
+            selector: (row: any) => row.hotelChain,
+            sortable: true,
+            center: true,
+        },
+        {
+            name: "Location",
+            selector: (row: any) => row.hotelCity,
+            sortable: true,
+            cell: (row: any) => (
+                <span className="capitalize">{row.hotelCity}, {row.hotelState}</span>
+            ),
+            center: true,
+        },
+        {
+            name: "Verified",
+            selector: (row: any) => row.verified,
+            sortable: true,
+            center: true,
+            cell: (row: any) => (
+                <span className={row.verified ? "text-green-600" : "text-red-600"}>
+                    {row.verified ? "Yes" : "No"}
+                </span>
+            ),
+        },
+        
+    ];
+
+    if (loading) {
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    height: "100vh",
+                }}
+            >
+                <EosIconsBubbleLoading />
+            </div>
+        );
+    }
+
+    const customStyles = {
+        rows: {
+            style: {
+                minHeight: "72px", // override the row height
+            },
+        },
+        headCells: {
+            style: {
+                paddingLeft: "2px", // override the cell padding for head cells
+                paddingRight: "2px",
+                color: fontColor,
+                fontWeight: "bold",
+                fontSize: "16px",
+                backgroundColor: backgroundColor,
+                
+                
+            },
+        },
+        subHeader: {
+            style: {
+                backgroundColor: backgroundColor,
+                color: fontColor,
+            },
+        },
+        cells: {
+            style: {
+                paddingLeft: "4px", // override the cell padding for data cells
+                paddingRight: "4px",
+                fontSize: "16px",
+                backgroundColor: backgroundColor,
+                color: fontColor,
+                fontWeight: "bold",
+            },
+        },
+        pagination: {
+            style: {
+                backgroundColor: backgroundColor,
+                color: fontColor,
+            },
+            pageButtonsStyle: {
+                color: fontColor,
+                fill: fontColor,
+                backgroundColor: "transparent",
+                "&:disabled": {
+                    cursor: "unset",
+                    color: fontColor,
+                    fill: mutedColor,
+                },
+                "&:hover:not(:disabled)": {
+                    backgroundColor: "#c1f2f3",
+                },
+                "&:focus": {
+                    outline: "none",
+                    backgroundColor: "#aa82f3",
+                },
+            },
+        },
+    };
+
+    const refresh = () => {
+        window.location.reload();
+    };
+
+    return (
+        <div className="flex justify-center min-h-[90vh]">
+            <div className="shadow-xl p-6 rounded-md max-w-screen-xl min-w-full">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-2xl font-semibold">Hotel Reservation Tracker</h1>
+                    {session?.roles?.some((role) =>
+                        ["Managers", "Human Resources"].includes(role)
+                    ) && (
+                        <NewHotelForm
+                            onNoteCreated={() => refresh()}
+                            creatingUser={session?.user?.name ?? ""}
+                        />
+                    )}
+                </div>
+                <div className="flex justify-start mb-4">
+                    <h3
+                        className="text-sm font-semibold cursor-pointer"
+                        onClick={handleInactive}
+                    >
+                        <button className="bg-blue-600 text-white py-1 px-2 rounded-sm hover:bg-blue-700">
+                            Show inactives
+                        </button>
+                    </h3>
+                </div>
+                <h3 className="pb-2">
+                    Displaying {filteredAssets.length} Reservations
+                </h3>
+                <div className="overflow-auto rounded-md w-full">
+                    <DataTable
+                        columns={columns}
+                        data={filteredAssets}
+                        pagination
+                        paginationResetDefaultPage={resetPaginationToggle}
+                        paginationPerPage={20}
+                        paginationRowsPerPageOptions={[10, 25, 50, 100]}
+                        subHeader
+                        subHeaderComponent={subHeaderComponentMemo}
+                        customStyles={customStyles}
+                        //theme="solarized"
+                    />
+                </div>
+                <Alert
+                    variant="destructive"
+                    className={errorStatus ? "" : "hidden"}
+                >
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                        That manufacturer already exists.
+                    </AlertDescription>
+                </Alert>
+            </div>
+        </div>
+    );
 }

@@ -62,7 +62,7 @@ export default function SideNav() {
                         {session && session?.user && (
                             <Link
                                 href="/dashboard"
-                                className="flex h-12 items-center pl-4  border-b px-4 text-sm font-medium transition-colors hover:bg-gray-700"
+                                className="flex h-12 items-center pl-4 border-b px-4 text-sm font-medium transition-colors hover:bg-gray-700"
                             >
                                 <DashboardIcon />
                                 <span className="text-center pl-20">
@@ -71,27 +71,33 @@ export default function SideNav() {
                                 </span>
                             </Link>
                         )}
-
-                        <Accordion type="single" collapsible>
-                            {/* <--------- Tech Management --------- */}
-                            {session?.roles?.some((role) =>
-                                ["Managers", "Human Resources"].includes(role)
-                            ) && (
-                                <AccordionItem value="item-1">
-                                    <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
-                                        <RiTeamFill />
+                        {session?.roles?.some((role) =>
+                            ["Managers", "Human Resources"].includes(role)
+                        ) && (
+                            <div>
+                                <Link
+                                    href="/hr/projects"
+                                    className="flex h-12 items-center pl-4  border-b px-4 text-sm font-medium transition-colors hover:bg-gray-700"
+                                >
+                                    <CodiconProject />
+                                    <span className="text-center pl-20">
+                                        {" "}
+                                        Project Management
+                                    </span>
+                                </Link>
+                                <Link
+                                    href="/hr/roster"
+                                    className="flex h-12 items-center pl-4  border-b px-4 text-sm font-medium transition-colors hover:bg-gray-700"
+                                >
+                                    <RiTeamFill />
+                                    <span className="text-center pl-20">
+                                        {" "}
                                         Tech Management
-                                    </AccordionTrigger>
-                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/hr/roster">Roster</Link>
-                                    </AccordionContent>
-                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/hr/projects">
-                                            Projects
-                                        </Link>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            )}
+                                    </span>
+                                </Link>
+                            </div>
+                        )}
+                        <Accordion type="single" collapsible>
                             {/* <--------- Trackers --------- */}
                             {session?.roles?.some((role) =>
                                 ["Managers", "Human Resources"].includes(role)
@@ -120,11 +126,11 @@ export default function SideNav() {
                             {/* <--------- Tech Resources --------- */}
                             {session?.roles?.includes("Managers") && (
                                 <AccordionItem value="item-3">
-                                    <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
+                                    <AccordionTrigger  className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
                                         <GraphIcon /> Manager Tools
                                     </AccordionTrigger>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/locations">TBD</Link>
+                                        <Link href="/">TBD</Link>
                                     </AccordionContent>
                                 </AccordionItem>
                             )}
@@ -206,9 +212,9 @@ export function GraphIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
             xmlns="http://www.w3.org/2000/svg"
-            width={8}
-            height={8}
-            viewBox="0 0 8 8"
+            width={16}
+            height={16}
+            viewBox="0 0 16 16"
             {...props}
         >
             <path
@@ -304,6 +310,25 @@ export function DashboardIcon(props: SVGProps<SVGSVGElement>) {
                 className="clr-i-outline clr-i-outline-path-2"
             ></path>
             <path fill="none" d="M0 0h36v36H0z"></path>
+        </svg>
+    );
+}
+
+export function CodiconProject(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={16}
+            height={16}
+            viewBox="0 0 16 16"
+            {...props}
+        >
+            <path
+                fill="currentColor"
+                fillRule="evenodd"
+                d="M1.5 1h13l.5.5v13l-.5.5h-13l-.5-.5v-13zM2 14h12V2H2zM3 3h2v10H3zm6 0H7v6h2zm2 0h2v8h-2z"
+                clipRule="evenodd"
+            ></path>
         </svg>
     );
 }

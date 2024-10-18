@@ -31,52 +31,49 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { createRental } from "@/app/rentals/rentalActions";
+import { createRez } from "@/app/hotels/actions";
 import { getProjects, getApprovedTechs } from "@/app/hr/hrActions";
 
 // Zod schema to validate the form
 const FormSchema = z.object({
-    rentalAgreement: z.string().min(1, "Rental Agreement is required."),
-    reservation: z.string().min(1, "Reservation is required."),
-    pickUpDate: z.date(),
-    dueDate: z.date(),
-    licensePlate: z.string().optional(),
-    vehicleType: z.string().optional(),
-    vehicleVin: z.string().optional(),
-    pickUpMileage: z.number().optional(),
-    dropOffMileage: z.number().optional(),
-    vendors: z.string().min(1, "Vendor is required."),
-    pickUpLocation: z.string().min(1, "Pick Up Location is required."),
-    returnLocation: z.string().optional(),
+    hotelConfirmationNumber: z.string().min(1, "Rental Agreement is required."),
+    hotelChain: z.string().min(1, "Hotel Chain is required."),
+    arrivalDate: z.date(),
+    departureDate: z.date(),
+    hotelCity: z.string().min(1, "Hotel City is required."),
+    hotelState: z.string().min(1, "Hotel State is required."),
     finalCharges: z.number().optional(),
     canceled: z.boolean().default(false),
     verified: z.boolean().default(false),
     archived: z.boolean().default(false),
-    driver: z.string(),
+    technician: z.string(),
     project: z.string(),
     lastUpdatedBy: z.string(),
 });
-
 
 interface NewRentalProps {
     onNoteCreated: () => void;
     creatingUser: string;
 }
 
-function ProjectWatch({ control }: { control: Control<z.infer<typeof FormSchema>> }) {
+function ProjectWatch({
+    control,
+}: {
+    control: Control<z.infer<typeof FormSchema>>;
+}) {
     const selectedProject = useWatch({
         control,
         name: "project" as const,
     });
     return selectedProject;
-}   
+}
 
-export default function NewRentalForm({
+export default function NewHotelForm({
     onNoteCreated,
     creatingUser,
 }: NewRentalProps) {
     const [projects, setProjects] = useState<any[]>([]);
-    const [drivers, setDrivers] = useState<string[]>([]);
+    const [technicians, setTechnicians] = useState<string[]>([]);
 
     // Remove these lines
     const {
@@ -89,23 +86,17 @@ export default function NewRentalForm({
     } = useForm({
         resolver: zodResolver(FormSchema),
     });
-    
+
     const form = useForm<z.infer<typeof FormSchema>>({
         defaultValues: {
             project: "",
-            driver: "",
-            rentalAgreement: "",
-            reservation: "",
-            pickUpDate: new Date(),
-            dueDate: new Date(),
-            vehicleType: "",
-            vehicleVin: "",
-            licensePlate: "",
-            pickUpMileage: 0,
-            dropOffMileage: 0,
-            vendors: "",
-            pickUpLocation: "",
-            returnLocation: "",
+            technician: "",
+            hotelConfirmationNumber: "",
+            hotelChain: "",
+            arrivalDate: new Date(),
+            departureDate: new Date(),
+            hotelCity: "",
+            hotelState: "",
             finalCharges: 0,
             canceled: false,
             verified: false,
@@ -120,7 +111,6 @@ export default function NewRentalForm({
 
     const selectedProject = ProjectWatch({ control: formControl });
     //console.log("selectedProject", selectedProject);
-    
 
     useEffect(() => {
         async function fetchData() {
@@ -139,25 +129,23 @@ export default function NewRentalForm({
                     const approvedTechs: any = await getApprovedTechs(
                         selectedProject
                     );
-                    const drivers = approvedTechs?.technicians.map(
+                    const techs = approvedTechs?.technicians.map(
                         (technician: any) => ({
                             id: technician.member.id,
-                            driverName: `${technician.member.firstname} ${technician.member.lastname}`,
+                            techName: `${technician.member.firstname} ${technician.member.lastname}`,
                         })
                     );
-                    setDrivers(drivers);
+                    setTechnicians(techs);
                 } catch (error) {
                     console.error("Error fetching drivers:", error);
-                    setDrivers([]); // Handle the error by clearing drivers
+                    setTechnicians([]); // Handle the error by clearing drivers
                 }
             } else {
-                setDrivers([]);
+                setTechnicians([]);
             }
         }
         fetchDrivers();
     }, [selectedProject]);
-
-    
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         console.log("form Values", values);
@@ -168,40 +156,41 @@ export default function NewRentalForm({
             ).id;
 
             const currentDate = new Date();
-            const rentalData = {
+            const rezData = {
                 ...values,
                 projectId: projectId,
-                memberId: parseInt(values.driver, 10),
+                memberId: parseInt(values.technician, 10),
                 createdDate: currentDate,
-                vendors: values.vendors as
-                    | "Hertz"
-                    | "Enterprise"
-                    | "Uhaul"
+                hotelChain: values.hotelChain as
+                    | "Hilton"
+                    | "Marriott"
+                    | "Holiday Inn"
                     | "Other",
                 lastUpdated: currentDate,
-                pickUpDate: values.pickUpDate.toISOString(),
-                dueDate: values.dueDate.toISOString(),
+                finalcharges: values.finalCharges || 0, 
+                arrivalDate: values.arrivalDate.toISOString(),
+                departureDate: values.departureDate.toISOString(),
             };
-            console.log("rentalData", rentalData);
-            await createRental(rentalData);
+            console.log("rentalData", rezData);
+            await createRez(rezData);
             onNoteCreated();
             reset(); // Reset the form after successful submission
         } catch (error) {
             console.error("Error creating rental:", error);
         }
     }
-   
+
     return (
         <Dialog key="1">
             <DialogTrigger asChild>
                 <Button className="bg-green-700 text-white hover:bg-green-800 hover:text-black">
-                    Create Rental
+                    New Reservation
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[640px] bg-background-foreground">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-secondary">
-                        Create A New Rental
+                        Create A Reservation
                     </DialogTitle>
                 </DialogHeader>
                 <Card className="w-full max-w-xl bg-background">
@@ -253,12 +242,12 @@ export default function NewRentalForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="driver"
+                                        name="technician"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Driver
+                                                        Technician
                                                     </div>
                                                 </FormLabel>
                                                 <Select
@@ -268,19 +257,21 @@ export default function NewRentalForm({
                                                     value={field.value}
                                                 >
                                                     <SelectTrigger>
-                                                        <SelectValue placeholder="Select Driver" />
+                                                        <SelectValue placeholder="Select Technician" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {drivers.map(
-                                                            (driver: any) => (
+                                                        {technicians.map(
+                                                            (
+                                                                technician: any
+                                                            ) => (
                                                                 <SelectItem
                                                                     key={
-                                                                        driver.id
+                                                                        technician.id
                                                                     }
-                                                                    value={driver.id.toString()}
+                                                                    value={technician.id.toString()}
                                                                 >
                                                                     {
-                                                                        driver.driverName
+                                                                        technician.techName
                                                                     }
                                                                 </SelectItem>
                                                             )
@@ -295,12 +286,12 @@ export default function NewRentalForm({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     <FormField
                                         control={form.control}
-                                        name="vendors"
+                                        name="hotelChain"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Rental Company
+                                                        Hotel Chain
                                                     </div>
                                                 </FormLabel>
                                                 <Select
@@ -313,14 +304,14 @@ export default function NewRentalForm({
                                                         <SelectValue placeholder="Select Company" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                    <SelectItem value="Enterprise">
-                                                            Enterprise
+                                                        <SelectItem value="Hilton">
+                                                            Hilton
                                                         </SelectItem>
-                                                        <SelectItem value="Hertz">
-                                                            Hertz
+                                                        <SelectItem value="Holiday Inn">
+                                                            Holiday Inn
                                                         </SelectItem>
-                                                        <SelectItem value="Uhaul">
-                                                            Uhaul
+                                                        <SelectItem value="Marriott">
+                                                            Marriott
                                                         </SelectItem>
                                                         <SelectItem value="Other">
                                                             Other
@@ -333,12 +324,12 @@ export default function NewRentalForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="rentalAgreement"
+                                        name="hotelConfirmationNumber"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Rental Agreement
+                                                        Reservation Number
                                                     </div>
                                                 </FormLabel>
                                                 <Input
@@ -357,31 +348,12 @@ export default function NewRentalForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="reservation"
+                                        name="arrivalDate"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Reservation Number
-                                                    </div>
-                                                </FormLabel>
-                                                <Input
-                                                    {...field}
-                                                    type="text"
-                                                    placeholder="Enter Email"
-                                                />
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="pickUpDate"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    <div className="pt-2 font-bold">
-                                                        Pick Up Date
+                                                        Arrival Date
                                                     </div>
                                                 </FormLabel>
                                                 <Input
@@ -409,12 +381,12 @@ export default function NewRentalForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="dueDate"
+                                        name="departureDate"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Due Date
+                                                        Check Out Date
                                                     </div>
                                                 </FormLabel>
                                                 <Input
@@ -442,12 +414,12 @@ export default function NewRentalForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="vehicleType"
+                                        name="hotelCity"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Vehicle Type
+                                                        Hotel City
                                                     </div>
                                                 </FormLabel>
                                                 <Input
@@ -461,56 +433,199 @@ export default function NewRentalForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="vehicleVin"
+                                        name="hotelState"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Vehicle Vin
+                                                        Hotel State
                                                     </div>
                                                 </FormLabel>
-                                                <Input
-                                                    {...field}
-                                                    type="text"
-                                                    placeholder="Enter Vehicle Vin"
-                                                />
+                                                <Select
+                                                    onValueChange={
+                                                        field.onChange
+                                                    }
+                                                    value={field.value}
+                                                >
+                                                    <SelectTrigger id="member-state">
+                                                        <SelectValue placeholder="Select State" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Alabama">
+                                                            Alabama
+                                                        </SelectItem>
+                                                        <SelectItem value="Alaska">
+                                                            Alaska
+                                                        </SelectItem>
+                                                        <SelectItem value="Arizona">
+                                                            Arizona
+                                                        </SelectItem>
+                                                        <SelectItem value="Arkansas">
+                                                            Arkansas
+                                                        </SelectItem>
+                                                        <SelectItem value="California">
+                                                            California
+                                                        </SelectItem>
+                                                        <SelectItem value="Colorado">
+                                                            Colorado
+                                                        </SelectItem>
+                                                        <SelectItem value="Connecticut">
+                                                            Connecticut
+                                                        </SelectItem>
+                                                        <SelectItem value="Delaware">
+                                                            Delaware
+                                                        </SelectItem>
+                                                        <SelectItem value="Florida">
+                                                            Florida
+                                                        </SelectItem>
+                                                        <SelectItem value="Georgia">
+                                                            Georgia
+                                                        </SelectItem>
+                                                        <SelectItem value="Hawaii">
+                                                            Hawaii
+                                                        </SelectItem>
+                                                        <SelectItem value="Idaho">
+                                                            Idaho
+                                                        </SelectItem>
+                                                        <SelectItem value="Illinois">
+                                                            Illinois
+                                                        </SelectItem>
+                                                        <SelectItem value="Indiana">
+                                                            Indiana
+                                                        </SelectItem>
+                                                        <SelectItem value="Iowa">
+                                                            Iowa
+                                                        </SelectItem>
+                                                        <SelectItem value="Kansas">
+                                                            Kansas
+                                                        </SelectItem>
+                                                        <SelectItem value="Kentucky">
+                                                            Kentucky
+                                                        </SelectItem>
+                                                        <SelectItem value="Louisiana">
+                                                            Louisiana
+                                                        </SelectItem>
+                                                        <SelectItem value="Maine">
+                                                            Maine
+                                                        </SelectItem>
+                                                        <SelectItem value="Maryland">
+                                                            Maryland
+                                                        </SelectItem>
+                                                        <SelectItem value="Massachusetts">
+                                                            Massachusetts
+                                                        </SelectItem>
+                                                        <SelectItem value="Michigan">
+                                                            Michigan
+                                                        </SelectItem>
+                                                        <SelectItem value="Minnesota">
+                                                            Minnesota
+                                                        </SelectItem>
+                                                        <SelectItem value="Mississippi">
+                                                            Mississippi
+                                                        </SelectItem>
+                                                        <SelectItem value="Missouri">
+                                                            Missouri
+                                                        </SelectItem>
+                                                        <SelectItem value="Montana">
+                                                            Montana
+                                                        </SelectItem>
+                                                        <SelectItem value="Nebraska">
+                                                            Nebraska
+                                                        </SelectItem>
+                                                        <SelectItem value="Nevada">
+                                                            Nevada
+                                                        </SelectItem>
+                                                        <SelectItem value="New Hampshire">
+                                                            New Hampshire
+                                                        </SelectItem>
+                                                        <SelectItem value="New Jersey">
+                                                            New Jersey
+                                                        </SelectItem>
+                                                        <SelectItem value="New Mexico">
+                                                            New Mexico
+                                                        </SelectItem>
+                                                        <SelectItem value="New York">
+                                                            New York
+                                                        </SelectItem>
+                                                        <SelectItem value="North Carolina">
+                                                            North Carolina
+                                                        </SelectItem>
+                                                        <SelectItem value="North Dakota">
+                                                            North Dakota
+                                                        </SelectItem>
+                                                        <SelectItem value="Ohio">
+                                                            Ohio
+                                                        </SelectItem>
+                                                        <SelectItem value="Oklahoma">
+                                                            Oklahoma
+                                                        </SelectItem>
+                                                        <SelectItem value="Oregon">
+                                                            Oregon
+                                                        </SelectItem>
+                                                        <SelectItem value="Pennsylvania">
+                                                            Pennsylvania
+                                                        </SelectItem>
+                                                        <SelectItem value="Rhode Island">
+                                                            Rhode Island
+                                                        </SelectItem>
+                                                        <SelectItem value="South Carolina">
+                                                            South Carolina
+                                                        </SelectItem>
+                                                        <SelectItem value="South Dakota">
+                                                            South Dakota
+                                                        </SelectItem>
+                                                        <SelectItem value="Tennessee">
+                                                            Tennessee
+                                                        </SelectItem>
+                                                        <SelectItem value="Texas">
+                                                            Texas
+                                                        </SelectItem>
+                                                        <SelectItem value="Utah">
+                                                            Utah
+                                                        </SelectItem>
+                                                        <SelectItem value="Vermont">
+                                                            Vermont
+                                                        </SelectItem>
+                                                        <SelectItem value="Virginia">
+                                                            Virginia
+                                                        </SelectItem>
+                                                        <SelectItem value="Washington">
+                                                            Washington
+                                                        </SelectItem>
+                                                        <SelectItem value="West Virginia">
+                                                            West Virginia
+                                                        </SelectItem>
+                                                        <SelectItem value="Wisconsin">
+                                                            Wisconsin
+                                                        </SelectItem>
+                                                        <SelectItem value="Wyoming">
+                                                            Wyoming
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="licensePlate"
+                                        name="finalCharges"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        License Plate
-                                                    </div>
-                                                </FormLabel>
-                                                <Input
-                                                    {...field}
-                                                    type="text"
-                                                    placeholder="Enter License Plate"
-                                                />
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="pickUpMileage"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    <div className="pt-2 font-bold">
-                                                        Pick Up Mileage
+                                                        Final Charges
                                                     </div>
                                                 </FormLabel>
                                                 <Input
                                                     type="number"
                                                     {...field}
-                                                    placeholder="Enter Pick Up Mileage"
+                                                    value={
+                                                        field.value != null
+                                                            ? field.value.toString()
+                                                            : ""
+                                                    }
+                                                    placeholder="Enter Toll Amount"
                                                     onChange={(e) => {
                                                         const value =
                                                             e.target.value;
@@ -523,76 +638,6 @@ export default function NewRentalForm({
                                                                 : ""
                                                         );
                                                     }}
-                                                />
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="dropOffMileage"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    <div className="pt-2 font-bold">
-                                                        Drop Off Mileage
-                                                    </div>
-                                                </FormLabel>
-                                                <Input
-                                                    type="number"
-                                                    {...field}
-                                                    placeholder="Enter Pick Up Mileage"
-                                                    onChange={(e) => {
-                                                        const value =
-                                                            e.target.value;
-                                                        field.onChange(
-                                                            value
-                                                                ? parseInt(
-                                                                      value,
-                                                                      10
-                                                                  )
-                                                                : ""
-                                                        );
-                                                    }}
-                                                />
-
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="pickUpLocation"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    <div className="pt-2 font-bold">
-                                                        Pick Up Location
-                                                    </div>
-                                                </FormLabel>
-                                                <Input
-                                                    {...field}
-                                                    type="text"
-                                                    placeholder="Enter Pick Up Location"
-                                                />
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="returnLocation"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    <div className="pt-2 font-bold">
-                                                        Retrun Location
-                                                    </div>
-                                                </FormLabel>
-                                                <Input
-                                                    {...field}
-                                                    type="text"
-                                                    placeholder="Enter Return Location"
                                                 />
                                                 <FormMessage />
                                             </FormItem>

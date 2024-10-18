@@ -541,6 +541,38 @@ export default function EditRentalForm({
                                             </FormItem>
                                         )}
                                     />
+                                    <FormField
+                                        control={form.control}
+                                        name="finalCharges"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    <div className="pt-2 font-bold">
+                                                        Final Charges
+                                                    </div>
+                                                </FormLabel>
+                                                <Input
+                                                    type="number"
+                                                    {...field}
+                                                    value={field.value != null ? field.value.toString() : ''}
+                                                    placeholder="Enter Toll Amount"
+                                                    onChange={(e) => {
+                                                        const value =
+                                                            e.target.value;
+                                                        field.onChange(
+                                                            value
+                                                                ? parseInt(
+                                                                      value,
+                                                                      10
+                                                                  )
+                                                                : ""
+                                                        );
+                                                    }}
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                 </div>
                                 <div className="grid gap-2 pt-4">
                                     <FormField

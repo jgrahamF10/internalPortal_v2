@@ -13,7 +13,7 @@ const s3 = new S3Client({
 });
 export async function POST(request: NextRequest) {
     const formData = await request.formData();
-    console.log("formData", formData);
+    //console.log("formData", formData);
 
     let aType = ""; // Initialize outside the if statement
     let keyPrefix = ""; // Initialize outside the if statement
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         Body: buffer, // Use Buffer instead of File
         ContentType: file.type, // Optional: Set content type
     });
-    console.log("File Name", key);
+
     try {
         await s3.send(command);
         const rentalIdNumber = parentId

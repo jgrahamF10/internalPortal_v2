@@ -17,6 +17,7 @@ import {
 import type { AdapterAccountType } from "next-auth/adapters";
 import { arch } from "os";
 import { projects, members } from "./member_management";
+import { create } from "domain";
 
 
 export const vendors = pgEnum('vendors', ['Hertz', 'Enterprise', 'Uhaul', 'Other']);
@@ -107,6 +108,10 @@ export const flights = pgTable("flight", {
     creationDate: timestamp("creationDate", { mode: "date" }).notNull(),
     verified: boolean("verified").default(false),
     archived: boolean("archived").default(false),
+    canceled: boolean("canceled").default(false),
+    lastUpdated: timestamp("lastUpdated", { mode: "date" }),
+    lastUpdatedBy: varchar("lastUpdatedBy", { length: 20 }),
+    createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
 }, (table) => ({
     idxFlightProjectId: index("idx_flight_projectId").on(table.projectId), 
     idxFlightMemberId: index("idx_flight_memberId").on(table.memberId),
@@ -186,13 +191,17 @@ export const hotelRezervations = pgTable("hotelRezervation", {
     memberId: integer("memberId").notNull(),
     hotelConfirmationNumber: varchar("confirmationNumber", { length: 50 }).unique('hotelConfirmationNumber').notNull(),
     hotelChain: hotelChains("hotelChain").notNull(),
-    arrivaDate: date("arrivaDate").notNull(),
+    arrivalDate: date("arrivalDate").notNull(),
     departureDate: date("departureDate").notNull(),
     hotelCity: varchar("hotelCity", { length: 100 }),
     hotelState: varchar("hotelState", { length: 100 }),
     finalcharges: real("finalcharges").notNull(),
+    canceled: boolean("canceled").default(false),
     verified: boolean("verified").default(false),
     archived: boolean("archived").default(false),
+    createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
+    lastUpdated: timestamp("lastUpdated", { mode: "date" }),
+    lastUpdatedBy: varchar("lastUpdatedBy", { length: 20 }),
 }, (table) => ({
     idxHotelRezervationProjectId: index("idx_hotelRezervation_projectId").on(table.projectId), 
     idxHotelRezervationMemberId: index("idx_hotelRezervation_memberId").on(table.memberId),
@@ -202,11 +211,11 @@ export type Hotels = typeof hotelRezervations.$inferSelect;
 export type NewHotel = typeof hotelRezervations.$inferInsert;
 
 export const hotelRezervations2projects = relations(projects, ({ many }) => ({
-    projectId: many(hotelRezervations)
+    rez: many(hotelRezervations)
 }));
 
 export const projects2hotelRezervations = relations(hotelRezervations, ({ one }) => ({
-    projectID: one(projects, {
+    project: one(projects, {
         fields: [hotelRezervations.projectId],
         references: [projects.id],
     })
@@ -241,7 +250,7 @@ export const notes = pgTable(
                 table.parentId,
                 table.noteType
             ),
-            unq: unique("unq_parent_note_type").on(table.parentId, table.noteType, table.id),
+            unq: unique("unq_parent_note_type").on(table.parentId, table.noteType),
 
         };
     }
@@ -300,6 +309,7 @@ export const attachments = pgTable(
         idxParentId: index("idx_parentId").on(table.parentId),
         idxAttachmentType: index("idx_attachmentType").on(table.attachmentType),
         idxParentAndType: index("idx_parentId_attachmentType").on(table.id, table.parentId, table.attachmentType),
+        unq: unique("unq_parent_type").on(table.parentId, table.attachmentType),
     })
 );
 
@@ -307,6 +317,7 @@ export const rental2RentalFile = relations(attachments, ({ one }) => ({
     rental: one(rentals, {
         fields: [attachments.parentId],
         references: [rentals.id],
+        
     })
 }));
 

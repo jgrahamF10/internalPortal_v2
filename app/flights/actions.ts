@@ -22,9 +22,7 @@ export async function getRental(rentalAgreement: string) {
             memberID: true,
             rentalNotes: true,
             project: true,
-            attachments: {
-                where: eq(attachments.attachmentType, "Rental"),
-            },
+            attachments: true,
         },
     });
     if (rentalData) {

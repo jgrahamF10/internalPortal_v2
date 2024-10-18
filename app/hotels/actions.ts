@@ -1,13 +1,13 @@
 "use server";
 import { db } from "@/db";
 import { members } from "@/db/schema/member_management";
-import { notes, rentals, NewNote, NewAttatchment, NewRentals, attachments } from "@/db/schema/tracker_db";
+import { notes, hotelRezervations, NewNote, NewAttatchment, NewHotel, attachments } from "@/db/schema/tracker_db";
 import { eq, ne, desc } from "drizzle-orm/expressions";
 
-export async function getRentals() {
-    const rentalData = await db.query.rentals.findMany({
-        where: ne(rentals.archived, true),
-        orderBy: [desc(rentals.createdDate)],
+export async function getReservations() {
+    const rentalData = await db.query.hotelRezervations.findMany({
+        where: ne(hotelRezervations.archived, true),
+        orderBy: [desc(hotelRezervations.id)],
         with: {
             memberID: true,
         },
@@ -15,27 +15,27 @@ export async function getRentals() {
     return rentalData;
 }
 
-export async function getRental(rentalAgreement: string) {
-    const rentalData = await db.query.rentals.findFirst({
-        where: eq(rentals.rentalAgreement, rentalAgreement),
+export async function getRez(hotelConfirmationNumber: string) {
+    const newRez = await db.query.hotelRezervations.findFirst({
+        where: eq(hotelRezervations.hotelConfirmationNumber, hotelConfirmationNumber),
         with: {
             memberID: true,
-            rentalNotes: true,
+            hotelNotes: true,
             project: true,
             attachments: {
-                where: eq(attachments.attachmentType, "Rental"),
+                where: eq(attachments.attachmentType, "Hotel"),
             },
         },
     });
-    if (rentalData) {
-        return rentalData;
+    if (newRez) {
+        return newRez;
     }
     else
     { return null; }
     
 }
 
-export async function createRentalNote(data: NewNote) {
+export async function createRezNote(data: NewNote) {
     try {
         await db.insert(notes).values(data);
     } catch (error) {
@@ -43,21 +43,22 @@ export async function createRentalNote(data: NewNote) {
     }
 }
 
-export async function createRental(data: NewRentals) {
+export async function createRez(data: NewHotel) {
+    //console.log("createRez data", data);
     try {
-        await db.insert(rentals).values(data);
+        await db.insert(hotelRezervations).values(data);
     } catch (error) {
         console.error("Error creating rental:", error);
     }
 }
 
-export async function updateRental(data: NewRentals) {
+export async function updateRez(data: NewHotel) {
     //console.log("createRental data", data);
     try {
         await db
-            .update(rentals)
+            .update(hotelRezervations)
             .set(data)
-            .where(eq(rentals.rentalAgreement, data.rentalAgreement));
+            .where(eq(hotelRezervations.hotelConfirmationNumber, data.hotelConfirmationNumber));
     } catch (error) {
         console.error("Error updating rental:", error);
     }

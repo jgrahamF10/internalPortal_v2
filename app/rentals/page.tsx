@@ -216,7 +216,7 @@ export default function Page() {
         },
         headCells: {
             style: {
-                paddingLeft: "2px", // override the cell padding for head cells
+                paddingLeft: "10px", // override the cell padding for head cells
                 paddingRight: "2px",
                 color: fontColor,
                 fontWeight: "bold",
@@ -232,11 +232,12 @@ export default function Page() {
         },
         cells: {
             style: {
-                paddingLeft: "4px", // override the cell padding for data cells
+                paddingLeft: "20px", // override the cell padding for data cells
                 paddingRight: "4px",
-                fontSize: "14px",
+                fontSize: "16px",
                 backgroundColor: backgroundColor,
                 color: fontColor,
+                fontWeight: "bold",
             },
         },
         pagination: {
@@ -273,7 +274,7 @@ export default function Page() {
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl min-w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold">Tech Roster</h1>
+                    <h1 className="text-2xl font-semibold">Rental Car Tracker</h1>
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (
