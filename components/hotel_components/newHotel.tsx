@@ -170,7 +170,7 @@ export default function NewHotelForm({
                 createdDate: currentDate,
                 hotelChainId: hotelId,
                 lastUpdated: currentDate,
-                finalcharges: values.finalCharges || 0, 
+                finalcharges: values.finalCharges?.toString() ?? null,
                 arrivalDate: values.arrivalDate.toISOString(),
                 departureDate: values.departureDate.toISOString(),
             };

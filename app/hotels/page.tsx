@@ -180,7 +180,7 @@ export default function Page() {
         },
         {
             name: "Hotel Chain",
-            selector: (row: any) => row.hotelChain,
+            selector: (row: any) => row.hotelChain.hotelName,
             sortable: true,
             center: true,
         },

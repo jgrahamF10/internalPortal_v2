@@ -12,7 +12,8 @@ import {
     date,
     real,
     index,
-    unique
+    unique,
+    numeric
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 import { arch } from "os";
@@ -40,8 +41,8 @@ export const rentals = pgTable("rental", {
     pickUpLocation: varchar("pickUpLocation", { length: 40 }).notNull(),
     returnLocation: varchar("returnLocation", { length: 40 }),
     canceled: boolean("canceled").default(false),
-    tolls: real("tolls"),
-    finalCharges: real("finalCharges"),
+    tolls: numeric("tolls", { precision: 12, scale: 2 }),
+    finalCharges: numeric("finalCharges",  { precision: 12, scale: 2 }),
     verified: boolean("verified").default(false),
     archived: boolean("archived").default(false),
     createdDate: timestamp("createdAt", { mode: "date" }).notNull(),
@@ -101,9 +102,9 @@ export const flights = pgTable("flight", {
     returnDate: date("returnDate"),
     departureAirport: varchar("departureAirport", { length: 10 }).notNull(),
     arrivalAirport: varchar("arrivalAirport", { length: 10 }).notNull(),
-    flightCost: real("flightCost").notNull(),
-    baggageFee: real("baggageFee").notNull(),
-    totalCost: real("totalCost").notNull(),
+    flightCost: numeric("flightCost", { precision: 12, scale: 2 }).notNull(),
+    baggageFee: numeric("baggageFee",  { precision: 12, scale: 2 }).notNull(),
+    totalCost: numeric("totalCost", { precision: 12, scale: 2 }).notNull(),
     cancelled: boolean("cancelled").default(false),
     creationDate: timestamp("creationDate", { mode: "date" }).notNull(),
     verified: boolean("verified").default(false),
@@ -149,7 +150,7 @@ export const flightCredits = pgTable("flightCredit", {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     flightId: integer("flightId").notNull(),
     memberId: integer("memberId").notNull(),
-    amount: real("amount").notNull(),
+    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
     creditType: creditTypes("creditType").notNull(),
     creator: varchar("creator", { length: 20 }).notNull(),
     archived: boolean("archived").default(false),
@@ -203,7 +204,7 @@ export const hotelRezervations = pgTable("hotelRezervation", {
     departureDate: date("departureDate").notNull(),
     hotelCity: varchar("hotelCity", { length: 100 }),
     hotelState: varchar("hotelState", { length: 100 }),
-    finalcharges: real("finalcharges").notNull(),
+    finalcharges: numeric("finalcharges", { precision: 12, scale: 2 } ),
     canceled: boolean("canceled").default(false),
     verified: boolean("verified").default(false),
     archived: boolean("archived").default(false),

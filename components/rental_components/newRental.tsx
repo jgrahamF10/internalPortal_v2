@@ -181,6 +181,7 @@ export default function NewRentalForm({
                 lastUpdated: currentDate,
                 pickUpDate: values.pickUpDate.toISOString(),
                 dueDate: values.dueDate.toISOString(),
+                finalCharges: values.finalCharges ? values.finalCharges.toString() : null,
             };
             console.log("rentalData", rentalData);
             await createRental(rentalData);

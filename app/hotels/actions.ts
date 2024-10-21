@@ -10,6 +10,7 @@ export async function getReservations() {
         orderBy: [desc(hotelRezervations.id)],
         with: {
             memberID: true,
+            hotelChain: true,
         },
     });
     return rentalData;
