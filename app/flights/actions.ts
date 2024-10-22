@@ -1,39 +1,47 @@
 "use server";
 import { db } from "@/db";
 import { members } from "@/db/schema/member_management";
-import { notes, rentals, NewNote, NewAttatchment, NewRentals, attachments } from "@/db/schema/tracker_db";
-import { eq, ne, desc } from "drizzle-orm/expressions";
+import { notes, NewNote, NewAttatchment, flights, NewFlightCredits, NewFlights, attachments, Flights, airline} from "@/db/schema/tracker_db";
+import { eq, ne, desc, asc } from "drizzle-orm/expressions";
 
-export async function getRentals() {
-    const rentalData = await db.query.rentals.findMany({
-        where: ne(rentals.archived, true),
-        orderBy: [desc(rentals.createdDate)],
+export async function getFlights() {
+    const data = await db.query.flights.findMany({
+        where: ne(flights.archived, true),
+        orderBy: [desc(flights.id)],
         with: {
-            memberID: true,
+            members: true,
+            credits: true,
+            airlines: true,
+            project: true,
         },
     });
-    return rentalData;
+    return data;
 }
 
-export async function getRental(rentalAgreement: string) {
-    const rentalData = await db.query.rentals.findFirst({
-        where: eq(rentals.rentalAgreement, rentalAgreement),
+
+export async function getFlight(hotelConfirmationNumber: string) {
+    const rezData = await db.query.flights.findFirst({
+        where: eq(flights.flightConfirmationNumber, hotelConfirmationNumber),
         with: {
-            memberID: true,
-            rentalNotes: true,
+            members: true,
+            credits: true,
             project: true,
-            attachments: true,
+            flightNotes: true,
+            airlines: true,
+            attachments: {
+                where: eq(attachments.attachmentType, "Flight"),
+            },
         },
     });
-    if (rentalData) {
-        return rentalData;
+    if (rezData) {
+        return rezData;
     }
     else
     { return null; }
-    
 }
 
-export async function createRentalNote(data: NewNote) {
+
+export async function createFlightNote(data: NewNote) {
     try {
         await db.insert(notes).values(data);
     } catch (error) {
@@ -41,21 +49,22 @@ export async function createRentalNote(data: NewNote) {
     }
 }
 
-export async function createRental(data: NewRentals) {
+export async function createFlight(data: NewFlights) {
+    console.log("createRez data", data);
     try {
-        await db.insert(rentals).values(data);
+        await db.insert(flights).values(data);
     } catch (error) {
         console.error("Error creating rental:", error);
     }
 }
 
-export async function updateRental(data: NewRentals) {
-    //console.log("createRental data", data);
+export async function updateFLight(data: Flights) {
+    console.log("updating flight data", data);
     try {
         await db
-            .update(rentals)
+            .update(flights)
             .set(data)
-            .where(eq(rentals.rentalAgreement, data.rentalAgreement));
+            .where(eq(flights.flightConfirmationNumber, data.flightConfirmationNumber));
     } catch (error) {
         console.error("Error updating rental:", error);
     }
@@ -70,4 +79,12 @@ export async function deleteAttachment(attachmentId: number) {
         console.error("Error deleting resume:", error);
         return false;
     }
+}
+
+export async function getAirlines() {
+    const airlineList = await db.query.airline.findMany({
+        where: ne(airline.inactive, true),
+        orderBy: [asc(airline.airlines)],
+    });
+    return airlineList;   
 }

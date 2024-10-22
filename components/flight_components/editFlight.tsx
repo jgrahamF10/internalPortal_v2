@@ -31,20 +31,14 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { updateRez } from "@/app/hotels/actions";
-import { getHotelChains } from "@/app/hotels/actions";
-
+import { updateFLight, getAirlines } from "@/app/flights/actions";
 
 // Zod schema to validate the form
 const FormSchema = z.object({
-    hotelConfirmationNumber: z.string().min(1, "Rental Agreement is required."),
-    hotelChainId: z.number(),
-    hotelChain: z.string().min(1, "Hotel Chain is required."),
-    arrivalDate: z.date(),
-    departureDate: z.date(),
-    hotelCity: z.string().min(1, "Hotel City is required."),
-    hotelState: z.string().min(1, "Hotel State is required."),
-    finalCharges: z.preprocess((val) => {
+    technician: z.string(), //
+    project: z.string(), //
+    lastUpdatedBy: z.string(),
+    flightCost: z.preprocess((val) => {
         if (typeof val === "string") {
             return parseFloat(val) || 0;
         }
@@ -53,22 +47,34 @@ const FormSchema = z.object({
     canceled: z.boolean().default(false),
     verified: z.boolean().default(false),
     archived: z.boolean().default(false),
-    technician: z.number(),
-    projectId: z.number(),
-    lastUpdatedBy: z.string(),
+    flightConfirmationNumber: z
+        .string()
+        .min(1, "Flight Confirmation Number is required."),
+    tripType: z.string().min(1, "Trip Type is required."),
+    airline: z.string().min(1, "Airline is required."),
+    travelDate: z.date(),
+    returnDate: z.date().optional(),
+    departureAirport: z.string().min(1, "Departure Airport is required."),
+    arrivalAirport: z.string().min(1, "Arrival Airport is required."),
+    baggageFee: z.preprocess((val) => {
+        if (typeof val === "string") {
+            return parseFloat(val) || 0;
+        }
+        return val;
+    }, z.number().min(0)),
 });
 
-interface EditRentalProps {
+interface EditFormProps {
     updatingUser: string;
-    hotelData: any;
+    flightData: any;
     onNoteCreated: () => void;
 }
 
-export default function EditHotelRezForm({
+export default function EditFlightForm({
     onNoteCreated,
     updatingUser,
-    hotelData,
-}: EditRentalProps) {
+    flightData,
+}: EditFormProps) {
     const {
         watch,
         register,
@@ -79,70 +85,78 @@ export default function EditHotelRezForm({
     } = useForm({
         resolver: zodResolver(FormSchema),
     });
-    const [hotels, setHotels] = useState<any[]>([]);
+    const [airlines, setAirlines] = useState<any[]>([]);
 
-    //console.log("rentalData", rentalData);
+    //console.log("flightData", flightData);
 
     useEffect(() => {
         async function fetchData() {
-            const fetchHotels = await getHotelChains();
-            setHotels(fetchHotels);
+            const fetchedAirlines = await getAirlines();
+            setAirlines(fetchedAirlines);
         }
         fetchData();
     }, []);
 
     const form = useForm<z.infer<typeof FormSchema>>({
         defaultValues: {
-            projectId: hotelData?.projectId,
-            technician: hotelData?.memberId,
-            hotelConfirmationNumber: hotelData?.hotelConfirmationNumber,
-            hotelChainId: hotelData?.hotelChainId,
-            hotelChain: hotelData?.hotelChain.hotelName,
-            arrivalDate: hotelData?.arrivalDate
-                ? new Date(hotelData?.arrivalDate)
+            flightConfirmationNumber: flightData?.flightConfirmationNumber,
+            airline: flightData?.airlines.airlines,
+            travelDate: flightData?.travelDate
+                ? new Date(flightData?.travelDate)
                 : new Date(),
-                departureDate: hotelData?.departureDate
-                ? new Date(hotelData?.departureDate)
+            returnDate: flightData?.returnDate
+                ? new Date(flightData?.returnDate)
                 : new Date(),
-            finalCharges: hotelData?.finalCharges,
-            hotelCity: hotelData?.hotelCity,
-            hotelState: hotelData?.hotelState,
-            canceled: hotelData?.canceled,
-            verified: hotelData?.verified,
-            archived: hotelData?.archived,
+            flightCost: flightData?.flightCost,
+            tripType: flightData?.tripType,
+            departureAirport: flightData?.departureAirport,
+            arrivalAirport: flightData?.arrivalAirport,
+            baggageFee: flightData?.baggageFee,
+            canceled: false,
+            verified: false,
+            archived: false,
             lastUpdatedBy: updatingUser,
-            
         },
         mode: "onTouched",
         resolver: zodResolver(FormSchema),
     });
 
-    
-
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         console.log("form Values", values);
         try {
             const currentDate = new Date();
-            const hotelId = hotels.find(
-                (hotel: { hotelName: string }) =>
-                    hotel.hotelName === values.hotelChain
+            const airlineId = airlines.find(
+                (airline: { airlines: string }) =>
+                    airline.airlines === values.airline
             ).id;
-            const rezData = {
+            const updatedData = {
                 ...values,
-                memberId: values.technician,
+                id: flightData.id,
+                memberId: flightData.memberId,
                 createdDate: currentDate,
                 lastUpdated: currentDate,
-                arrivalDate: values.arrivalDate.toISOString(),
-                departureDate: values.departureDate.toISOString(),
-                hotelChainId: hotelId,
-                finalCharges: values.finalCharges.toString(),
+                airlinesID: airlineId,
+                projectId: flightData.projectId, // Assuming projectId is present in the form values
+                totalCost: (values.flightCost + values.baggageFee).toString(),
+                cancelled: values.canceled, // Note the spelling difference
+                flightConfirmationNumber: values.flightConfirmationNumber,
+                tripType: values.tripType as "One-Way" | "Round Trip",
+                flightCost: values.flightCost.toString(), // Convert to string
+                canceled: values.canceled === null ? false : values.canceled,
+                verified: values.verified === null ? false : values.verified,
+                archived: values.archived === null ? false : values.archived,
+                lastUpdatedBy: updatingUser,
+                travelDate: values.travelDate.toISOString(),
+                returnDate: values.returnDate ? values.returnDate.toISOString() : null,
+                baggageFee: values.baggageFee.toString(),
+                
             };
-            console.log("rentalData", rezData);
-            await updateRez(rezData);
+            console.log("FlightData", updatedData);
+            await updateFLight(updatedData);
             onNoteCreated();
-            reset(); // Reset the form after successful submission
+            reset();
         } catch (error) {
-            console.error("Error creating rental:", error);
+            console.error("Error updating flight:", error);
         }
     }
 
@@ -164,14 +178,14 @@ export default function EditHotelRezForm({
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <FormField
+                                    <FormField
                                         control={form.control}
-                                        name="hotelChain"
+                                        name="airline"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Hotel Chain
+                                                        Airline
                                                     </div>
                                                 </FormLabel>
                                                 <Select
@@ -180,22 +194,22 @@ export default function EditHotelRezForm({
                                                     }
                                                     value={field.value}
                                                 >
-                                                    <SelectTrigger id="vendor">
-                                                        <SelectValue placeholder="Select Hotel Chain" />
+                                                    <SelectTrigger id="airline">
+                                                        <SelectValue placeholder="Select Airline" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {hotels.map(
-                                                            (hotel: any) => (
+                                                        {airlines.map(
+                                                            (airline: any) => (
                                                                 <SelectItem
                                                                     key={
-                                                                        hotel.id
+                                                                        airline.id
                                                                     }
                                                                     value={
-                                                                        hotel.hotelName
+                                                                        airline.airlines
                                                                     }
                                                                 >
                                                                     {
-                                                                        hotel.hotelName
+                                                                        airline.airlines
                                                                     }
                                                                 </SelectItem>
                                                             )
@@ -208,18 +222,18 @@ export default function EditHotelRezForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="hotelConfirmationNumber"
+                                        name="flightConfirmationNumber"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Reservation Number
+                                                        Confirmation Number
                                                     </div>
                                                 </FormLabel>
                                                 <Input
                                                     {...field}
                                                     type="text"
-                                                    placeholder="Enter The Reservaition Number"
+                                                    placeholder="Enter The Renal Agreement"
                                                     onChange={(e) =>
                                                         field.onChange(
                                                             e.target.value.trim()
@@ -232,12 +246,12 @@ export default function EditHotelRezForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="arrivalDate"
+                                        name="travelDate"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Arrival Date
+                                                        Travel Date
                                                     </div>
                                                 </FormLabel>
                                                 <Input
@@ -265,12 +279,12 @@ export default function EditHotelRezForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="departureDate"
+                                        name="returnDate"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Check Out Date
+                                                        Return Date
                                                     </div>
                                                 </FormLabel>
                                                 <Input
@@ -298,31 +312,12 @@ export default function EditHotelRezForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="hotelCity"
+                                        name="tripType"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Hotel City
-                                                    </div>
-                                                </FormLabel>
-                                                <Input
-                                                    {...field}
-                                                    type="text"
-                                                    placeholder="Enter Vehicle Type"
-                                                />
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                    <FormField
-                                        control={form.control}
-                                        name="hotelState"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    <div className="pt-2 font-bold">
-                                                        Hotel State
+                                                        Trip Type
                                                     </div>
                                                 </FormLabel>
                                                 <Select
@@ -331,159 +326,15 @@ export default function EditHotelRezForm({
                                                     }
                                                     value={field.value}
                                                 >
-                                                    <SelectTrigger id="member-state">
-                                                        <SelectValue placeholder="Select State" />
+                                                    <SelectTrigger id="tripType">
+                                                        <SelectValue placeholder="Select Type" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="Alabama">
-                                                            Alabama
+                                                        <SelectItem value="Round Trip">
+                                                            Round Trip
                                                         </SelectItem>
-                                                        <SelectItem value="Alaska">
-                                                            Alaska
-                                                        </SelectItem>
-                                                        <SelectItem value="Arizona">
-                                                            Arizona
-                                                        </SelectItem>
-                                                        <SelectItem value="Arkansas">
-                                                            Arkansas
-                                                        </SelectItem>
-                                                        <SelectItem value="California">
-                                                            California
-                                                        </SelectItem>
-                                                        <SelectItem value="Colorado">
-                                                            Colorado
-                                                        </SelectItem>
-                                                        <SelectItem value="Connecticut">
-                                                            Connecticut
-                                                        </SelectItem>
-                                                        <SelectItem value="Delaware">
-                                                            Delaware
-                                                        </SelectItem>
-                                                        <SelectItem value="Florida">
-                                                            Florida
-                                                        </SelectItem>
-                                                        <SelectItem value="Georgia">
-                                                            Georgia
-                                                        </SelectItem>
-                                                        <SelectItem value="Hawaii">
-                                                            Hawaii
-                                                        </SelectItem>
-                                                        <SelectItem value="Idaho">
-                                                            Idaho
-                                                        </SelectItem>
-                                                        <SelectItem value="Illinois">
-                                                            Illinois
-                                                        </SelectItem>
-                                                        <SelectItem value="Indiana">
-                                                            Indiana
-                                                        </SelectItem>
-                                                        <SelectItem value="Iowa">
-                                                            Iowa
-                                                        </SelectItem>
-                                                        <SelectItem value="Kansas">
-                                                            Kansas
-                                                        </SelectItem>
-                                                        <SelectItem value="Kentucky">
-                                                            Kentucky
-                                                        </SelectItem>
-                                                        <SelectItem value="Louisiana">
-                                                            Louisiana
-                                                        </SelectItem>
-                                                        <SelectItem value="Maine">
-                                                            Maine
-                                                        </SelectItem>
-                                                        <SelectItem value="Maryland">
-                                                            Maryland
-                                                        </SelectItem>
-                                                        <SelectItem value="Massachusetts">
-                                                            Massachusetts
-                                                        </SelectItem>
-                                                        <SelectItem value="Michigan">
-                                                            Michigan
-                                                        </SelectItem>
-                                                        <SelectItem value="Minnesota">
-                                                            Minnesota
-                                                        </SelectItem>
-                                                        <SelectItem value="Mississippi">
-                                                            Mississippi
-                                                        </SelectItem>
-                                                        <SelectItem value="Missouri">
-                                                            Missouri
-                                                        </SelectItem>
-                                                        <SelectItem value="Montana">
-                                                            Montana
-                                                        </SelectItem>
-                                                        <SelectItem value="Nebraska">
-                                                            Nebraska
-                                                        </SelectItem>
-                                                        <SelectItem value="Nevada">
-                                                            Nevada
-                                                        </SelectItem>
-                                                        <SelectItem value="New Hampshire">
-                                                            New Hampshire
-                                                        </SelectItem>
-                                                        <SelectItem value="New Jersey">
-                                                            New Jersey
-                                                        </SelectItem>
-                                                        <SelectItem value="New Mexico">
-                                                            New Mexico
-                                                        </SelectItem>
-                                                        <SelectItem value="New York">
-                                                            New York
-                                                        </SelectItem>
-                                                        <SelectItem value="North Carolina">
-                                                            North Carolina
-                                                        </SelectItem>
-                                                        <SelectItem value="North Dakota">
-                                                            North Dakota
-                                                        </SelectItem>
-                                                        <SelectItem value="Ohio">
-                                                            Ohio
-                                                        </SelectItem>
-                                                        <SelectItem value="Oklahoma">
-                                                            Oklahoma
-                                                        </SelectItem>
-                                                        <SelectItem value="Oregon">
-                                                            Oregon
-                                                        </SelectItem>
-                                                        <SelectItem value="Pennsylvania">
-                                                            Pennsylvania
-                                                        </SelectItem>
-                                                        <SelectItem value="Rhode Island">
-                                                            Rhode Island
-                                                        </SelectItem>
-                                                        <SelectItem value="South Carolina">
-                                                            South Carolina
-                                                        </SelectItem>
-                                                        <SelectItem value="South Dakota">
-                                                            South Dakota
-                                                        </SelectItem>
-                                                        <SelectItem value="Tennessee">
-                                                            Tennessee
-                                                        </SelectItem>
-                                                        <SelectItem value="Texas">
-                                                            Texas
-                                                        </SelectItem>
-                                                        <SelectItem value="Utah">
-                                                            Utah
-                                                        </SelectItem>
-                                                        <SelectItem value="Vermont">
-                                                            Vermont
-                                                        </SelectItem>
-                                                        <SelectItem value="Virginia">
-                                                            Virginia
-                                                        </SelectItem>
-                                                        <SelectItem value="Washington">
-                                                            Washington
-                                                        </SelectItem>
-                                                        <SelectItem value="West Virginia">
-                                                            West Virginia
-                                                        </SelectItem>
-                                                        <SelectItem value="Wisconsin">
-                                                            Wisconsin
-                                                        </SelectItem>
-                                                        <SelectItem value="Wyoming">
-                                                            Wyoming
+                                                        <SelectItem value="One-Way">
+                                                            One-Way
                                                         </SelectItem>
                                                     </SelectContent>
                                                 </Select>
@@ -493,12 +344,100 @@ export default function EditHotelRezForm({
                                     />
                                     <FormField
                                         control={form.control}
-                                        name="finalCharges"
+                                        name="departureAirport"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
                                                     <div className="pt-2 font-bold">
-                                                        Final Charges
+                                                        Departure Airport
+                                                    </div>
+                                                </FormLabel>
+                                                <Input
+                                                    {...field}
+                                                    type="text"
+                                                    placeholder="Enter Airport"
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="arrivalAirport"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    <div className="pt-2 font-bold">
+                                                        Arrival Airport
+                                                    </div>
+                                                </FormLabel>
+                                                <Input
+                                                    {...field}
+                                                    type="text"
+                                                    placeholder="Enter Airport"
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="flightCost"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    <div className="pt-2 font-bold">
+                                                        Flight Cost
+                                                    </div>
+                                                </FormLabel>
+                                                <Input
+                                                    type="text"
+                                                    {...field}
+                                                    value={field.value ?? ""}
+                                                    placeholder="Enter Amount (e.g., 12.40)"
+                                                    onChange={(e) => {
+                                                        const value =
+                                                            e.target.value;
+                                                        // Allow empty string, numbers, and one decimal point
+                                                        if (
+                                                            value === "" ||
+                                                            /^\d*\.?\d*$/.test(
+                                                                value
+                                                            )
+                                                        ) {
+                                                            field.onChange(
+                                                                value
+                                                            );
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const value =
+                                                            e.target.value;
+                                                        const numericValue =
+                                                            parseFloat(value);
+                                                        if (
+                                                            !isNaN(numericValue)
+                                                        ) {
+                                                            field.onChange(
+                                                                numericValue
+                                                            );
+                                                        } else {
+                                                            field.onChange(0);
+                                                        }
+                                                    }}
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="baggageFee"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    <div className="pt-2 font-bold">
+                                                        Baggage Fees
                                                     </div>
                                                 </FormLabel>
                                                 <Input
@@ -606,6 +545,7 @@ export default function EditHotelRezForm({
                                                         checked={field.value}
                                                     />
                                                 </div>
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />

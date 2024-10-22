@@ -148,14 +148,14 @@ export default function MemberDetails({ params }: HotelRez) {
                                 onNoteCreated={() => refresh()}
                             />
                         </div>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex flex-col-2 gap-[7.5rem] justify-start items-center mb-4">
                             <h3 className="text-lg font-bold">
                                 Status:{" "}
                                 <span
                                     className={
                                         data?.verified === false
                                             ? "text-orange-500 dark:text-orange-400" // Red for canceled
-                                            : data?.dropOffMileage === 0
+                                            : data?.verified === true
                                             ? "text-green-700"
                                             : "text-red-500 dark:text-red-400"
                                     }
@@ -169,9 +169,9 @@ export default function MemberDetails({ params }: HotelRez) {
                                         : "Active"}
                                 </span>
                             </h3>
-                            <h3 className="block text-lg font-bold pr-[11.3rem]">
+                            <h3 className="block text-lg font-bold ">
                                 Final Charges:{" "}
-                                <span>${data?.finalcharges}</span>
+                                <span>${data?.finalCharges}</span>
                             </h3>
                         </div>
 
@@ -303,7 +303,7 @@ export default function MemberDetails({ params }: HotelRez) {
                             params={{
                                 rental: data.id,
                                 uploader: session?.user?.name ?? "",
-                                fileSuffix: `-${data?.rentalAgreement}-${data?.memberID?.firstname}-${data?.memberID?.lastname}`,
+                                fileSuffix: `-${data?.hotelConfirmationNumber}-${data?.memberID?.firstname}-${data?.memberID?.lastname}`,
                             }}
                         />
                     </div>

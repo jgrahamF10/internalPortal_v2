@@ -92,12 +92,12 @@ export default function Page() {
         setInactives(!inactives);
     };
 
-    const filteredAssets = data.filter((rental) => {
+    const filteredAssets = data.filter((rez) => {
         // Filter by active/inactive status
         if (inactives) {
-            if (rental.archived !== false) return false;
+            if (rez.archived !== false) return false;
         } else {
-            if (rental.verified !== false) return false;
+            if (rez.verified !== false) return false;
         }
 
         // If filterText is empty, include all remaining users
@@ -108,10 +108,10 @@ export default function Page() {
 
         // Match against the relevant fields
         return (
-            rental.rentalAgreement.toLowerCase().includes(lowerFilterText) ||
-            rental.member.firstname.toLowerCase().includes(lowerFilterText) ||
-            rental.member.lastname.toLowerCase().includes(lowerFilterText) ||
-            rental.pickUpLocation.toLowerCase().includes(lowerFilterText)
+            rez.rentalAgreement.toLowerCase().includes(lowerFilterText) ||
+            rez.member.firstname.toLowerCase().includes(lowerFilterText) ||
+            rez.member.lastname.toLowerCase().includes(lowerFilterText) ||
+            rez.pickUpLocation.toLowerCase().includes(lowerFilterText)
         );
     });
 
@@ -161,6 +161,12 @@ export default function Page() {
             ),
         },
         {
+            name: "Project",
+            selector: (row: any) => row.project.projectName,
+            sortable: true,
+            center: true,
+        },
+        {
             name: "Check In Date",
             selector: (row: any) => row.arrivalDate,
             sortable: true,
@@ -168,7 +174,7 @@ export default function Page() {
         },
         {
             name: "Final Charges",
-            selector: (row: any) => row.finalcharges,
+            selector: (row: any) => row.finalCharges,
             sortable: true,
             center: true,
         },
@@ -182,15 +188,6 @@ export default function Page() {
             name: "Hotel Chain",
             selector: (row: any) => row.hotelChain.hotelName,
             sortable: true,
-            center: true,
-        },
-        {
-            name: "Location",
-            selector: (row: any) => row.hotelCity,
-            sortable: true,
-            cell: (row: any) => (
-                <span className="capitalize">{row.hotelCity}, {row.hotelState}</span>
-            ),
             center: true,
         },
         {

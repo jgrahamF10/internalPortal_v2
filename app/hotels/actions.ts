@@ -11,6 +11,7 @@ export async function getReservations() {
         with: {
             memberID: true,
             hotelChain: true,
+            project: true,
         },
     });
     return rentalData;

@@ -59,7 +59,7 @@ const FilterComponent = ({
 
 export default function Page() {
     const router = useRouter();
-    const [members, setMembers] = useState<any[]>([]);
+    const [rentals, setRentals] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
     const [inactives, setInactives] = useState<boolean>(false);
@@ -71,9 +71,9 @@ export default function Page() {
 
     useEffect(() => {
         async function fetchData() {
-            const rentals: any = await getRentals();
-            console.log("members", rentals);
-            setMembers(rentals);
+            const rentalData: any = await getRentals();
+            console.log("rentals", rentalData);
+            setRentals(rentalData);
             setLoading(false);
         }
         fetchData();
@@ -92,7 +92,7 @@ export default function Page() {
         setInactives(!inactives);
     };
 
-    const filteredAssets = members.filter((rental) => {
+    const filteredAssets = rentals.filter((rental) => {
         // Filter by active/inactive status
         if (inactives) {
             if (rental.archived !== false) return false;
@@ -109,9 +109,10 @@ export default function Page() {
         // Match against the relevant fields
         return (
             rental.rentalAgreement.toLowerCase().includes(lowerFilterText) ||
-            rental.member.firstname.toLowerCase().includes(lowerFilterText) ||
-            rental.member.lastname.toLowerCase().includes(lowerFilterText) ||
-            rental.pickUpLocation.toLowerCase().includes(lowerFilterText)
+            rental.memberID.firstname.toLowerCase().includes(lowerFilterText) ||
+            rental.memberID.lastname.toLowerCase().includes(lowerFilterText) ||
+            rental.pickUpLocation.toLowerCase().includes(lowerFilterText) ||
+            rental.vendors.toLowerCase().includes(lowerFilterText)
         );
     });
 
@@ -159,6 +160,13 @@ export default function Page() {
             ),
         },
         {
+            name: "Project",
+            selector: (row: any) => row.project.projectName,
+            sortable: true,
+            center: true,
+
+        },
+        {
             name: "Pick Up Date",
             selector: (row: any) => row.pickUpDate,
             sortable: true,
@@ -172,14 +180,6 @@ export default function Page() {
             name: "Due Date",
             selector: (row: any) => row.dueDate,
             sortable: true,
-        },
-        {
-            name: "Drop Off Location",
-            selector: (row: any) => row.returnLocation,
-            sortable: true,
-            cell: (row: any) => (
-                <span className="capitalize">{row.returnLocation}</span>
-            ),
         },
         {
             name: "Actual Return Date",

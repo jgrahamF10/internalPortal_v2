@@ -19,6 +19,7 @@ import type { AdapterAccountType } from "next-auth/adapters";
 import { arch } from "os";
 import { projects, members } from "./member_management";
 import { create } from "domain";
+import { TypeOf } from "zod";
 
 
 export const vendors = pgEnum('vendors', ['Hertz', 'Enterprise', 'Uhaul', 'Other']);
@@ -79,17 +80,15 @@ export const members2rentals = relations(rentals, ({ one }) => ({
 export type Rentals = typeof rentals.$inferSelect;
 export type NewRentals = typeof rentals.$inferInsert;
 
-export const airlinesList = pgEnum('airlinesList', [
-    'Alaska Airlines',
-    'American Airlines',
-    'Delta',
-    'Frontier',
-    'JetBlue',
-    'Southwest',
-    'Spirit',
-    'United',
-    'Other'
-]);
+
+export const airline = pgTable("airline", {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    airlines: varchar("airlines", { length: 50 }).unique('airlines').notNull(),
+    inactive: boolean("inactive").default(false),
+});
+
+export type AirlinesList = typeof airline.$inferSelect;
+export type NewAirlinesList = typeof airline.$inferInsert
   
 export const flights = pgTable("flight", {
     id: bigserial("id", { mode: "number" }).primaryKey(),
@@ -97,7 +96,7 @@ export const flights = pgTable("flight", {
     memberId: integer("memberId").notNull(),
     flightConfirmationNumber: varchar("flightConfirmationNumber", { length: 50 }).unique('flightConfirmationNumber').notNull(),
     tripType: varchar("tripType", { enum: ['One-Way', 'Round Trip',], length: 12 }).notNull(),
-    airlines: airlinesList("airlines").notNull(),
+    airlinesID: integer("airlinesID").notNull(),
     travelDate: date("travelDate").notNull(),
     returnDate: date("returnDate"),
     departureAirport: varchar("departureAirport", { length: 10 }).notNull(),
@@ -106,7 +105,6 @@ export const flights = pgTable("flight", {
     baggageFee: numeric("baggageFee",  { precision: 12, scale: 2 }).notNull(),
     totalCost: numeric("totalCost", { precision: 12, scale: 2 }).notNull(),
     cancelled: boolean("cancelled").default(false),
-    creationDate: timestamp("creationDate", { mode: "date" }).notNull(),
     verified: boolean("verified").default(false),
     archived: boolean("archived").default(false),
     canceled: boolean("canceled").default(false),
@@ -119,15 +117,15 @@ export const flights = pgTable("flight", {
     idxFlightTravelDate: index("idx_flight_travelDate").on(table.travelDate),
 }));
 
-export type Flights = typeof rentals.$inferSelect;
-export type NewFlights = typeof rentals.$inferInsert;
+export type Flights = typeof flights.$inferSelect;
+export type NewFlights = typeof flights.$inferInsert;
 
 export const flights2projects = relations(projects, ({ many }) => ({
     projectId: many(flights)
 }));
 
 export const projects2flights = relations(flights, ({ one }) => ({
-    projectID: one(projects, {
+    project: one(projects, {
         fields: [flights.projectId],
         references: [projects.id],
     })
@@ -138,9 +136,20 @@ export const flights2members = relations(members, ({ many }) => ({
 }));
 
 export const members2flights = relations(flights, ({ one }) => ({
-    memberID: one(members, {
+    members: one(members, {
         fields: [flights.memberId], 
         references: [members.id],
+    })
+}));
+
+export const flights2airlines = relations(airline, ({ many }) => ({
+    flights: many(flights)
+}));
+
+export const airlines2flights = relations(flights, ({ one }) => ({
+    airlines: one(airline, {
+        fields: [flights.airlinesID],
+        references: [airline.id],
     })
 }));
 
@@ -163,7 +172,7 @@ export type FlightCredits = typeof flightCredits.$inferSelect;
 export type NewFlightCredits = typeof flightCredits.$inferInsert;
 
 export const flight2flightCredits = relations(flightCredits, ({ one }) => ({
-    flightId: one(flights, {
+    credit: one(flights, {
         fields: [flightCredits.flightId],
         references: [flights.id],
     })
@@ -177,7 +186,7 @@ export const member2flightCredits = relations(flightCredits, ({ one }) => ({
 }));
 
 export const flightCredits2flights = relations(flights, ({ many }) => ({
-    flightId: many(flightCredits)
+    credits: many(flightCredits)
 }));
 
 export const flightCredits2members = relations(members, ({ many }) => ({
@@ -204,7 +213,7 @@ export const hotelRezervations = pgTable("hotelRezervation", {
     departureDate: date("departureDate").notNull(),
     hotelCity: varchar("hotelCity", { length: 100 }),
     hotelState: varchar("hotelState", { length: 100 }),
-    finalcharges: numeric("finalcharges", { precision: 12, scale: 2 } ),
+    finalCharges: numeric("finalCharges", { precision: 12, scale: 2 } ),
     canceled: boolean("canceled").default(false),
     verified: boolean("verified").default(false),
     archived: boolean("archived").default(false),
@@ -277,7 +286,7 @@ export const notes = pgTable(
 );
 
 export const notes2Rental = relations(notes, ({ one }) => ({
-    remtal: one(rentals, {
+    rental: one(rentals, {
         fields: [notes.parentId],
         references: [rentals.id],
     })

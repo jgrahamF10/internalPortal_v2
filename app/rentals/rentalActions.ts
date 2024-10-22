@@ -10,6 +10,7 @@ export async function getRentals() {
         orderBy: [desc(rentals.createdDate)],
         with: {
             memberID: true,
+            project: true,
         },
     });
     return rentalData;

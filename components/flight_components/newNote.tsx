@@ -2,7 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { SubmitHandler, useForm, Control, FieldValues } from "react-hook-form";
-import { createRezNote } from "@/app/hotels/actions";
+import { createFlightNote } from "@/app/flights/actions";
 import { NewNote } from "@/db/schema/tracker_db";
 import {
     DialogTrigger,
@@ -38,7 +38,7 @@ const FormSchema = z.object({
     
 });
 
-export default function RentalNoteModal({ params, onNoteCreated }: NoteFormProps) {
+export default function FlightNoteModal({ params, onNoteCreated }: NoteFormProps) {
     const {
         register,
         handleSubmit,
@@ -54,9 +54,9 @@ export default function RentalNoteModal({ params, onNoteCreated }: NoteFormProps
                 noteAuthor: params.uploader,
                 parentId: params.rentalId,
                 createdDate: new Date(),
-                noteType: "Hotel" as const
+                noteType: "Flight" as const
             };
-            await createRezNote(updatedValues);
+            await createFlightNote(updatedValues);
             onNoteCreated(); 
         } catch (error) {
             console.error("Error submitting form:", error);

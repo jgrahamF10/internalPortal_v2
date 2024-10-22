@@ -152,7 +152,7 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                 onNoteCreated={() => refresh()}
                             />
                         </div>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
                             <h3 className="text-lg font-bold">
                                 Status:{" "}
                                 <span
@@ -171,9 +171,9 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                         : "Returned"}
                                 </span>
                             </h3>
-                            <h3 className="block text-lg font-bold pr-[11.3rem]">
+                            <h3 className="block text-lg font-bold">
                                 Final Charges:{" "}
-                                <span>${data?.finalCharges + data.tolls}</span>
+                                <span>${((Number(data?.finalCharges) || 0) + (Number(data?.tolls) || 0)).toFixed(2)}</span>
                             </h3>
                         </div>
 

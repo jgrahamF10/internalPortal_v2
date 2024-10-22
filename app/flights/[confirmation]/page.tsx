@@ -1,25 +1,21 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { getRental } from "../actions";
+import { getFlight } from "../actions";
 import React, { useState, useEffect } from "react";
 import { EosIconsBubbleLoading } from "@/components/spinner";
 import { useSession } from "next-auth/react";
 import NotAuth from "@/components/auth/notAuth";
-import Link from "next/link";
-import ProjectApprovalModal from "@/components/hr_components/projectApproval";
-import RentalNoteModal from "@/components/rental_components/newNote";
-import EditRentalForm from "@/components/rental_components/editRental";
-import ResumeUpload from "@/components/hr_components/uploadResume";
+import FlightNoteModal from "@/components/flight_components/newNote";
+import EditFlightForm from "@/components/flight_components/editFlight";
 import { getFile } from "@/lib/aws";
+import { AttachmentDelete } from "@/components/flight_components/deleteAttachment";
+import FlightAttatchment from "@/components/flight_components/flightAttachment";
 
-import { AttachmentDelete } from "@/components/rental_components/deleteAttachment";
-import RentalAttatchment from "@/components/rental_components/rentalAttachment";
-
-interface RentalAgreement {
-    params: { rentalAgreement: string };
+interface HotelRez {
+    params: { confirmation: string };
 }
 
-export default function MemberDetails({ params }: RentalAgreement) {
+export default function MemberDetails({ params }: HotelRez) {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [notFound, setNotFound] = useState<boolean>(false);
@@ -31,11 +27,11 @@ export default function MemberDetails({ params }: RentalAgreement) {
     const [resumeUrl, setResumeUrl] = useState<string>("");
     const [urls, setUrls] = useState<{ [key: string]: string }>({}); // Map of attachment descriptions to URLs
 
-    // console.log("Rental Agreement", params.rentalAgreement);
+    //console.log("Rental Agreement", params.confirmation);
 
     useEffect(() => {
         async function fetchData() {
-            const fetchRental: any = await getRental(params.rentalAgreement);
+            const fetchRental: any = await getFlight(params.confirmation);
             if (!fetchRental) {
                 // Check for null or undefined
                 setNotFound(true);
@@ -73,7 +69,7 @@ export default function MemberDetails({ params }: RentalAgreement) {
         }
 
         fetchData();
-    }, [params.rentalAgreement]);
+    }, [params.confirmation]);
 
     const errorStatusChange = (estatus: boolean) => {
         setErrorStatus(estatus);
@@ -112,9 +108,9 @@ export default function MemberDetails({ params }: RentalAgreement) {
             <div className="container mx-auto py-8 px-4 md:px-6">
                 <div className="bg-white rounded-lg  p-6 dark:bg-gray-950">
                     <h2 className="text-2xl font-bold">
-                        Rental Not Found -{" "}
+                        Flight Not Found -{" "}
                         <span className="text-red-600">
-                            {params.rentalAgreement}
+                            {params.confirmation}
                         </span>
                     </h2>
                 </div>
@@ -130,7 +126,7 @@ export default function MemberDetails({ params }: RentalAgreement) {
         <div className="p-2">
             <nav className="flex justify-end space-x-2">
                 <a href="/rentals" className="text-muted-foreground">
-                    All Rentals
+                    All Flights
                 </a>
                 <span className="text-muted-foreground">/</span>
                 <span className="text-muted-foreground">Details</span>
@@ -141,91 +137,117 @@ export default function MemberDetails({ params }: RentalAgreement) {
                     <div className="rounded-lg shadow-md dark:shadow-slate-700 p-6">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-bold">
-                                Rental Agreement -{" "}
+                                Flight Confirmation -{" "}
                                 <span className="font-semibold text-green-700">
-                                    {data?.rentalAgreement}
+                                    {data?.flightConfirmationNumber}
                                 </span>
                             </h2>
-                            <EditRentalForm
-                                rentalData={data}
+                            
+                            <EditFlightForm
+                                flightData={data}
                                 updatingUser={session?.user?.name ?? ""}
                                 onNoteCreated={() => refresh()}
                             />
                         </div>
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
                             <h3 className="text-lg font-bold">
                                 Status:{" "}
                                 <span
                                     className={
-                                        data?.canceled === true
-                                            ? "text-red-500 dark:text-red-400" // Red for canceled
-                                            : data?.dropOffMileage === 0
+                                        data?.verified === false
+                                            ? "text-orange-500 dark:text-orange-400" // Red for canceled
+                                            : data?.verified !== false
                                             ? "text-green-700"
                                             : "text-red-500 dark:text-red-400"
                                     }
                                 >
                                     {data?.canceled === true
                                         ? "Canceled"
-                                        : data?.dropOffMileage === 0
-                                        ? "Active"
-                                        : "Returned"}
+                                        : data?.verified === false
+                                        ? "Unverified"
+                                        : data?.verified === true
+                                        ? "Verified"
+                                        : "Active"}
                                 </span>
                             </h3>
-                            <h3 className="block text-lg font-bold pr-[11.3rem]">
+                            <h3 className="block text-lg font-bold ">
                                 Final Charges:{" "}
-                                <span>${data?.finalCharges + data.tolls}</span>
+                                <span>
+                                    $
+                                    {(
+                                        (Number(data?.flightCost) || 0) +
+                                        (Number(data?.baggageFee) || 0)
+                                    ).toFixed(2)}
+                                </span>
                             </h3>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="block text-sm font-bold">
-                                Driver:{" "}
+                            <div className="block text-md font-bold">
+                                Technician:{" "}
                                 <span className="font-medium underline">
-                                    {data?.memberID?.firstname}{" "}
-                                    {data?.memberID?.lastname}
+                                    {data?.members?.firstname}{" "}
+                                    {data?.members?.lastname}
                                 </span>
                             </div>
-                            <div className="block text-sm font-bold ">
+                            <div className="block text-md font-bold ">
                                 Project:{" "}
                                 <span className="font-medium underline">
                                     {data?.project?.projectName}
                                 </span>
                             </div>
-                            <div className="block text-sm font-bold">
-                                Reservation #:{" "}
+                            <div className="block text-md font-bold">
+                                Airline:{" "}
                                 <span className="font-medium capitalize">
-                                    {data?.reservation}
+                                    {data?.airlines.airlines}
                                 </span>
                             </div>
-                            <div className="block text-sm font-bold">
-                                Pick Up Date:{" "}
+                            <div className="block text-md font-bold">
+                                Trip Type:{" "}
                                 <span className="font-medium underline">
-                                    {data?.pickUpDate}
+                                    {data?.tripType}
                                 </span>
                             </div>
-                            <div className="block text-sm font-bold">
-                                Pick Up Location:{" "}
+                            <div className="block text-md font-bold">
+                                Travel Date:{" "}
                                 <span className="font-medium underline">
-                                    {data?.pickUpLocation}
+                                    {data?.travelDate}
                                 </span>
                             </div>
-
-                            <div className="block text-sm font-bold">
-                                Return Location:{" "}
+                            <div className="block text-md font-bold">
+                                Departing Airport:{" "}
                                 <span className="font-medium underline">
-                                    {data?.returnLocation}
+                                    {data?.departureAirport}
                                 </span>
                             </div>
-                            <div className="block text-sm font-bold">
-                                Due Date:{" "}
-                                <span className="font-medium capitalize">
-                                    {data?.dueDate}
+                            <div className="block text-md font-bold">
+                                Arrival Airport:{" "}
+                                <span className="font-medium underline">
+                                    {data?.arrivalAirport}
                                 </span>
                             </div>
-                            <div className="block text-sm font-bold">
-                                Actual Return Date:{" "}
-                                <span className="font-medium capitalize">
+                            <div className="block text-md font-bold">
+                                Return Date:{" "}
+                                <span className="font-medium underline">
                                     {data?.returnDate}
+                                </span>
+                            </div>
+                            <div className="block text-md font-bold">
+                                Baggage Fees:{" "}
+                                <span className="font-medium underline">
+                                    ${data?.baggageFee}
+                                </span>
+                            </div>
+                            <div className="block text-md font-bold">
+                                Canceled:{" "}
+                                <span className="font-medium capitalize">
+                                    {data?.canceled === true ? "Yes" : "No"}
+                                </span>
+                            </div>
+                            <div className="block text-md font-bold">
+                                Archived:{" "}
+                                <span className="font-medium capitalize">
+                                    {data?.archived === true ? "Yes" : "No"}
                                 </span>
                             </div>
                         </div>
@@ -233,60 +255,17 @@ export default function MemberDetails({ params }: RentalAgreement) {
                     <div className="rounded-lg shadow-md dark:shadow-slate-700 p-6">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-2xl font-bold mb-4 underline">
-                                Vehicle Info
+                                Flight Credits
                             </h2>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="block text-md font-bold">
-                                Vendor:{" "}
+                                Available Creidts:{" "}
                                 <span className="font-medium capitalize">
-                                    {data?.vendors}
-                                </span>
-                            </div>
-                            <div className="block text-md font-bold">
-                                Vehicle Type:{" "}
-                                <span className="font-medium capitalize">
-                                    {data?.vehicleType}
-                                </span>
-                            </div>
-
-                            <div className="block text-md font-bold ">
-                                Vin Number:{" "}
-                                <span>
-                                    {data?.vehicleVIN ? data.vehicleVIN : "N/A"}
-                                </span>
-                            </div>
-
-                            <div className="block text-md font-bold">
-                                License Plate:{" "}
-                                <span className="font-medium capitalize">
-                                    {data?.LicensePlate
-                                        ? data.LicensePlate
-                                        : "N/A"}
-                                </span>
-                            </div>
-                            <div className="block text-md font-bold">
-                                Pick Up Milage:{" "}
-                                <span className="font-medium capitalize">
-                                    {data?.pickUpMilage
-                                        ? data.pickUpMilage
-                                        : "N/A"}
-                                </span>
-                            </div>
-                            <div className="block text-md font-bold">
-                                Drop Off Milage:{" "}
-                                <span className="font-medium capitalize">
-                                    {data?.dropOffMileage
-                                        ? data.dropOffMileage
-                                        : "N/A"}
-                                </span>
-                            </div>
-                            <div className="flex items-center text-md font-bold">
-                                {/* Resume label */}
-                                Tolls:{" "}
-                                <span className="font-medium underline pl-2">
-                                    ${data?.tolls ? data.tolls : "0"}
+                                    {data?.credits.length === 0
+                                        ? "No Credits"
+                                        : `$${data?.credits?.amount}`}
                                 </span>
                             </div>
                         </div>
@@ -295,7 +274,7 @@ export default function MemberDetails({ params }: RentalAgreement) {
                 <div className=" rounded-lg shadow-md dark:shadow-slate-700 p-6 mt-8">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold mb-4">Notes</h2>
-                        <RentalNoteModal
+                        <FlightNoteModal
                             params={{
                                 rentalId: data.id,
                                 uploader: session?.user?.name ?? "",
@@ -320,7 +299,7 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {data.rentalNotes.map((note: any) => (
+                                {data.flightNotes.map((note: any) => (
                                     <tr
                                         className="border-b border-gray-200 dark:border-gray-700"
                                         key={note.id}
@@ -346,11 +325,11 @@ export default function MemberDetails({ params }: RentalAgreement) {
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold mb-4">Attachments</h2>
 
-                        <RentalAttatchment
+                        <FlightAttatchment
                             params={{
-                                rental: data.id,
+                                flight: data.id,
                                 uploader: session?.user?.name ?? "",
-                                fileSuffix: `-${data?.rentalAgreement}-${data?.memberID?.firstname}-${data?.memberID?.lastname}`,
+                                fileSuffix: `-${data?.flightConfirmationNumber}-${data?.members?.firstname}-${data?.members?.lastname}`,
                             }}
                         />
                     </div>
@@ -374,52 +353,46 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                 </tr>
                             </thead>
                             <tbody>
-                                
-                                {data?.attachments
-                                    .map((attachment: any) => (
-                                        <tr
-                                            className="border-b border-gray-200 dark:border-gray-700"
-                                            key={attachment.id}
-                                        >
-                                            <td className="px-4 py-2 text-sm">
-                                                <a
-                                                    href={
-                                                        urls[
-                                                            attachment
-                                                                .description
-                                                        ] || "#"
-                                                    }
-                                                    target="_blank"
-                                                    className={`underline hover:text-green-700 ${
-                                                        urls[
-                                                            attachment
-                                                                .description
-                                                        ]
-                                                            ? ""
-                                                            : "text-gray-400" // Gray out if the URL hasn't loaded yet
-                                                    }`}
-                                                >
-                                                    {attachment.description.replace(
-                                                        /userAttachments\//i,
-                                                        ""
-                                                    )}
-                                                </a>
-                                            </td>
-                                            <td className="px-4 py-2 text-sm">
-                                                {attachment.uploader}
-                                            </td>
+                                {data?.attachments.map((attachment: any) => (
+                                    <tr
+                                        className="border-b border-gray-200 dark:border-gray-700"
+                                        key={attachment.id}
+                                    >
+                                        <td className="px-4 py-2 text-sm">
+                                            <a
+                                                href={
+                                                    urls[
+                                                        attachment.description
+                                                    ] || "#"
+                                                }
+                                                target="_blank"
+                                                className={`underline hover:text-green-700 ${
+                                                    urls[attachment.description]
+                                                        ? ""
+                                                        : "text-gray-400" // Gray out if the URL hasn't loaded yet
+                                                }`}
+                                            >
+                                                {attachment.description.replace(
+                                                    /userAttachments\//i,
+                                                    ""
+                                                )}
+                                            </a>
+                                        </td>
+                                        <td className="px-4 py-2 text-sm">
+                                            {attachment.uploader}
+                                        </td>
 
-                                            <td className="px-4 py-2 text-sm">
-                                                {attachment.uploadDate.toLocaleDateString()}
-                                            </td>
-                                            <td className="px-4 py-2 text-sm">
-                                                {/* Delete button */}
-                                                <AttachmentDelete
-                                                    attachmentId={attachment.id}
-                                                />
-                                            </td>
-                                        </tr>
-                                    ))}
+                                        <td className="px-4 py-2 text-sm">
+                                            {attachment.uploadDate.toLocaleDateString()}
+                                        </td>
+                                        <td className="px-4 py-2 text-sm">
+                                            {/* Delete button */}
+                                            <AttachmentDelete
+                                                attachmentId={attachment.id}
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>

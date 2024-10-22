@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import { getRentals } from "./actions";
+import { getFlights } from "./actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,7 +9,7 @@ import { EosIconsBubbleLoading } from "@/components/spinner";
 import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
-import NewRentalForm from "@/components/rental_components/newRental";
+import NewFlightForm from "@/components/flight_components/newFlight";
 import { ThemeColors } from "@/lib/utils";
 
 const TextField = styled.input`
@@ -59,7 +59,7 @@ const FilterComponent = ({
 
 export default function Page() {
     const router = useRouter();
-    const [members, setMembers] = useState<any[]>([]);
+    const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
     const [inactives, setInactives] = useState<boolean>(false);
@@ -71,9 +71,9 @@ export default function Page() {
 
     useEffect(() => {
         async function fetchData() {
-            const rentals: any = await getRentals();
-            console.log("members", rentals);
-            setMembers(rentals);
+            const flightData: any = await getFlights();
+            console.log("confirmations", flightData);
+            setData(flightData);
             setLoading(false);
         }
         fetchData();
@@ -92,12 +92,12 @@ export default function Page() {
         setInactives(!inactives);
     };
 
-    const filteredAssets = members.filter((rental) => {
+    const filteredAssets = data.filter((flight) => {
         // Filter by active/inactive status
         if (inactives) {
-            if (rental.archived !== false) return false;
+            if (flight.archived !== false) return false;
         } else {
-            if (rental.verified !== false) return false;
+            if (flight.verified !== false) return false;
         }
 
         // If filterText is empty, include all remaining users
@@ -108,10 +108,10 @@ export default function Page() {
 
         // Match against the relevant fields
         return (
-            rental.rentalAgreement.toLowerCase().includes(lowerFilterText) ||
-            rental.member.firstname.toLowerCase().includes(lowerFilterText) ||
-            rental.member.lastname.toLowerCase().includes(lowerFilterText) ||
-            rental.pickUpLocation.toLowerCase().includes(lowerFilterText)
+            flight.flightConfirmationNumber.toLowerCase().includes(lowerFilterText) ||
+            flight.members.firstname.toLowerCase().includes(lowerFilterText) ||
+            flight.members.lastname.toLowerCase().includes(lowerFilterText) ||
+            flight.departureAirport.toLowerCase().includes(lowerFilterText)
         );
     });
 
@@ -136,61 +136,88 @@ export default function Page() {
 
     const columns = [
         {
-            name: "Rental Agreement",
-            selector: (row: any) => row.rentalAgreement,
+            name: "Confirmation #",
+            selector: (row: any) => row.flightConfirmationNumber,
             cell: (row: any) => (
                 <Link
-                    href={`/rentals/${row.rentalAgreement}`}
-                    className="font-medium text-green-700 capitalize hover:underline"
+                    href={`/flights/${row.flightConfirmationNumber}`}
+                    className="font-bold text-lg text-green-700 capitalize hover:underline pl-4"
                 >
-                    {row.rentalAgreement}
+                    {row.flightConfirmationNumber}
                 </Link>
             ),
             sortable: true,
+            center: true,
         },
         {
-            name: "Driver",
-            selector: (row: any) => row.memberID?.firstname,
+            name: "Passenger",
+            selector: (row: any) => row.members?.firstname,
             sortable: true,
+            center: true,
             cell: (row: any) => (
-                <span className=" capitalize">
-                    {row.memberID?.firstname} {row.memberID?.lastname}
+                <span className="capitalize">
+                    {row.members?.firstname} {row.members?.lastname}
                 </span>
             ),
         },
         {
-            name: "Pick Up Date",
-            selector: (row: any) => row.pickUpDate,
+            name: "Project",
+            selector: (row: any) => row.project.projectName            ,
             sortable: true,
+            center: true,
         },
         {
-            name: "Final Charges",
-            selector: (row: any) => row.finalCharges,
+            name: "Flight Date",
+            selector: (row: any) => row.travelDate            ,
             sortable: true,
+            center: true,
         },
         {
-            name: "Due Date",
-            selector: (row: any) => row.dueDate,
+            name: "Charges",
+            selector: (row: any) => row.finalCharge,
             sortable: true,
-        },
-        {
-            name: "Drop Off Location",
-            selector: (row: any) => row.returnLocation,
-            sortable: true,
+            center: true,
             cell: (row: any) => (
-                <span className="capitalize">{row.returnLocation}</span>
+                <span className="capitalize">
+                   ${((Number(row?.totalCost) || 0) + (Number(row?.baggageFee) || 0)).toFixed(2)}
+                </span>
             ),
         },
         {
-            name: "Actual Return Date",
-            selector: (row: any) => row.returnDate,
+            name: "Credits",
+            selector: (row: any) => row.credits.amount,
             sortable: true,
+            center: true,
+            cell: (row: any) => (
+                <span className="capitalize">
+                   ${row.credits.amount?? 0}
+                </span>
+            ),
         },
         {
-            name: "Rental Company",
-            selector: (row: any) => row.vendors,
+            name: "Departure Airport",
+            selector: (row: any) => row.departureAirport,
             sortable: true,
+            center: true,
         },
+        {
+            name: "Airline",
+            selector: (row: any) => row.airlines.airlines,
+            sortable: true,
+            center: true,
+        },
+        {
+            name: "Verified",
+            selector: (row: any) => row.verified,
+            sortable: true,
+            center: true,
+            cell: (row: any) => (
+                <span className={row.verified ? "text-green-600" : "text-red-600"}>
+                    {row.verified ? "Yes" : "No"}
+                </span>
+            ),
+        },
+        
     ];
 
     if (loading) {
@@ -222,6 +249,8 @@ export default function Page() {
                 fontWeight: "bold",
                 fontSize: "16px",
                 backgroundColor: backgroundColor,
+                
+                
             },
         },
         subHeader: {
@@ -234,9 +263,10 @@ export default function Page() {
             style: {
                 paddingLeft: "4px", // override the cell padding for data cells
                 paddingRight: "4px",
-                fontSize: "14px",
+                fontSize: "16px",
                 backgroundColor: backgroundColor,
                 color: fontColor,
+                fontWeight: "bold",
             },
         },
         pagination: {
@@ -273,11 +303,11 @@ export default function Page() {
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl min-w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold">Tech Roster</h1>
+                    <h1 className="text-2xl font-semibold">Flight Tracker</h1>
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (
-                        <NewRentalForm
+                        <NewFlightForm
                             onNoteCreated={() => refresh()}
                             creatingUser={session?.user?.name ?? ""}
                         />
@@ -289,12 +319,12 @@ export default function Page() {
                         onClick={handleInactive}
                     >
                         <button className="bg-blue-600 text-white py-1 px-2 rounded-sm hover:bg-blue-700">
-                            Show inactives
+                            Show Archived
                         </button>
                     </h3>
                 </div>
                 <h3 className="pb-2">
-                    Displaying {filteredAssets.length} Rentals
+                    Displaying {filteredAssets.length} Flights
                 </h3>
                 <div className="overflow-auto rounded-md w-full">
                     <DataTable

@@ -88,28 +88,28 @@ export default function EditRentalForm({
         defaultValues: {
             projectId: rentalData?.projectId,
             memberId: rentalData?.memberId,
-            rentalAgreement: rentalData?.rentalAgreement,
-            reservation: rentalData?.reservation,
+            rentalAgreement: rentalData?.rentalAgreement || '',
+            reservation: rentalData?.reservation || '',
             pickUpDate: rentalData?.pickUpDate
                 ? new Date(rentalData?.pickUpDate)
                 : new Date(),
             dueDate: rentalData?.dueDate
                 ? new Date(rentalData?.dueDate)
                 : new Date(),
-            vehicleType: rentalData?.vehicleType,
-            vehicleVin: rentalData?.vehicleVIN,
-            licensePlate: rentalData?.licensePlate,
-            pickUpMileage: rentalData?.pickUpMileage,
-            dropOffMileage: rentalData?.dropOffMileage,
-            vendors: rentalData?.vendors,
-            pickUpLocation: rentalData?.pickUpLocation,
-            returnLocation: rentalData?.returnLocation,
-            finalCharges: rentalData?.finalCharges,
-            canceled: rentalData?.canceled,
-            verified: rentalData?.verified,
-            archived: rentalData?.archived,
+            vehicleType: rentalData?.vehicleType || '',
+            vehicleVin: rentalData?.vehicleVIN || '',
+            licensePlate: rentalData?.licensePlate || '',
+            pickUpMileage: rentalData?.pickUpMileage || 0,
+            dropOffMileage: rentalData?.dropOffMileage || 0,
+            vendors: rentalData?.vendors || '',
+            pickUpLocation: rentalData?.pickUpLocation || '',
+            returnLocation: rentalData?.returnLocation || '',
+            finalCharges: rentalData?.finalCharges || 0,
+            canceled: rentalData?.canceled || false,
+            verified: rentalData?.verified || false,
+            archived: rentalData?.archived || false,
             lastUpdatedBy: updatingUser,
-            tolls: rentalData?.tolls,
+            tolls: rentalData?.tolls || 0,
             returnDate: rentalData?.returnDate
                 ? new Date(rentalData?.returnDate)
                 : new Date(),
@@ -125,6 +125,7 @@ export default function EditRentalForm({
             const newData = {
                 ...values,
                 createdDate: currentDate,
+                finalCharges: values.finalCharges?.toString() ?? '',
                 vendors: values.vendors as
                     | "Hertz"
                     | "Enterprise"
@@ -136,6 +137,9 @@ export default function EditRentalForm({
                 returnDate: values.returnDate
                     ? values.returnDate.toISOString()
                     : null,
+                tolls: values.tolls !== undefined && values.tolls !== null
+                    ? values.tolls.toString()
+                    : values.tolls,
             };
             //console.log("rentalData", newData);
             await updateRental(newData);
@@ -520,21 +524,39 @@ export default function EditRentalForm({
                                                     </div>
                                                 </FormLabel>
                                                 <Input
-                                                    type="number"
+                                                    type="text"
                                                     {...field}
-                                                    value={field.value != null ? field.value.toString() : ''}
-                                                    placeholder="Enter Toll Amount"
+                                                    value={field.value ?? ""}
+                                                    placeholder="Enter Amount (e.g., 12.40)"
                                                     onChange={(e) => {
                                                         const value =
                                                             e.target.value;
-                                                        field.onChange(
-                                                            value
-                                                                ? parseInt(
-                                                                      value,
-                                                                      10
-                                                                  )
-                                                                : ""
-                                                        );
+                                                        // Allow empty string, numbers, and one decimal point
+                                                        if (
+                                                            value === "" ||
+                                                            /^\d*\.?\d*$/.test(
+                                                                value
+                                                            )
+                                                        ) {
+                                                            field.onChange(
+                                                                value
+                                                            );
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const value =
+                                                            e.target.value;
+                                                        const numericValue =
+                                                            parseFloat(value);
+                                                        if (
+                                                            !isNaN(numericValue)
+                                                        ) {
+                                                            field.onChange(
+                                                                numericValue
+                                                            );
+                                                        } else {
+                                                            field.onChange(0);
+                                                        }
                                                     }}
                                                 />
                                                 <FormMessage />
@@ -552,21 +574,39 @@ export default function EditRentalForm({
                                                     </div>
                                                 </FormLabel>
                                                 <Input
-                                                    type="number"
+                                                    type="text"
                                                     {...field}
-                                                    value={field.value != null ? field.value.toString() : ''}
-                                                    placeholder="Enter Toll Amount"
+                                                    value={field.value ?? ""}
+                                                    placeholder="Enter Amount (e.g., 12.40)"
                                                     onChange={(e) => {
                                                         const value =
                                                             e.target.value;
-                                                        field.onChange(
-                                                            value
-                                                                ? parseInt(
-                                                                      value,
-                                                                      10
-                                                                  )
-                                                                : ""
-                                                        );
+                                                        // Allow empty string, numbers, and one decimal point
+                                                        if (
+                                                            value === "" ||
+                                                            /^\d*\.?\d*$/.test(
+                                                                value
+                                                            )
+                                                        ) {
+                                                            field.onChange(
+                                                                value
+                                                            );
+                                                        }
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const value =
+                                                            e.target.value;
+                                                        const numericValue =
+                                                            parseFloat(value);
+                                                        if (
+                                                            !isNaN(numericValue)
+                                                        ) {
+                                                            field.onChange(
+                                                                numericValue
+                                                            );
+                                                        } else {
+                                                            field.onChange(0);
+                                                        }
                                                     }}
                                                 />
                                                 <FormMessage />
