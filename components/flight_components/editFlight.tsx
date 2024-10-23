@@ -35,8 +35,8 @@ import { updateFLight, getAirlines } from "@/app/flights/actions";
 
 // Zod schema to validate the form
 const FormSchema = z.object({
-    technician: z.string(), //
-    project: z.string(), //
+    memberId: z.number(), 
+    projectId: z.number(), 
     lastUpdatedBy: z.string(),
     flightCost: z.preprocess((val) => {
         if (typeof val === "string") {
@@ -51,7 +51,7 @@ const FormSchema = z.object({
         .string()
         .min(1, "Flight Confirmation Number is required."),
     tripType: z.string().min(1, "Trip Type is required."),
-    airline: z.string().min(1, "Airline is required."),
+    airlines: z.string().min(1, "Airline is required."),
     travelDate: z.date(),
     returnDate: z.date().optional(),
     departureAirport: z.string().min(1, "Departure Airport is required."),
@@ -64,30 +64,50 @@ const FormSchema = z.object({
     }, z.number().min(0)),
 });
 
-interface EditFormProps {
-    updatingUser: string;
-    flightData: any;
+interface NewRentalProps {
     onNoteCreated: () => void;
+    flightData: any;
+    updatingUser: string;
 }
 
-export default function EditFlightForm({
+export default function NewFlightForm({
     onNoteCreated,
     updatingUser,
     flightData,
-}: EditFormProps) {
+}: NewRentalProps) {
+    const [airlines, setAirlines] = useState<any[]>([]);
     const {
-        watch,
-        register,
-        handleSubmit,
-        control,
         formState: { errors },
         reset,
     } = useForm({
         resolver: zodResolver(FormSchema),
     });
-    const [airlines, setAirlines] = useState<any[]>([]);
 
-    //console.log("flightData", flightData);
+    const form = useForm<z.infer<typeof FormSchema>>({
+        defaultValues: {
+            projectId: flightData?.projectId,
+            memberId: flightData?.memberId,
+            flightConfirmationNumber: flightData?.flightConfirmationNumber,
+            tripType: flightData?.tripType,
+            airlines: flightData?.airlines.airlines,
+            travelDate: flightData?.travelDate
+                ? new Date(flightData?.travelDate)
+                : new Date(),
+            returnDate: flightData?.returnDate
+                ? new Date(flightData?.returnDate)
+                : new Date(),
+            flightCost: flightData?.flightCost,
+            baggageFee: flightData?.baggageFee,
+            departureAirport: flightData?.departureAirport,
+            arrivalAirport: flightData?.arrivalAirport,
+            canceled: flightData?.canceled,
+            verified: flightData?.verified, 
+            archived: flightData?.archived,
+            lastUpdatedBy: updatingUser,
+        },
+        mode: "onTouched",
+        resolver: zodResolver(FormSchema),
+    });
 
     useEffect(() => {
         async function fetchData() {
@@ -97,66 +117,35 @@ export default function EditFlightForm({
         fetchData();
     }, []);
 
-    const form = useForm<z.infer<typeof FormSchema>>({
-        defaultValues: {
-            flightConfirmationNumber: flightData?.flightConfirmationNumber,
-            airline: flightData?.airlines.airlines,
-            travelDate: flightData?.travelDate
-                ? new Date(flightData?.travelDate)
-                : new Date(),
-            returnDate: flightData?.returnDate
-                ? new Date(flightData?.returnDate)
-                : new Date(),
-            flightCost: flightData?.flightCost,
-            tripType: flightData?.tripType,
-            departureAirport: flightData?.departureAirport,
-            arrivalAirport: flightData?.arrivalAirport,
-            baggageFee: flightData?.baggageFee,
-            canceled: false,
-            verified: false,
-            archived: false,
-            lastUpdatedBy: updatingUser,
-        },
-        mode: "onTouched",
-        resolver: zodResolver(FormSchema),
-    });
-
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         console.log("form Values", values);
         try {
-            const currentDate = new Date();
             const airlineId = airlines.find(
                 (airline: { airlines: string }) =>
-                    airline.airlines === values.airline
+                    airline.airlines === values.airlines
             ).id;
+            const currentDate = new Date();
             const updatedData = {
                 ...values,
-                id: flightData.id,
+                projectId: flightData.projectId,
                 memberId: flightData.memberId,
+                airlinesID: airlineId,
                 createdDate: currentDate,
                 lastUpdated: currentDate,
-                airlinesID: airlineId,
-                projectId: flightData.projectId, // Assuming projectId is present in the form values
+                flightCost: values.flightCost.toString(),
                 totalCost: (values.flightCost + values.baggageFee).toString(),
-                cancelled: values.canceled, // Note the spelling difference
                 flightConfirmationNumber: values.flightConfirmationNumber,
                 tripType: values.tripType as "One-Way" | "Round Trip",
-                flightCost: values.flightCost.toString(), // Convert to string
-                canceled: values.canceled === null ? false : values.canceled,
-                verified: values.verified === null ? false : values.verified,
-                archived: values.archived === null ? false : values.archived,
-                lastUpdatedBy: updatingUser,
                 travelDate: values.travelDate.toISOString(),
-                returnDate: values.returnDate ? values.returnDate.toISOString() : null,
+                returnDate: values.returnDate ? values.returnDate.toISOString() : undefined,
                 baggageFee: values.baggageFee.toString(),
-                
             };
-            console.log("FlightData", updatedData);
+            console.log("flightData", updatedData);
             await updateFLight(updatedData);
             onNoteCreated();
             reset();
         } catch (error) {
-            console.error("Error updating flight:", error);
+            console.error("Error creating flight:", error);
         }
     }
 
@@ -170,7 +159,7 @@ export default function EditFlightForm({
             <DialogContent className="sm:max-w-[640px] bg-background-foreground">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-secondary">
-                        Edit Reservation
+                        Edit A Flight
                     </DialogTitle>
                 </DialogHeader>
                 <Card className="w-full max-w-xl bg-background">
@@ -180,7 +169,7 @@ export default function EditFlightForm({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                     <FormField
                                         control={form.control}
-                                        name="airline"
+                                        name="airlines"
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>
@@ -545,7 +534,6 @@ export default function EditFlightForm({
                                                         checked={field.value}
                                                     />
                                                 </div>
-                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />

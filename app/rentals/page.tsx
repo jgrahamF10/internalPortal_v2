@@ -164,7 +164,6 @@ export default function Page() {
             selector: (row: any) => row.project.projectName,
             sortable: true,
             center: true,
-
         },
         {
             name: "Pick Up Date",
@@ -175,6 +174,12 @@ export default function Page() {
             name: "Final Charges",
             selector: (row: any) => row.finalCharges,
             sortable: true,
+            center: true,
+            cell: (row: any) => (
+                <span className="capitalize">
+                    ${row.finalCharges || "0.00"}
+                </span>
+            ),
         },
         {
             name: "Due Date",
@@ -185,6 +190,20 @@ export default function Page() {
             name: "Actual Return Date",
             selector: (row: any) => row.returnDate,
             sortable: true,
+            center: true,
+            cell: (row: any) => (
+                <span
+                    className={
+                        row?.returnDate === null
+                            ? "text-orange-500 dark:text-orange-400" // Red for canceled
+                            : row?.returnDate !== null
+                            ? "text-green-700"
+                            : "text-red-500 dark:text-red-400"
+                    }
+                >
+                    {row.returnDate ? row.returnDate : "Still Active"}
+                </span>
+            ),
         },
         {
             name: "Rental Company",
@@ -274,7 +293,9 @@ export default function Page() {
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl min-w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold">Rental Car Tracker</h1>
+                    <h1 className="text-2xl font-semibold">
+                        Rental Car Tracker
+                    </h1>
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (

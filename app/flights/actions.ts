@@ -58,7 +58,7 @@ export async function createFlight(data: NewFlights) {
     }
 }
 
-export async function updateFLight(data: Flights) {
+export async function updateFLight(data: NewFlights) {
     console.log("updating flight data", data);
     try {
         await db

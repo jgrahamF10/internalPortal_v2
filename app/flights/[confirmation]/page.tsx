@@ -174,10 +174,7 @@ export default function MemberDetails({ params }: HotelRez) {
                                 Final Charges:{" "}
                                 <span>
                                     $
-                                    {(
-                                        (Number(data?.flightCost) || 0) +
-                                        (Number(data?.baggageFee) || 0)
-                                    ).toFixed(2)}
+                                    {data?.totalCost}
                                 </span>
                             </h3>
                         </div>
@@ -198,7 +195,7 @@ export default function MemberDetails({ params }: HotelRez) {
                             </div>
                             <div className="block text-md font-bold">
                                 Airline:{" "}
-                                <span className="font-medium capitalize">
+                                <span className="font-medium underline">
                                     {data?.airlines.airlines}
                                 </span>
                             </div>
