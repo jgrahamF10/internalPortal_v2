@@ -179,6 +179,7 @@ export default function Page() {
             name: "Pick Up Date",
             selector: (row: any) => row.pickUpDate,
             sortable: true,
+            center: true,
         },
         {
             name: "Final Charges",
@@ -186,7 +187,7 @@ export default function Page() {
             sortable: true,
             center: true,
             cell: (row: any) => (
-                <span className="capitalize">
+                <span className="text-green-700">
                     ${row.finalCharges || "0.00"}
                 </span>
             ),

@@ -187,6 +187,11 @@ export default function Page() {
             selector: (row: any) => row.finalCharges,
             sortable: true,
             center: true,
+            cell: (row: any) => (
+                <span className="text-green-700">
+                    ${row.finalCharges || "0.00"}
+                </span>
+            ),
         },
         {
             name: "Check Out Date",
