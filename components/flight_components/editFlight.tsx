@@ -152,7 +152,7 @@ export default function NewFlightForm({
     return (
         <Dialog key="1">
             <DialogTrigger asChild>
-                <Button className="bg-green-700 text-white hover:bg-green-800 hover:text-black">
+                <Button className="bg-red-700 text-white hover:bg-red-800 hover:text-black">
                     Edit
                 </Button>
             </DialogTrigger>

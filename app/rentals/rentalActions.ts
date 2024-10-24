@@ -70,7 +70,7 @@ export async function deleteAttachment(attachmentId: number) {
         await db.delete(attachments).where(eq(attachments.id, attachmentId));
         return true;
     } catch (error) {
-        console.error("Error deleting resume:", error);
+        console.error("Error deleting attatchment:", error);
         return false;
     }
 }

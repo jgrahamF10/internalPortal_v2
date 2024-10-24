@@ -108,10 +108,10 @@ export default function Page() {
 
         // Match against the relevant fields
         return (
-            rez.rentalAgreement.toLowerCase().includes(lowerFilterText) ||
-            rez.member.firstname.toLowerCase().includes(lowerFilterText) ||
-            rez.member.lastname.toLowerCase().includes(lowerFilterText) ||
-            rez.pickUpLocation.toLowerCase().includes(lowerFilterText)
+            rez.hotelConfirmationNumber.toLowerCase().includes(lowerFilterText) ||
+            rez.memberID.firstname.toLowerCase().includes(lowerFilterText) ||
+            rez.memberID.lastname.toLowerCase().includes(lowerFilterText) ||
+            rez.project.projectName.toLowerCase().includes(lowerFilterText)
         );
     });
 
@@ -136,14 +136,24 @@ export default function Page() {
 
     const columns = [
         {
-            name: "Rental Agreement",
+            name: "Confirmation #",
             selector: (row: any) => row.hotelConfirmationNumber,
             cell: (row: any) => (
                 <Link
                     href={`/hotels/${row.hotelConfirmationNumber}`}
-                    className="font-bold text-lg text-green-700 capitalize hover:underline pl-4"
+                    className="font-bold text-lg text-green-700 capitalize hover:underline"
                 >
-                    {row.hotelConfirmationNumber}
+                     <span
+                        className={
+                            row?.verified === false
+                                ? "text-warning"
+                                : row?.verified === true
+                                ? "text-green-700"
+                                : "text-primary"
+                        }
+                    >
+                        {row.hotelConfirmationNumber}
+                    </span>
                 </Link>
             ),
             sortable: true,

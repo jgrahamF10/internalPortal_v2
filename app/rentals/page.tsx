@@ -142,9 +142,19 @@ export default function Page() {
             cell: (row: any) => (
                 <Link
                     href={`/rentals/${row.rentalAgreement}`}
-                    className="font-medium text-green-700 capitalize hover:underline"
+                    className="font-bold text-lg text-green-700 capitalize hover:underline"
                 >
-                    {row.rentalAgreement}
+                    <span
+                        className={
+                            row?.verified === false
+                                ? "text-warning"
+                                : row?.verified === true
+                                ? "text-green-700"
+                                : "text-primary"
+                        }
+                    >
+                        {row.rentalAgreement}
+                    </span>
                 </Link>
             ),
             sortable: true,
@@ -195,7 +205,7 @@ export default function Page() {
                 <span
                     className={
                         row?.returnDate === null
-                            ? "text-orange-500 dark:text-orange-400" // Red for canceled
+                            ? "text-warning"
                             : row?.returnDate !== null
                             ? "text-green-700"
                             : "text-red-500 dark:text-red-400"

@@ -141,9 +141,19 @@ export default function Page() {
             cell: (row: any) => (
                 <Link
                     href={`/flights/${row.flightConfirmationNumber}`}
-                    className="font-bold text-lg text-green-700 capitalize hover:underline pl-4"
+                    className="font-bold text-lg text-green-700 capitalize hover:underline"
                 >
-                    {row.flightConfirmationNumber}
+                    <span
+                        className={
+                            row?.verified === false
+                                ? "text-warning"
+                                : row?.verified === true
+                                ? "text-green-700"
+                                : "text-primary"
+                        }
+                    >
+                        {row.flightConfirmationNumber}
+                    </span>
                 </Link>
             ),
             sortable: true,
@@ -178,7 +188,7 @@ export default function Page() {
             sortable: true,
             center: true,
             cell: (row: any) => (
-                <span className="capitalize">
+                <span className="text-green-700">
                    ${((Number(row?.totalCost) || 0) + (Number(row?.baggageFee) || 0)).toFixed(2)}
                 </span>
             ),
@@ -189,7 +199,7 @@ export default function Page() {
             sortable: true,
             center: true,
             cell: (row: any) => (
-                <span className="capitalize">
+                <span className="text-green-700">
                    ${row.credits.amount?? 0}
                 </span>
             ),

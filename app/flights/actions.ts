@@ -1,7 +1,18 @@
 "use server";
 import { db } from "@/db";
 import { members } from "@/db/schema/member_management";
-import { notes, NewNote, NewAttatchment, flights, NewFlightCredits, NewFlights, attachments, Flights, airline} from "@/db/schema/tracker_db";
+import {
+    notes,
+    NewNote,
+    NewAttatchment,
+    flights,
+    NewFlightCredits,
+    flightCredits,
+    NewFlights,
+    attachments,
+    Flights,
+    airline,
+} from "@/db/schema/tracker_db";
 import { eq, ne, desc, asc } from "drizzle-orm/expressions";
 
 export async function getFlights() {
@@ -17,7 +28,6 @@ export async function getFlights() {
     });
     return data;
 }
-
 
 export async function getFlight(hotelConfirmationNumber: string) {
     const rezData = await db.query.flights.findFirst({
@@ -35,11 +45,10 @@ export async function getFlight(hotelConfirmationNumber: string) {
     });
     if (rezData) {
         return rezData;
+    } else {
+        return null;
     }
-    else
-    { return null; }
 }
-
 
 export async function createFlightNote(data: NewNote) {
     try {
@@ -59,19 +68,24 @@ export async function createFlight(data: NewFlights) {
 }
 
 export async function updateFLight(data: NewFlights) {
-    console.log("updating flight data", data);
+    //console.log("updating flight data", data);
     try {
         await db
             .update(flights)
             .set(data)
-            .where(eq(flights.flightConfirmationNumber, data.flightConfirmationNumber));
+            .where(
+                eq(
+                    flights.flightConfirmationNumber,
+                    data.flightConfirmationNumber
+                )
+            );
     } catch (error) {
         console.error("Error updating rental:", error);
     }
 }
 
 export async function deleteAttachment(attachmentId: number) {
-    console.log("attachmentId", attachmentId);
+    //console.log("attachmentId", attachmentId);
     try {
         await db.delete(attachments).where(eq(attachments.id, attachmentId));
         return true;
@@ -86,5 +100,25 @@ export async function getAirlines() {
         where: ne(airline.inactive, true),
         orderBy: [asc(airline.airlines)],
     });
-    return airlineList;   
+    return airlineList;
+}
+
+export async function getFlightCredits(flightId: number) {
+    const results = await db.query.flightCredits.findMany({
+        where: eq(flightCredits.flightId, flightId),
+        with: {
+            credit: true,
+            member: true,
+        },
+    });
+    return results;
+}
+
+export async function createFlightCredits(data: NewFlightCredits) {
+    //console.log("createFlightCredits data", data);
+    try {
+        await db.insert(flightCredits).values(data);
+    } catch (error) {
+        console.error("Error creating flight credits:", error);
+    }
 }

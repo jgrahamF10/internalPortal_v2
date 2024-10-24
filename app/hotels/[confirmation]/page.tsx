@@ -10,6 +10,7 @@ import EditHotelRezForm from "@/components/hotel_components/editHotelRez";
 import { getFile } from "@/lib/aws";
 import { AttachmentDelete } from "@/components/hotel_components/deleteAttachment";
 import RentalAttatchment from "@/components/hotel_components/hotelAttachment";
+import NoteDelete from "@/components/deleteNote";
 
 interface HotelRez {
     params: { confirmation: string };
@@ -270,6 +271,9 @@ export default function MemberDetails({ params }: HotelRez) {
                                     <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
                                         Created Date
                                     </th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
+                                        Delete
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -287,6 +291,9 @@ export default function MemberDetails({ params }: HotelRez) {
 
                                         <td className="px-4 py-2 text-sm">
                                             {note.createdDate.toLocaleDateString()}
+                                        </td>
+                                        <td className="px-4 py-2 text-sm">
+                                            <NoteDelete noteId={note.id} />
                                         </td>
                                     </tr>
                                 ))}

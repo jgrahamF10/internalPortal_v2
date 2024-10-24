@@ -10,18 +10,19 @@ import EditFlightForm from "@/components/flight_components/editFlight";
 import { getFile } from "@/lib/aws";
 import { AttachmentDelete } from "@/components/flight_components/deleteAttachment";
 import FlightAttatchment from "@/components/flight_components/flightAttachment";
+import CreditForm from "@/components/flight_components/addCredits";
+import { set } from "zod";
 
-interface HotelRez {
+interface FlightConfirm {
     params: { confirmation: string };
 }
 
-export default function MemberDetails({ params }: HotelRez) {
+export default function MemberDetails({ params }: FlightConfirm) {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [notFound, setNotFound] = useState<boolean>(false);
-    const [resume, setResume] = useState<any>(null);
+    const [availableCredit, setAvailableCredit] = useState<any>(null);
     const [auditLogVisible, setAuditLogVisible] = useState<boolean>(false);
-    const [intakeStatus, setIntakeStatus] = useState<any>(null);
     const { data: session } = useSession();
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
     const [resumeUrl, setResumeUrl] = useState<string>("");
@@ -31,18 +32,24 @@ export default function MemberDetails({ params }: HotelRez) {
 
     useEffect(() => {
         async function fetchData() {
-            const fetchRental: any = await getFlight(params.confirmation);
-            if (!fetchRental) {
+            const fetchFlight: any = await getFlight(params.confirmation);
+            if (!fetchFlight) {
                 // Check for null or undefined
                 setNotFound(true);
                 setLoading(false);
                 return;
             }
-            console.log("RentalData", fetchRental);
-            setData(fetchRental);
-
+            console.log("FlightData", fetchFlight);
+            setData(fetchFlight);
+            const credits = fetchFlight.credits || [];
+            const totalAvailableCredit = credits.reduce((total: number, item: { amount: any; creditType: string; }) => {
+                const amount = item.amount;
+                // If creditType is "Credit", add the amount; if "Debit", subtract the amount
+                return item.creditType === "Credit" ? total + amount : total - amount;
+              }, 0);
+            setAvailableCredit(totalAvailableCredit);
             // Ensure 'attachment' exists and is an array before processing
-            const attachments = fetchRental.attachments || [];
+            const attachments = fetchFlight.attachments || [];
 
             // Store the URLs in an object
             const urlMap: { [key: string]: string } = {};
@@ -61,7 +68,7 @@ export default function MemberDetails({ params }: HotelRez) {
                     }
                 })
             );
-
+            console.log("urlMap", urlMap);
             // Update state with the fetched URLs
             setUrls(urlMap);
 
@@ -142,7 +149,7 @@ export default function MemberDetails({ params }: HotelRez) {
                                     {data?.flightConfirmationNumber}
                                 </span>
                             </h2>
-                            
+
                             <EditFlightForm
                                 flightData={data}
                                 updatingUser={session?.user?.name ?? ""}
@@ -171,11 +178,7 @@ export default function MemberDetails({ params }: HotelRez) {
                                 </span>
                             </h3>
                             <h3 className="block text-lg font-bold ">
-                                Final Charges:{" "}
-                                <span>
-                                    $
-                                    {data?.totalCost}
-                                </span>
+                                Final Charges: <span>${data?.totalCost}</span>
                             </h3>
                         </div>
 
@@ -254,17 +257,66 @@ export default function MemberDetails({ params }: HotelRez) {
                             <h2 className="text-2xl font-bold mb-4 underline">
                                 Flight Credits
                             </h2>
+                            <CreditForm
+                                flightNum={data?.id}
+                                memberNum={data?.members?.id}
+                                creatingUser={session?.user?.name ?? ""}
+                                onNoteCreated={() => refresh()}
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="block text-md font-bold">
                                 Available Creidts:{" "}
-                                <span className="font-medium capitalize">
-                                    {data?.credits.length === 0
+                                <span className=" font-bold text-lg underline">
+                                    {availableCredit === 0
                                         ? "No Credits"
-                                        : `$${data?.credits?.amount}`}
+                                        : `$${availableCredit}`}
                                 </span>
                             </div>
+                        </div>
+                        <div className="mt-4">
+                            <table className="w-full table-auto">
+                                <thead>
+                                    <tr className="bg-tableBoarder">
+                                        <th className="px-4 py-2 text-left text-sm font-medium uppercase tracking-wide">
+                                            Amount
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-sm font-medium uppercase tracking-wide">
+                                            Type
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-sm font-medium uppercase tracking-wide">
+                                            Entered By
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-sm font-medium uppercase tracking-wide">
+                                            Entered Date{" "}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {data.credits.map((credit: any) => (
+                                        <tr
+                                            className="border-b border-gray-200 dark:border-gray-700"
+                                            key={credit.id}
+                                        >
+                                            <td className="px-4 py-2 text-md">
+                                                $<span className={credit.creditType === "Credit" ? "text-green-600" : "text-red-600"}>
+                                                {credit.amount}
+                                                </span>
+                                            </td>
+                                            <td className="px-4 py-2 text-md">
+                                                {credit.creditType}
+                                            </td>
+                                            <td className="px-4 py-2 text-md">
+                                                {credit.creator}
+                                            </td>
+                                            <td className="px-4 py-2 text-md">
+                                                {credit.createdDate.toLocaleDateString()}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

@@ -159,10 +159,11 @@ export const flightCredits = pgTable("flightCredit", {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     flightId: integer("flightId").notNull(),
     memberId: integer("memberId").notNull(),
-    amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
+    amount: real("amount").notNull(),
     creditType: creditTypes("creditType").notNull(),
     creator: varchar("creator", { length: 20 }).notNull(),
     archived: boolean("archived").default(false),
+    createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
 }, (table) => ({
     idxFlightCreditFlightId: index("idx_flightCredit_flightId").on(table.flightId),
     idxFlightCreditMemberId: index("idx_flightCredit_memberId").on(table.memberId),
@@ -338,7 +339,7 @@ export const attachments = pgTable(
         idxParentId: index("idx_parentId").on(table.parentId),
         idxAttachmentType: index("idx_attachmentType").on(table.attachmentType),
         idxParentAndType: index("idx_parentId_attachmentType").on(table.id, table.parentId, table.attachmentType),
-        unq: unique("unq_parent_type").on(table.parentId, table.attachmentType),
+        unq: unique("unq_parent_type").on(table.parentId, table.attachmentType, table.description),
     })
 );
 
