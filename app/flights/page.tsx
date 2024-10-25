@@ -72,7 +72,7 @@ export default function Page() {
     useEffect(() => {
         async function fetchData() {
             const flightData: any = await getFlights();
-            console.log("confirmations", flightData);
+            //console.log("confirmations", flightData);
             setData(flightData);
             setLoading(false);
         }
@@ -197,12 +197,12 @@ export default function Page() {
             name: "Credits",
             selector: (row: any) => row.credits.amount,
             sortable: true,
-            center: true,
             cell: (row: any) => (
                 <span className="text-green-700">
                    ${row.credits.amount?? 0}
                 </span>
             ),
+            center: true,
         },
         {
             name: "Departure Airport",
