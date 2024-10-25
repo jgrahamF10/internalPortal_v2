@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     DialogTrigger,
@@ -59,7 +59,7 @@ interface FormProps {
     memberNum: number;
 }
 
-export default function CreditForm({
+export default function UseCreditForm({
     onNoteCreated,
     creatingUser,
     flightNum,
@@ -92,7 +92,7 @@ export default function CreditForm({
     });
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
-        console.log("form Values", values);
+       // console.log("form Values", values);
         try {
 
             const creditData = {
@@ -104,7 +104,6 @@ export default function CreditForm({
                 amount: values.amount,
                 expirationDate: values.expirationDate.toISOString(),
             };
-            console.log("creditData", creditData);
             await useFlightCredit(creditData);
             onNoteCreated();
             reset();
