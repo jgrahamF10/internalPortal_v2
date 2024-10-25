@@ -32,7 +32,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 
-import { useFlightCredit } from "@/app/flights/actions";
+import { applyFlightCredit } from "@/app/flights/actions";
 
 
 // Zod schema to validate the form
@@ -104,7 +104,7 @@ export default function UseCreditForm({
                 amount: values.amount,
                 expirationDate: values.expirationDate.toISOString(),
             };
-            await useFlightCredit(creditData);
+            await applyFlightCredit(creditData);
             onNoteCreated();
             reset();
         } catch (error) {

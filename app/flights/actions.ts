@@ -126,7 +126,7 @@ export async function createFlightCredits(data: NewFlightCredits) {
     }
 }
 
-export async function useFlightCredit(data: NewCreditUsage) {
+export async function applyFlightCredit(data: NewCreditUsage) {
     //console.log("createFlightCredits data", data);
     try {
         await db.insert(creditUsage).values(data);
