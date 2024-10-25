@@ -8,8 +8,11 @@ import {
     flights,
     NewFlightCredits,
     flightCredits,
+    FlightCredits,
+    creditUsage,
     NewFlights,
     attachments,
+    NewCreditUsage,
     Flights,
     airline,
 } from "@/db/schema/tracker_db";
@@ -21,9 +24,9 @@ export async function getFlights() {
         orderBy: [desc(flights.id)],
         with: {
             members: true,
-            credits: true,
             airlines: true,
             project: true,
+            credits: true
         },
     });
     return data;
@@ -34,10 +37,10 @@ export async function getFlight(hotelConfirmationNumber: string) {
         where: eq(flights.flightConfirmationNumber, hotelConfirmationNumber),
         with: {
             members: true,
-            credits: true,
             project: true,
             flightNotes: true,
             airlines: true,
+            credits: true,
             attachments: {
                 where: eq(attachments.attachmentType, "Flight"),
             },
@@ -118,6 +121,15 @@ export async function createFlightCredits(data: NewFlightCredits) {
     //console.log("createFlightCredits data", data);
     try {
         await db.insert(flightCredits).values(data);
+    } catch (error) {
+        console.error("Error creating flight credits:", error);
+    }
+}
+
+export async function useFlightCredit(data: NewCreditUsage) {
+    //console.log("createFlightCredits data", data);
+    try {
+        await db.insert(creditUsage).values(data);
     } catch (error) {
         console.error("Error creating flight credits:", error);
     }

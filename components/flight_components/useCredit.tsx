@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { date, z } from "zod";
 import { useForm, useWatch, Control } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,18 +25,19 @@ import {
 import { Switch } from "@/components/ui/switch";
 import {
     Form,
-    FormControl,
+
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
 
-import { createFlightCredits, getAirlines } from "@/app/flights/actions";
+import { useFlightCredit } from "@/app/flights/actions";
 
 
 // Zod schema to validate the form
 const FormSchema = z.object({
+    creditId: z.number(),
     memberId: z.number(),
     flightId: z.number(),
     amount: z.preprocess((val) => {
@@ -46,6 +47,7 @@ const FormSchema = z.object({
         return val || 0;
     }, z.number().min(0)),
     creditType: z.enum(["Credit", "Debit"]),
+    expirationDate: z.date(),
     creator: z.string(),
     archived: z.boolean().default(false),
 });
@@ -82,7 +84,6 @@ export default function CreditForm({
             memberId: 0,
             flightId: 0,
             amount: 0,
-            creditType: "Credit",
             creator: creatingUser,
             archived: false,
         },
@@ -93,7 +94,7 @@ export default function CreditForm({
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         console.log("form Values", values);
         try {
-            const currentDate = new Date();
+
             const creditData = {
                 ...values,
                 memberId: memberNum,
@@ -101,9 +102,10 @@ export default function CreditForm({
                 creator: creatingUser,
                 createdDate: new Date(),
                 amount: values.amount,
+                expirationDate: values.expirationDate.toISOString(),
             };
             console.log("creditData", creditData);
-            await createFlightCredits(creditData);
+            await useFlightCredit(creditData);
             onNoteCreated();
             reset();
         } catch (error) {
@@ -115,7 +117,7 @@ export default function CreditForm({
         <Dialog key="1">
             <DialogTrigger asChild>
                 <Button className="bg-green-700 text-white hover:bg-green-800 hover:text-black">
-                    Credit
+                    Use Credit
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[640px] bg-background-foreground">
@@ -179,38 +181,7 @@ export default function CreditForm({
                                             </FormItem>
                                         )}
                                     />
-                                    <FormField
-                                        control={form.control}
-                                        name="creditType"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    <div className="pt-2 font-bold">
-                                                        Type
-                                                    </div>
-                                                </FormLabel>
-                                                <Select
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                    value={field.value}
-                                                >
-                                                    <SelectTrigger id="creditType">
-                                                        <SelectValue placeholder="Select Type" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="Credit">
-                                                            Credit
-                                                        </SelectItem>
-                                                        <SelectItem value="Debit">
-                                                            Debit
-                                                        </SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
+                                    
                                 </div>
                                 <DialogFooter className="pt-4">
                                     <DialogClose asChild>

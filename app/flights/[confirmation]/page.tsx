@@ -10,7 +10,7 @@ import EditFlightForm from "@/components/flight_components/editFlight";
 import { getFile } from "@/lib/aws";
 import { AttachmentDelete } from "@/components/flight_components/deleteAttachment";
 import FlightAttatchment from "@/components/flight_components/flightAttachment";
-import CreditForm from "@/components/flight_components/addCredits";
+import NewCreditForm from "@/components/flight_components/newCredit";
 import { set } from "zod";
 
 interface FlightConfirm {
@@ -42,10 +42,10 @@ export default function MemberDetails({ params }: FlightConfirm) {
             console.log("FlightData", fetchFlight);
             setData(fetchFlight);
             const credits = fetchFlight.credits || [];
-            const totalAvailableCredit = credits.reduce((total: number, item: { amount: any; creditType: string; }) => {
+            const totalAvailableCredit = credits.reduce((total: number, item: { amount: number }) => {
                 const amount = item.amount;
                 // If creditType is "Credit", add the amount; if "Debit", subtract the amount
-                return item.creditType === "Credit" ? total + amount : total - amount;
+                return total + amount;
               }, 0);
             setAvailableCredit(totalAvailableCredit);
             // Ensure 'attachment' exists and is an array before processing
@@ -132,7 +132,7 @@ export default function MemberDetails({ params }: FlightConfirm) {
     return (
         <div className="p-2">
             <nav className="flex justify-end space-x-2">
-                <a href="/rentals" className="text-muted-foreground">
+                <a href="/flights" className="text-muted-foreground">
                     All Flights
                 </a>
                 <span className="text-muted-foreground">/</span>
@@ -257,12 +257,11 @@ export default function MemberDetails({ params }: FlightConfirm) {
                             <h2 className="text-2xl font-bold mb-4 underline">
                                 Flight Credits
                             </h2>
-                            <CreditForm
+                            <NewCreditForm
                                 flightNum={data?.id}
                                 memberNum={data?.members?.id}
                                 creatingUser={session?.user?.name ?? ""}
-                                onNoteCreated={() => refresh()}
-                            />
+                                onNoteCreated={() => refresh()} />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -274,7 +273,16 @@ export default function MemberDetails({ params }: FlightConfirm) {
                                         : `$${availableCredit}`}
                                 </span>
                             </div>
+                            {/* 
+                            <CreditForm
+                                flightNum={data?.id}
+                                memberNum={data?.members?.id}
+                                creatingUser={session?.user?.name ?? ""}
+                                onNoteCreated={() => refresh()}
+                            />
+                            */}
                         </div>
+                        {/* 
                         <div className="mt-4">
                             <table className="w-full table-auto">
                                 <thead>
@@ -294,7 +302,7 @@ export default function MemberDetails({ params }: FlightConfirm) {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {data.credits.map((credit: any) => (
+                                    {data.creditUsage.map((credit: any) => (
                                         <tr
                                             className="border-b border-gray-200 dark:border-gray-700"
                                             key={credit.id}
@@ -317,7 +325,7 @@ export default function MemberDetails({ params }: FlightConfirm) {
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 <div className=" rounded-lg shadow-md dark:shadow-slate-700 p-6 mt-8">
@@ -373,7 +381,6 @@ export default function MemberDetails({ params }: FlightConfirm) {
                 <div className=" rounded-lg shadow-md dark:shadow-slate-700 p-6 mt-8">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold mb-4">Attachments</h2>
-
                         <FlightAttatchment
                             params={{
                                 flight: data.id,
