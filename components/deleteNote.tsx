@@ -10,14 +10,14 @@ import {
     AlertDialogTrigger,
   } from "@/components/ui/alert-dialog"
   import { Button } from "@/components/ui/button"
-import { deleteAttachment } from "@/app/rentals/rentalActions";
+import { deleteNote } from "@/lib/globalActions"
 import { TrashOutline } from "@/components/icons/trash";
   
 export default function NoteDelete({ noteId }: { noteId: number }) {
       
     async function confirmDelete() {
         try {
-            await deleteAttachment(noteId);
+            await deleteNote(noteId);
         } catch (error) {
             console.error("Error deleting project approval:", error);
         } finally {
