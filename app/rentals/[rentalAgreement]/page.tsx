@@ -11,7 +11,7 @@ import RentalNoteModal from "@/components/rental_components/newNote";
 import EditRentalForm from "@/components/rental_components/editRental";
 import ResumeUpload from "@/components/hr_components/uploadResume";
 import { getFile } from "@/lib/aws";
-
+import NoteDelete from "@/components/deleteNote";
 import { AttachmentDelete } from "@/components/rental_components/deleteAttachment";
 import RentalAttatchment from "@/components/rental_components/rentalAttachment";
 
@@ -317,6 +317,9 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                     <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
                                         Created Date
                                     </th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
+                                        Delete
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -334,6 +337,9 @@ export default function MemberDetails({ params }: RentalAgreement) {
 
                                         <td className="px-4 py-2 text-sm">
                                             {note.createdDate.toLocaleDateString()}
+                                        </td>
+                                        <td className="px-4 py-2 text-sm">
+                                            <NoteDelete noteId={note.id} />
                                         </td>
                                     </tr>
                                 ))}

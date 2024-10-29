@@ -190,6 +190,7 @@ export const flightCredits = pgTable("flightCredit", {
     amount: real("amount").notNull(),
     expirationDate: date("expirationDate"),
     creator: varchar("creator", { length: 20 }).notNull(),
+    used: boolean("used").default(false),
     archived: boolean("archived").default(false),
 });
 
@@ -197,7 +198,7 @@ export type FlightCredits = typeof flightCredits.$inferSelect;
 export type NewFlightCredits = typeof flightCredits.$inferInsert;
 
 export const member2flightCredits = relations(flightCredits, ({ one }) => ({
-    memberId: one(members, {
+    member: one(members, {
         fields: [flightCredits.memberId],
         references: [members.id],
     }),
@@ -207,7 +208,7 @@ export const flightCredits2members = relations(members, ({ many }) => ({
 }));
 
 export const credits2Flight = relations(flightCredits, ({ one }) => ({
-    credits: one(flights, {
+    flight: one(flights, {
         fields: [flightCredits.flightId],
         references: [flights.id],
     }),
@@ -218,7 +219,7 @@ export const flights2credits = relations(flights, ({ many }) => ({
 }));
 
 export const flightCredits2flights = relations(flights, ({ many }) => ({
-    credit: many(flightCredits),
+    flightCredit: many(flightCredits),
 }));
 
 

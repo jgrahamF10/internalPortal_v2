@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import { getFlights } from "./actions";
+import { getFlights, getAllFLightCredits } from "../actions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,8 +9,9 @@ import { EosIconsBubbleLoading } from "@/components/spinner";
 import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
-import NewFlightForm from "@/components/flight_components/newFlight";
+
 import { ThemeColors } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const TextField = styled.input`
     height: 32px;
@@ -71,8 +72,8 @@ export default function Page() {
 
     useEffect(() => {
         async function fetchData() {
-            const flightData: any = await getFlights();
-            console.log("Flights", flightData);
+            const flightData: any = await getAllFLightCredits();
+            console.log("flight credits", flightData);
             setData(flightData);
             setLoading(false);
         }
@@ -96,10 +97,7 @@ export default function Page() {
         // Filter by active/inactive status
         if (inactives) {
             if (flight.archived !== false) return false;
-        } else {
-            if (flight.verified !== false) return false;
         }
-
         // If filterText is empty, include all remaining users
         if (!filterText) return true;
 
@@ -108,7 +106,9 @@ export default function Page() {
 
         // Match against the relevant fields
         return (
-            flight.flightConfirmationNumber.toLowerCase().includes(lowerFilterText) ||
+            flight.flightConfirmationNumber
+                .toLowerCase()
+                .includes(lowerFilterText) ||
             flight.members.firstname.toLowerCase().includes(lowerFilterText) ||
             flight.members.lastname.toLowerCase().includes(lowerFilterText) ||
             flight.departureAirport.toLowerCase().includes(lowerFilterText)
@@ -136,8 +136,8 @@ export default function Page() {
 
     const columns = [
         {
-            name: "Confirmation #",
-            selector: (row: any) => row.flightConfirmationNumber,
+            name: "OriginalConfirmation #",
+            selector: (row: any) => row.flight.flightConfirmationNumber,
             cell: (row: any) => (
                 <Link
                     href={`/flights/${row.flightConfirmationNumber}`}
@@ -152,7 +152,7 @@ export default function Page() {
                                 : "text-primary"
                         }
                     >
-                        {row.flightConfirmationNumber}
+                        {row.flight.flightConfirmationNumber}
                     </span>
                 </Link>
             ),
@@ -166,68 +166,65 @@ export default function Page() {
             center: true,
             cell: (row: any) => (
                 <span className="capitalize">
-                    {row.members?.firstname} {row.members?.lastname}
+                    {row.member?.firstname} {row.member?.lastname}
                 </span>
             ),
         },
         {
-            name: "Project",
-            selector: (row: any) => row.project.projectName            ,
+            name: "Original Flight Date",
+            selector: (row: any) => row.flight.travelDate,
             sortable: true,
             center: true,
         },
         {
-            name: "Flight Date",
-            selector: (row: any) => row.travelDate            ,
-            sortable: true,
-            center: true,
-        },
-        {
-            name: "Charges",
-            selector: (row: any) => row.finalCharge,
-            sortable: true,
-            center: true,
-            cell: (row: any) => (
-                <span className="text-green-700">
-                   ${((Number(row?.totalCost) || 0) + (Number(row?.baggageFee) || 0)).toFixed(2)}
-                </span>
-            ),
-        },
-        {
-            name: "Credits",
-            selector: (row: any) => row.credits.amount,
+            name: "Credits Amount",
+            selector: (row: any) => row.amount,
             sortable: true,
             cell: (row: any) => (
-                <span className="text-green-700">
-                   ${row.credits.amount?? 0}
-                </span>
+                <span className="text-green-700">${row.amount ?? 0}</span>
             ),
             center: true,
         },
         {
-            name: "Departure Airport",
+            name: "Credits Used",
             selector: (row: any) => row.departureAirport,
             sortable: true,
             center: true,
+            cell: (row: any) => (
+                <span className="text-green-700">
+                    $
+                    {(
+                        (Number(row?.totalCost) || 0) +
+                        (Number(row?.baggageFee) || 0)
+                    ).toFixed(2)}
+                </span>
+            ),
         },
         {
             name: "Airline",
-            selector: (row: any) => row.airlines.airlines,
+            selector: (row: any) => row.flight.airlines.airlines,
             sortable: true,
             center: true,
         },
         {
-            name: "Verified",
-            selector: (row: any) => row.verified,
+            name: "Expiration Date",
+            selector: (row: any) => row.expirationDate,
+            sortable: true,
+            center: true,
+        },
+        {
+            name: "Credits Used",
+            selector: (row: any) => row.used,
             sortable: true,
             center: true,
             cell: (row: any) => (
-                <span className={row.verified ? "text-green-600" : "text-red-600"}>
+                <span
+                    className={row.used ? "text-green-600" : "text-red-600"}
+                >
                     {row.verified ? "Yes" : "No"}
                 </span>
             ),
         },
-        
     ];
 
     if (loading) {
@@ -259,8 +256,6 @@ export default function Page() {
                 fontWeight: "bold",
                 fontSize: "16px",
                 backgroundColor: backgroundColor,
-                
-                
             },
         },
         subHeader: {
@@ -317,10 +312,9 @@ export default function Page() {
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (
-                        <NewFlightForm
-                            onNoteCreated={() => refresh()}
-                            creatingUser={session?.user?.name ?? ""}
-                        />
+                        <Button className="bg-green-700 hover:bg-green-800 text-white font-bold py-2 px-4 rounded-lg">
+                            New Credit
+                        </Button>
                     )}
                 </div>
                 <div className="flex justify-start mb-4">
@@ -329,12 +323,12 @@ export default function Page() {
                         onClick={handleInactive}
                     >
                         <button className="bg-blue-600 text-white py-1 px-2 rounded-sm hover:bg-blue-700">
-                        Show Verified
+                            Show Archived
                         </button>
                     </h3>
                 </div>
                 <h3 className="pb-2">
-                    Displaying {filteredAssets.length} Flights
+                    Displaying {filteredAssets.length} Flight Credits
                 </h3>
                 <div className="overflow-auto rounded-md w-full">
                     <DataTable

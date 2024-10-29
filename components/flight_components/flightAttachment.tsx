@@ -106,7 +106,7 @@ export default function FlightAttatchment({ params }: UploadProps) {
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="file-description">
-                            File Description
+                            File Description 
                         </Label>
                         <Input
                             id="file-description"
@@ -114,6 +114,7 @@ export default function FlightAttatchment({ params }: UploadProps) {
                             placeholder="Enter file description"
                             value={fileDescription}
                             onChange={handleDescriptionChange}
+                            maxLength={40}
                         />
                     </div>
                 </Card>

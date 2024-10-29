@@ -322,7 +322,7 @@ export default function Page() {
                         onClick={handleInactive}
                     >
                         <button className="bg-blue-600 text-white py-1 px-2 rounded-sm hover:bg-blue-700">
-                            Show inactives
+                            Show Verified
                         </button>
                     </h3>
                 </div>

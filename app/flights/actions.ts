@@ -134,3 +134,19 @@ export async function applyFlightCredit(data: NewCreditUsage) {
         console.error("Error creating flight credits:", error);
     }
 }
+
+export async function getAllFLightCredits() {
+    const creditData = await db.query.flightCredits.findMany({
+        with: {
+            flight: {
+                with: {
+                    airlines: true,
+                },
+
+            },
+            member: true,
+            //flight: true,
+        },
+    });
+    return creditData;
+}
