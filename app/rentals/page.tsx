@@ -96,8 +96,10 @@ export default function Page() {
         // Filter by active/inactive status
         if (inactives) {
             if (rental.archived !== false) return false;
-        } else {
-            if (rental.verified !== false) return false;
+        } else if (rental.verified !== false) {
+            return false;
+        } else if (rental.canceled === true) {
+            return false;
         }
 
         // If filterText is empty, include all remaining users

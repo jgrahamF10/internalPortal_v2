@@ -113,7 +113,7 @@ export default function EditMember({
     useEffect(() => {
         async function fetchData() {
             const fetchedMember = await getMember(params.person);
-            console.log("fetchedMember", fetchedMember);
+            //console.log("fetchedMember", fetchedMember);
             if (fetchedMember) {
                 setMember(fetchedMember);
                 form.reset({
