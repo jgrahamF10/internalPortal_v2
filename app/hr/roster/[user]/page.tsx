@@ -12,7 +12,7 @@ import EditProjectApproval from "@/components/hr_components/editProjectApproval"
 import EditMember from "@/components/hr_components/editMember";
 import ResumeUpload from "@/components/hr_components/uploadResume";
 import { getFile } from "@/lib/aws";
-
+import { useRouter } from "next/navigation";
 import { AttachmentDelete } from "@/components/hr_components/deleteResume";
 import MemberAttatchment from "@/components/hr_components/memberAttachment";
 
@@ -39,7 +39,8 @@ export default function MemberDetails({
     const newNote = searchParams?.newNote;
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
     const [resumeUrl, setResumeUrl] = useState<string>("");
-    const [urls, setUrls] = useState<{ [key: string]: string }>({}); // Map of attachment descriptions to URLs
+    const [urls, setUrls] = useState<{ [key: string]: string }>({});
+    const router = useRouter();
 
     //console.log("sessionData", session);
 
@@ -143,6 +144,10 @@ export default function MemberDetails({
         );
     }
 
+    const refreshUser = (updatedUser: string) => {
+        router.push(`/hr/roster/${updatedUser}`);
+    };
+
     const refresh = () => {
         window.location.reload();
     };
@@ -171,11 +176,19 @@ export default function MemberDetails({
                                     person: params.user,
                                     editingUser: session?.user?.name ?? "",
                                 }}
-                                onNoteCreated={() => refresh()}
+                                onNoteCreated={(updatedUser) =>
+                                    refreshUser(updatedUser)
+                                }
                             />
                         </div>
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-bold">
+                            <h3
+                                className={
+                                    member?.status === "Inactive"
+                                        ? "text-red-500 text-lg font-bold"
+                                        : "text-lg font-bold"
+                                }
+                            >
                                 Status:{" "}
                                 <span
                                     className={

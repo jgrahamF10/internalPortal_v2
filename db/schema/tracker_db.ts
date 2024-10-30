@@ -367,7 +367,7 @@ export const notes = pgTable(
         id: bigserial("id", { mode: "number" }).primaryKey(),
         parentId: integer("parentId").notNull(),
         noteType: NoteType("noteType").notNull(),
-        note: varchar("note", { length: 100 }).notNull(),
+        note: varchar("note", { length: 1000 }).notNull(),
         noteAuthor: varchar("noteAuthor", { length: 20 }).notNull(),
         createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
     },
@@ -379,7 +379,8 @@ export const notes = pgTable(
             ),
             unq: unique("unq_parent_note_type").on(
                 table.parentId,
-                table.noteType
+                table.noteType, 
+                table.note
             ),
         };
     }

@@ -12,7 +12,8 @@ import {
     NewMemberNotes,
     NewProjectBGStatus,
     NewProject,
-    NewMember
+    NewMember,
+    Members
 } from "@/db/schema/member_management";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
@@ -210,12 +211,13 @@ export async function getApprovedTechs(projectName: string) {
     return { project: projectData, technicians: results };
 }
 
-export async function editMember(data: NewMember) {
+export async function editMember(data: Members) {
+   // console.log("data", data);
     try {
         await db
             .update(members)
             .set(data)
-            .where(eq(members.preferedName, data.preferedName));
+            .where(eq(members.id, data.id));
         return true;
     } catch (error) {
         console.error("Error updating member:", error);

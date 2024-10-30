@@ -44,7 +44,7 @@ import { on } from "events";
 
 interface MemmberFormProps {
     params: { person: string; editingUser: string };
-    onNoteCreated: () => void;
+    onNoteCreated: (user: string) => void;
 }
 
 const FormSchema = z.object({
@@ -65,6 +65,7 @@ const FormSchema = z.object({
     state: z.string(),
     zipcode: z.string(),
     startDate: z.date(),
+    status: z.string(),
     intakeStatus: z.string(),
     documentsCollected: z.boolean(),
     approvalDate: z.date().nullable(),
@@ -100,8 +101,9 @@ export default function EditMember({
             zipcode: "",
             startDate: new Date(),
             intakeStatus: "In Progress",
+            status: "Active",
             documentsCollected: false,
-            enteredBy: params.editingUser,
+            enteredBy: '',
             approvalDate: new Date(),
         },
         mode: "onTouched",
@@ -111,6 +113,7 @@ export default function EditMember({
     useEffect(() => {
         async function fetchData() {
             const fetchedMember = await getMember(params.person);
+            console.log("fetchedMember", fetchedMember);
             if (fetchedMember) {
                 setMember(fetchedMember);
                 form.reset({
@@ -125,6 +128,7 @@ export default function EditMember({
                     city: fetchedMember.city,
                     state: fetchedMember.state,
                     zipcode: fetchedMember.zipcode,
+                    status: fetchedMember.status || "Active",
                     startDate: fetchedMember.startDate ? new Date(fetchedMember.startDate) : new Date(),
                     intakeStatus: fetchedMember.intakeStatus || "In Progress",
                     documentsCollected: fetchedMember.documentsCollected ?? false,
@@ -138,12 +142,10 @@ export default function EditMember({
 
     //console.log("fetchedProject", projectApproval);
     async function onSubmit(values: z.infer<typeof FormSchema>) {
+        //console.log("values", values);
         try {
             const updatedValues = {
                 ...values,
-                startDate: values.approvalDate
-                    ? values.approvalDate.toISOString()
-                    : undefined,
                 dob: values.dob ? values.dob.toISOString() : null,
                 designation: values.designation as "Contractor" | "Employee",
                 state: values.state as
@@ -200,19 +202,18 @@ export default function EditMember({
                 approvalDate: values.approvalDate
                     ? values.approvalDate.toISOString()
                     : new Date().toISOString(),
-                intakeStatus: values.intakeStatus as
-                    | "In Progress"
-                    | "Failed"
-                    | "Approved"
-                    | null
-                    | undefined,
+                status: values.status as "Active" | "Inactive" | "Do not Contact",
+                id: member.id,
+                updatedBy: params.editingUser,
+                startDate: values.startDate ? values.startDate.toISOString() : null,
+                intakeStatus: values.intakeStatus as "In Progress" | "Failed" | "Approved" | null,
             };
             await editMember(updatedValues);
         } catch (error) {
-            console.error("Error creating member:", error);
+            console.error("Error editing member:", error);
         } finally {
             form.reset();
-            onNoteCreated();
+            onNoteCreated(`${values.preferedName}-${values.lastname}`);
         }
     }
 
@@ -719,7 +720,47 @@ export default function EditMember({
                                             </FormItem>
                                         )}
                                     />
-
+                                    <FormField
+                                        control={form.control}
+                                        name="approvalDate"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    <div className="font-bold pt-2">
+                                                        Approval Date
+                                                    </div>
+                                                </FormLabel>
+                                                <Input
+                                                    type="date"
+                                                    {...field}
+                                                    value={
+                                                        field.value
+                                                            ? field.value
+                                                                  .toISOString()
+                                                                  .split("T")[0]
+                                                            : ""
+                                                    }
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.value
+                                                                ? new Date(
+                                                                      e.target.value
+                                                                  )
+                                                                : null
+                                                        )
+                                                    }
+                                                />
+                                                {errors.approvalDate && (
+                                                    <FormMessage>
+                                                        {
+                                                            errors.approvalDate
+                                                                .message
+                                                        }
+                                                    </FormMessage>
+                                                )}
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="startDate"
@@ -758,6 +799,42 @@ export default function EditMember({
                                                         }
                                                     </FormMessage>
                                                 )}
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="status"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <Label htmlFor="documents-collected">
+                                                        <div className="font-bold">
+                                                           Status
+                                                        </div>
+                                                    </Label>
+                                                    <Select
+                                                    onValueChange={
+                                                        field.onChange
+                                                    }
+                                                    value={field.value}
+                                                >
+                                                    <SelectTrigger id="designation">
+                                                        <SelectValue placeholder="Select intake status" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Active">
+                                                            Active
+                                                        </SelectItem>
+                                                        <SelectItem value="Inactive">
+                                                            Inactive
+                                                        </SelectItem>
+                                                        <SelectItem value="Do not Contact">
+                                                            Do not Contact
+                                                        </SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                </div>
                                             </FormItem>
                                         )}
                                     />
