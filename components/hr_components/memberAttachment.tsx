@@ -28,7 +28,7 @@ interface UploadProps {
 export default function MemberAttatchment({ params }: UploadProps) {
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadStatus, setUploadStatus] = useState("");
-    console.log("params", params);
+    //console.log("params", params);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files.length > 0) {

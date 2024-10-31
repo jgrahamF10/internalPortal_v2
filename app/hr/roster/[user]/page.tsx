@@ -152,6 +152,8 @@ export default function MemberDetails({
         window.location.reload();
     };
 
+    console.log("member", member);
+
     return (
         <div className="p-2">
             <nav className="flex justify-end space-x-2">
@@ -220,6 +222,12 @@ export default function MemberDetails({
                                 Actual First Name:{" "}
                                 <span className="font-medium capitalize">
                                     {member?.firstname}
+                                </span>
+                            </div>
+                            <div className="block text-sm font-bold">
+                                Middle Name:{" "}
+                                <span className="font-medium capitalize">
+                                    {member?.middleName}
                                 </span>
                             </div>
                             <div className="block text-sm font-bold">
@@ -307,6 +315,22 @@ export default function MemberDetails({
                                     {member?.documentsCollected
                                         ? " Collected"
                                         : " Missing"}
+                                </span>
+                            </div>
+                            <div className="block text-md font-bold ">
+                                Credit Card Issued:{" "}
+                                <span
+                                    className={
+                                        member?.companyCard === false
+                                            ? "text-red-500 dark:text-red-400 underline"
+                                            : member.companyCard === true
+                                            ? "text-green-700 underline"
+                                            : ""
+                                    }
+                                >
+                                    {member?.documentsCollected
+                                        ? " Card Issued"
+                                        : " Not Issued"}
                                 </span>
                             </div>
                             <div className="block text-md font-bold">

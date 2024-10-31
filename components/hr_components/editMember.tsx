@@ -41,6 +41,7 @@ import { Input } from "@/components/ui/input";
 import { editMember, getMember } from "@/app/hr/hrActions"; // Add updateProject and getProject functions
 import { NewMember } from "@/db/schema/member_management";
 import { on } from "events";
+import { middleware } from "@/middleware";
 
 interface MemmberFormProps {
     params: { person: string; editingUser: string };
@@ -52,6 +53,7 @@ const FormSchema = z.object({
     firstname: z.string(),
     lastname: z.string(),
     preferedName: z.string(),
+    middleName: z.string(),
     dob: z.date(),
     email: z.string(),
     phone: z
@@ -68,6 +70,7 @@ const FormSchema = z.object({
     status: z.string(),
     intakeStatus: z.string(),
     documentsCollected: z.boolean(),
+    companyCard: z.boolean(),
     approvalDate: z.date().nullable(),
     enteredBy: z.string(),
 });
@@ -92,6 +95,7 @@ export default function EditMember({
             firstname: "",
             lastname: "",
             preferedName: "",
+            middleName: "",
             dob: new Date(),
             email: "",
             phone: "",
@@ -103,6 +107,7 @@ export default function EditMember({
             intakeStatus: "In Progress",
             status: "Active",
             documentsCollected: false,
+            companyCard: false,
             enteredBy: '',
             approvalDate: new Date(),
         },
@@ -207,6 +212,7 @@ export default function EditMember({
                 updatedBy: params.editingUser,
                 startDate: values.startDate ? values.startDate.toISOString() : null,
                 intakeStatus: values.intakeStatus as "In Progress" | "Failed" | "Approved" | null,
+                //companyCard: values.companyCard || null,
             };
             await editMember(updatedValues);
         } catch (error) {
@@ -315,7 +321,30 @@ export default function EditMember({
                                             </FormItem>
                                         )}
                                     />
-
+                                    <FormField
+                                        control={form.control}
+                                        name="middleName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    <div className="pt-2 font-bold">
+                                                        Middle Name
+                                                    </div>
+                                                </FormLabel>
+                                                <Input
+                                                    {...field}
+                                                    type="text"
+                                                    placeholder="Enter Prefered Name"
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.value.trim()
+                                                        )
+                                                    }
+                                                />
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="preferedName"
@@ -707,6 +736,28 @@ export default function EditMember({
                                                     <Label htmlFor="documents-collected">
                                                         <div className="font-bold">
                                                             Documents Collected
+                                                        </div>
+                                                    </Label>
+                                                    <Switch
+                                                        id="documents-collected"
+                                                        onCheckedChange={
+                                                            field.onChange
+                                                        }
+                                                        checked={field.value}
+                                                    />
+                                                </div>
+                                            </FormItem>
+                                        )}
+                                    />
+                                     <FormField
+                                        control={form.control}
+                                        name="companyCard"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <div className="flex items-center space-x-2 pt-2">
+                                                    <Label htmlFor="documents-collected">
+                                                        <div className="font-bold">
+                                                            Credit Card Issued
                                                         </div>
                                                     </Label>
                                                     <Switch

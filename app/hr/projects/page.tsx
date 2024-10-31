@@ -10,7 +10,6 @@ import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
 import { NewProjecForm } from "@/components/hr_components/newProject";
-import { EditProjectForm } from "@/components/hr_components/editProject";
 import { ThemeColors } from "@/lib/utils";
 import NotAuth from "@/components/auth/notAuth";
 
@@ -99,6 +98,9 @@ export default function Page(
     const handleInactive = () => {
         setInactives(!inactives);
     };
+
+
+    
     
 
     const filteredAssets = projects.filter((project) => {
@@ -155,17 +157,23 @@ export default function Page(
             name: "Required Technicians",
             selector: (row: any) => (row.requiredTechnians),
             sortable: true,
-           
+            cell: (row: any) => (
+                <span
+                    className={row.requiredTechnians > row.projectBgStatus.length ? "text-red-600" : "text-green-700 font-medium"  }
+                >
+                    {row.requiredTechnians}
+                </span>
+            ),
         },
         {
             name: "Status",
-            selector: (row: any) => (row.status ? "Inactive" : "Active" ),
+            selector: (row: any) => (row.inactive ? "Inactive" : "Active" ),
             sortable: true,
             cell: (row: any) => (
                 <span
-                    className={row.status ? "text-red-600" : "text-green-700 font-medium"  }
+                    className={row.inactive ? "text-red-600" : "text-green-700 font-medium"  }
                 >
-                    {row.status ? "Inactive" : "Active" }
+                    {row.inactive ? "Inactive" : "Active" }
                 </span>
             ),
         },
@@ -242,8 +250,15 @@ export default function Page(
         },
     };
 
-    
+    if (
+        !session?.roles?.some((role) =>
+            ["Managers", "Human Resources"].includes(role)
+        )
+    ) {
+        return <NotAuth />;
+    }
 
+    
     return (
         <div className="flex justify-center min-h-[90vh]">
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">

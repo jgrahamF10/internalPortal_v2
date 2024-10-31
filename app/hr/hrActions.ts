@@ -22,6 +22,11 @@ import { attachments } from "@/db/schema/tracker_db";
 
 export async function getProjects() {
     const fetchedProjects = await db.query.projects.findMany({
+        with: {
+            projectBgStatus: {
+                members: true,
+            },
+        },
         orderBy: asc(projects.projectName),
     });
     return fetchedProjects;
