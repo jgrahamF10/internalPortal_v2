@@ -126,6 +126,7 @@ export default function EditMember({
                     firstname: fetchedMember.firstname,
                     lastname: fetchedMember.lastname,
                     preferedName: fetchedMember.preferedName,
+                    middleName: fetchedMember.middleName || "",
                     dob: fetchedMember.dob ? new Date(fetchedMember.dob) : new Date(),
                     email: fetchedMember.email,
                     phone: fetchedMember.phone,
@@ -137,6 +138,7 @@ export default function EditMember({
                     startDate: fetchedMember.startDate ? new Date(fetchedMember.startDate) : new Date(),
                     intakeStatus: fetchedMember.intakeStatus || "In Progress",
                     documentsCollected: fetchedMember.documentsCollected ?? false,
+                    companyCard: fetchedMember.companyCard || false,
                     approvalDate: fetchedMember.approvalDate ? new Date(fetchedMember.approvalDate) : null,
                     enteredBy: params.editingUser,
                 });
@@ -214,6 +216,7 @@ export default function EditMember({
                 intakeStatus: values.intakeStatus as "In Progress" | "Failed" | "Approved" | null,
                 //companyCard: values.companyCard || null,
             };
+            console.log("updatedValues", updatedValues);
             await editMember(updatedValues);
         } catch (error) {
             console.error("Error editing member:", error);

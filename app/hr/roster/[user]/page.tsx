@@ -46,7 +46,8 @@ export default function MemberDetails({
 
     useEffect(() => {
         async function fetchData() {
-            const fetchedMember: any = await getMember(params.user);
+            const fetchedMember: any = await getMember(params.user); 
+            console.log("fetchedMember", fetchedMember);
             if (!fetchedMember) {
                 // Check for null or undefined
                 setNotFound(true);
@@ -145,14 +146,18 @@ export default function MemberDetails({
     }
 
     const refreshUser = (updatedUser: string) => {
-        router.push(`/hr/roster/${updatedUser}`);
+        if (updatedUser !== params.user) {
+            router.push(`/hr/roster/${updatedUser}`);
+        }
+        else {
+             window.location.reload();
+        }
     };
 
     const refresh = () => {
         window.location.reload();
     };
 
-    console.log("member", member);
 
     return (
         <div className="p-2">
@@ -328,7 +333,7 @@ export default function MemberDetails({
                                             : ""
                                     }
                                 >
-                                    {member?.documentsCollected
+                                    {member?.companyCard
                                         ? " Card Issued"
                                         : " Not Issued"}
                                 </span>

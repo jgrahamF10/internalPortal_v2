@@ -79,7 +79,7 @@ export default function Page(
     useEffect(() => {
         async function fetchData() {
             const projects = await getProjects();
-            console.log("projects", projects);
+            //console.log("projects", projects);
             setProjects(projects);
             setLoading(false);
         }

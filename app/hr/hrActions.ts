@@ -217,7 +217,7 @@ export async function getApprovedTechs(projectName: string) {
 }
 
 export async function editMember(data: Members) {
-   // console.log("data", data);
+   console.log("data", data);
     try {
         await db
             .update(members)
