@@ -15,6 +15,7 @@ import { getFile } from "@/lib/aws";
 import { useRouter } from "next/navigation";
 import { AttachmentDelete } from "@/components/hr_components/deleteResume";
 import MemberAttatchment from "@/components/hr_components/memberAttachment";
+import NoteDelete from "@/components/hr_components/deleteMemberNote";
 
 interface UserName {
     params: { user: string };
@@ -47,7 +48,7 @@ export default function MemberDetails({
     useEffect(() => {
         async function fetchData() {
             const fetchedMember: any = await getMember(params.user); 
-            console.log("fetchedMember", fetchedMember);
+            //console.log("fetchedMember", fetchedMember);
             if (!fetchedMember) {
                 // Check for null or undefined
                 setNotFound(true);
@@ -536,6 +537,9 @@ export default function MemberDetails({
                                     <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
                                         Created Date
                                     </th>
+                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
+                                        Delete
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -553,6 +557,9 @@ export default function MemberDetails({
 
                                         <td className="px-4 py-2 text-sm">
                                             {note.createdDate.toLocaleDateString()}
+                                        </td>
+                                        <td className="px-4 py-2 text-sm">
+                                            <NoteDelete noteId={note.id} />
                                         </td>
                                     </tr>
                                 ))}
