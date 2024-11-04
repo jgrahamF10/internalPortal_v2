@@ -47,7 +47,7 @@ export default function MemberDetails({
 
     useEffect(() => {
         async function fetchData() {
-            const fetchedMember: any = await getMember(params.user); 
+            const fetchedMember: any = await getMember(params.user);
             //console.log("fetchedMember", fetchedMember);
             if (!fetchedMember) {
                 // Check for null or undefined
@@ -149,16 +149,14 @@ export default function MemberDetails({
     const refreshUser = (updatedUser: string) => {
         if (updatedUser !== params.user) {
             router.push(`/hr/roster/${updatedUser}`);
-        }
-        else {
-             window.location.reload();
+        } else {
+            window.location.reload();
         }
     };
 
     const refresh = () => {
         window.location.reload();
     };
-
 
     return (
         <div className="p-2">
@@ -179,15 +177,22 @@ export default function MemberDetails({
                                     {member?.preferedName} {member?.lastname}
                                 </span>
                             </h2>
-                            <EditMember
-                                params={{
-                                    person: params.user,
-                                    editingUser: session?.user?.name ?? "",
-                                }}
-                                onNoteCreated={(updatedUser) =>
-                                    refreshUser(updatedUser)
-                                }
-                            />
+                            {session?.roles?.some((role) =>
+                                [
+                                    "Internal Portal Admins",
+                                    "Human Resources",
+                                ].includes(role)
+                            ) && (
+                                <EditMember
+                                    params={{
+                                        person: params.user,
+                                        editingUser: session?.user?.name ?? "",
+                                    }}
+                                    onNoteCreated={(updatedUser) =>
+                                        refreshUser(updatedUser)
+                                    }
+                                />
+                            )}
                         </div>
                         <div className="flex justify-between items-center mb-4">
                             <h3
@@ -236,12 +241,20 @@ export default function MemberDetails({
                                     {member?.middleName}
                                 </span>
                             </div>
-                            <div className="block text-sm font-bold">
-                                Date Of Birth:{" "}
-                                <span className="font-medium underline">
-                                    {member?.dob.toString()}
-                                </span>
-                            </div>
+                            {session?.roles?.some((role) =>
+                                [
+                                    "Internal Portal Admins",
+                                    "Human Resources",
+                                ].includes(role)
+                            ) && (
+                                <div className="block text-sm font-bold">
+                                    Date Of Birth:{" "}
+                                    <span className="font-medium underline">
+                                        {member?.dob.toString()}
+                                    </span>
+                                </div>
+                            )}
+
                             <div className="block text-sm font-bold">
                                 Phone:{" "}
                                 <span className="font-medium underline">
@@ -280,12 +293,19 @@ export default function MemberDetails({
                             <h2 className="text-2xl font-bold mb-4 underline">
                                 Onboarding Status
                             </h2>
-                            <ResumeUpload
-                                params={{
-                                    person: member.id,
-                                    uploader: session?.user?.name ?? "",
-                                }}
-                            />
+                            {session?.roles?.some((role) =>
+                                [
+                                    "Internal Portal Admins",
+                                    "Human Resources",
+                                ].includes(role)
+                            ) && (
+                                <ResumeUpload
+                                    params={{
+                                        person: member.id,
+                                        uploader: session?.user?.name ?? "",
+                                    }}
+                                />
+                            )}
                         </div>
                         <div className="overflow-x-auto"></div>
                         <div className="grid grid-cols-1 gap-4">
@@ -353,41 +373,50 @@ export default function MemberDetails({
                                     {member?.approvalDate.toString()}
                                 </span>
                             </div>
-                            <div className="flex items-center text-md font-bold">
-                                {/* Resume label */}
-                                Resume:{" "}
-                                {/* Resume Description and Download Link */}
-                                {member?.attachment
-                                    .filter((item: any) => item.resume === true)
-                                    .map((item: any) => (
-                                        <span
-                                            key={item.id}
-                                            className="flex items-center font-medium capitalize ml-2"
-                                        >
-                                            {/* Resume Description */}
-                                            {item.description.replace(
-                                                /resumes\//i,
-                                                ""
-                                            )}
-
-                                            {/* Download Link */}
-                                            <a
-                                                href={resumeUrl}
-                                                download
-                                                className="ml-4 underline hover:text-green-700"
+                            {session?.roles?.some((role) =>
+                                [
+                                    "Internal Portal Admins",
+                                    "Human Resources",
+                                ].includes(role)
+                            ) && (
+                                <div className="flex items-center text-md font-bold">
+                                    {/* Resume label */}
+                                    Resume:{" "}
+                                    {/* Resume Description and Download Link */}
+                                    {member?.attachment
+                                        .filter(
+                                            (item: any) => item.resume === true
+                                        )
+                                        .map((item: any) => (
+                                            <span
+                                                key={item.id}
+                                                className="flex items-center font-medium capitalize ml-2"
                                             >
-                                                Download
-                                            </a>
+                                                {/* Resume Description */}
+                                                {item.description.replace(
+                                                    /resumes\//i,
+                                                    ""
+                                                )}
 
-                                            {/* Trash Icon */}
-                                            <span className="ml-4">
-                                                <AttachmentDelete
-                                                    attachmentId={item.id}
-                                                />
+                                                {/* Download Link */}
+                                                <a
+                                                    href={resumeUrl}
+                                                    download
+                                                    className="ml-4 underline hover:text-green-700"
+                                                >
+                                                    Download
+                                                </a>
+
+                                                {/* Trash Icon */}
+                                                <span className="ml-4">
+                                                    <AttachmentDelete
+                                                        attachmentId={item.id}
+                                                    />
+                                                </span>
                                             </span>
-                                        </span>
-                                    ))}
-                            </div>
+                                        ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -490,20 +519,27 @@ export default function MemberDetails({
                                             <td className="px-4 py-2 text-sm">
                                                 {projectIntake.updatedBy}
                                             </td>
-                                            <td className="px-4 py-2 text-sm">
-                                                <EditProjectApproval
-                                                    errorStatusChange={
-                                                        errorStatusChange
-                                                    }
-                                                    projectApprovalId={
-                                                        projectIntake.id
-                                                    }
-                                                    editingUser={
-                                                        session?.user?.name ??
-                                                        ""
-                                                    }
-                                                />
-                                            </td>
+                                            {session?.roles?.some((role) =>
+                                                [
+                                                    "Internal Portal Admins",
+                                                    "Human Resources",
+                                                ].includes(role)
+                                            ) && (
+                                                <td className="px-4 py-2 text-sm">
+                                                    <EditProjectApproval
+                                                        errorStatusChange={
+                                                            errorStatusChange
+                                                        }
+                                                        projectApprovalId={
+                                                            projectIntake.id
+                                                        }
+                                                        editingUser={
+                                                            session?.user
+                                                                ?.name ?? ""
+                                                        }
+                                                    />
+                                                </td>
+                                            )}
                                         </tr>
                                     )
                                 )}
@@ -537,9 +573,16 @@ export default function MemberDetails({
                                     <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
                                         Created Date
                                     </th>
-                                    <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
-                                        Delete
-                                    </th>
+                                    {session?.roles?.some((role) =>
+                                        [
+                                            "Internal Portal Admins",
+                                            "Human Resources",
+                                        ].includes(role)
+                                    ) && (
+                                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wide">
+                                            Delete
+                                        </th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody>
@@ -558,9 +601,16 @@ export default function MemberDetails({
                                         <td className="px-4 py-2 text-sm">
                                             {note.createdDate.toLocaleDateString()}
                                         </td>
-                                        <td className="px-4 py-2 text-sm">
-                                            <NoteDelete noteId={note.id} />
-                                        </td>
+                                        {session?.roles?.some((role) =>
+                                            [
+                                                "Internal Portal Admins",
+                                                "Human Resources",
+                                            ].includes(role)
+                                        ) && (
+                                            <td className="px-4 py-2 text-sm">
+                                                <NoteDelete noteId={note.id} />
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
