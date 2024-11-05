@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/db";
 import { members } from "@/db/schema/member_management";
-import { notes, rentals, NewNote, NewAttatchment, NewRentals, attachments } from "@/db/schema/tracker_db";
+import { notes, rentals, NewNote, NewAttatchment, NewRentals, attachments, Rentals } from "@/db/schema/tracker_db";
 import { eq, ne, desc } from "drizzle-orm/expressions";
 
 export async function getRentals() {
@@ -52,13 +52,13 @@ export async function createRental(data: NewRentals) {
     }
 }
 
-export async function updateRental(data: NewRentals) {
-    //console.log("createRental data", data);
+export async function updateRental(data: Rentals) {
+    console.log("createRental data", data);
     try {
         await db
             .update(rentals)
             .set(data)
-            .where(eq(rentals.rentalAgreement, data.rentalAgreement));
+            .where(eq(rentals.id, data.id));
     } catch (error) {
         console.error("Error updating rental:", error);
     }

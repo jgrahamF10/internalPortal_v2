@@ -166,3 +166,57 @@ export const member2notes = relations(memberNotes, ({ one }) => ({
 export const memberNotes2members = relations(members, ({ many }) => ({
     Notes: many(memberNotes)
 }));
+
+export const tsa_Status = pgEnum('tsaStatus', ['In Progress', 'Approved', 'Rejected']);
+export const piv_Status = pgEnum('pivStatus', ['Issued', 'Activated', 'Awaiting PIV', 'Needs Provisioning']);
+
+export const tsaApprovals = pgTable("tsaApprovals", {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    memberId: integer("memberId").notNull(),
+    approvalStatus: tsa_Status("tsaStatus").notNull(),
+    piv: piv_Status("pivStatus").notNull(),
+    emailSetup: boolean("emailSetup").default(false),
+    approvalDate: date("approvalDate"),
+    submittedDate: timestamp("submittedDate", { mode: "date" }).notNull(),
+    submittedBy: varchar("submittedBy", { length: 20 }).notNull(),
+    createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
+    updatedBy: varchar("updatedBy", { length: 20 }).notNull(),
+    lastActivity: timestamp("lastActivity", { mode: "date" }).notNull(),
+});
+
+export type TsaApprovals = typeof tsaApprovals.$inferSelect;
+export type NewTsaApprovals = typeof tsaApprovals.$inferInsert;
+
+export const tsaApprovals2members = relations(members, ({ many }) => ({
+    tsaApprovals: many(tsaApprovals)
+}));
+
+export const members2tsaApprovals = relations(tsaApprovals, ({ one }) => ({
+    member: one(members, {
+        fields: [tsaApprovals.memberId],
+        references: [members.id],
+    })
+}));
+
+export const tsaNotes = pgTable("tsaNotes", {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    tsaApprovalId: integer("tsaApprovalId").notNull(),
+    note: varchar("note", { length: 1000 }).notNull(),
+    noteAuthor: varchar("noteAuthor", { length: 20 }).notNull(),
+    createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
+    inactive: boolean("inactive").default(false),
+});
+
+export type TsaNotes = typeof tsaNotes.$inferSelect;
+export type NewTsaNotes = typeof tsaNotes.$inferInsert;
+
+export const tsaApprovals2notes = relations(tsaNotes, ({ one }) => ({
+    tsaApproval: one(tsaApprovals, {
+        fields: [tsaNotes.tsaApprovalId],
+        references: [tsaApprovals.id],
+    })
+}));
+
+export const tsaNotes2members = relations(tsaApprovals, ({ many }) => ({
+    tsaNotes: many(tsaNotes)
+}));

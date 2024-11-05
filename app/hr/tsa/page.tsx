@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import DataTable, { createTheme } from "react-data-table-component";
-import { getRoster } from "../hrActions";
+import { getTsaApprovals } from "../hrActions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -73,8 +73,8 @@ export default function Page() {
     
     useEffect(() => {
         async function fetchData() {
-            const members: any = await getRoster();
-            // console.log("members", members);
+            const members: any = await getTsaApprovals();
+            //console.log("members", members);
             setMembers(members);
             setLoading(false);
         }
@@ -97,10 +97,8 @@ export default function Page() {
     const filteredAssets = members.filter((user) => {
         // Filter by active/inactive status
         if (inactives) {
-            if (user.status !== "Inactive") return false;
-        } else {
-            if (user.status !== "Active") return false;
-        }
+            if (user.approvalStatus !== "Rejected") return false;
+        } 
 
         // If filterText is empty, include all remaining users
         if (!filterText) return true;
@@ -110,12 +108,12 @@ export default function Page() {
 
         // Match against the relevant fields
         return (
-            user.preferedName.toLowerCase().includes(lowerFilterText) ||
-            user.designation?.toLowerCase().includes(lowerFilterText) || // Assuming you meant designation
-            user.email?.toLowerCase().includes(lowerFilterText) ||
-            user.city?.toLowerCase().includes(lowerFilterText) ||
-            user.state?.toLowerCase().includes(lowerFilterText) ||
-            user.zipcode?.toLowerCase().includes(lowerFilterText)
+            user.approvalStatus.toLowerCase().includes(lowerFilterText) ||
+            user.piv.toLowerCase().includes(lowerFilterText) ||
+            user.member?.firstname.toLowerCase().includes(lowerFilterText) ||
+            user.member?.middleName.toLowerCase().includes(lowerFilterText) ||
+            user.member?.preferedName.toLowerCase().includes(lowerFilterText) ||
+            user.member?.lastname.toLowerCase().includes(lowerFilterText)
         );
     });
 
@@ -141,56 +139,57 @@ export default function Page() {
     const columns = [
         {
             name: "Name",
-            selector: (row: any) => row.preferedName,
+            selector: (row: any) => row.member.preferedName,
             cell: (row: any) => (
                 <Link
-                    href={`/hr/roster/${row.preferedName}-${row.lastname}`}
+                    href={`roster/${row.member.preferedName}-${row.member.lastname}`}
                     className="font-medium text-green-700 capitalize hover:underline"
                 >
-                    {row.preferedName} {row.lastname}
+                    {row.member.preferedName} {row.member.lastname}
                 </Link>
             ),
             sortable: true,
-        },
-        {
-            name: "Designation",
-            selector: (row: any) => row.designation,
-            sortable: true,
-        },
-        {
-            name: "Phone",
-            selector: (row: any) => row.phone,
-            sortable: true,
-        },
-        {
-            name: "Email",
-            selector: (row: any) => row.email,
-            sortable: true,
-        },
-        {
-            name: "City",
-            selector: (row: any) => row.city,
-            sortable: true,
-            cell: (row: any) => <span className="capitalize">{row.city}</span>,
-        },
-        {
-            name: "State",
-            selector: (row: any) => row.state,
-            sortable: true,
-            cell: (row: any) => <span className="capitalize">{row.state}</span>,
+            center: true,
         },
         {
             name: "Status",
-            selector: (row: any) => (row.status ? "Active" : "Inactive"),
+            selector: (row: any) => row.approvalStatus,
             sortable: true,
+            center: true,
+        },
+        {
+            name: "PIV Status",
+            selector: (row: any) => row.piv,
+            sortable: true,
+            center: true,
+        },
+        {
+            name: "Email",
+            selector: (row: any) => row.emailSetup,
+            sortable: true,
+            center: true,
             cell: (row: any) => (
                 <span
-                    className={row.status ? "text-green-600" : "text-red-600"}
+                    className={row.emailSetup ? "text-green-600" : "text-red-600"}
                 >
-                    {row.status ? "Active" : "Inactive"}
+                    {row.emailSetup ? "Yes" : "No"}
                 </span>
             ),
         },
+        {
+            name: "Approval Date",
+            selector: (row: any) => row.approvalDate,
+            sortable: true,
+            
+        },
+        {
+            name: "Last Activity",
+            selector: (row: any) => row.lastActivity,
+            sortable: true,
+            cell: (row: any) => <span>{row.lastActivity.toLocaleDateString()}</span>,
+            center: true,
+        },
+        
     ];
 
     if (loading) {
@@ -266,7 +265,7 @@ export default function Page() {
 
     if (
         !session?.roles?.some((role) =>
-            ["Managers", "Human Resources"].includes(role)
+            ["Managers", "Internal Portal Admins", "Human Resources"].includes(role)
         )
     ) {
         return <NotAuth />;
@@ -277,7 +276,7 @@ export default function Page() {
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold">Tech Roster</h1>
+                    <h1 className="text-2xl font-semibold">TSA Approvals</h1>
                     {session?.roles?.some((role) =>
                         ["Internal Portal Admins", "Human Resources"].includes(role)
                     ) && (
@@ -293,7 +292,7 @@ export default function Page() {
                         onClick={handleInactive}
                     >
                         <button className="bg-blue-600 text-white py-1 px-2 rounded-sm hover:bg-blue-700">
-                            Show inactives
+                            Show Rejected
                         </button>
                     </h3>
                 </div>

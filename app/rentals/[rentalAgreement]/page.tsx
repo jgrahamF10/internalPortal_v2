@@ -14,12 +14,13 @@ import { getFile } from "@/lib/aws";
 import NoteDelete from "@/components/deleteNote";
 import { AttachmentDelete } from "@/components/rental_components/deleteAttachment";
 import RentalAttatchment from "@/components/rental_components/rentalAttachment";
+import { useRouter } from "next/navigation";
 
-interface RentalAgreement {
+interface Rez {
     params: { rentalAgreement: string };
 }
 
-export default function MemberDetails({ params }: RentalAgreement) {
+export default function MemberDetails({ params }: Rez) {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [notFound, setNotFound] = useState<boolean>(false);
@@ -29,7 +30,8 @@ export default function MemberDetails({ params }: RentalAgreement) {
     const { data: session } = useSession();
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
     const [resumeUrl, setResumeUrl] = useState<string>("");
-    const [urls, setUrls] = useState<{ [key: string]: string }>({}); // Map of attachment descriptions to URLs
+    const [urls, setUrls] = useState<{ [key: string]: string }>({}); 
+    const router = useRouter();
 
     // console.log("Rental Agreement", params.rentalAgreement);
 
@@ -122,10 +124,15 @@ export default function MemberDetails({ params }: RentalAgreement) {
         );
     }
 
-    const refresh = () => {
-        window.location.reload();
-    };
 
+    const refresh = (updatedRez: string) => {
+        if (updatedRez !== params.rentalAgreement) {
+            console.log("updatedRez", updatedRez);
+            router.push(`/rentals/${updatedRez}`);
+        } else {
+            window.location.reload();
+        }
+    };
     return (
         <div className="p-2">
             <nav className="flex justify-end space-x-2">
@@ -149,7 +156,7 @@ export default function MemberDetails({ params }: RentalAgreement) {
                             <EditRentalForm
                                 rentalData={data}
                                 updatingUser={session?.user?.name ?? ""}
-                                onNoteCreated={() => refresh()}
+                                onUpdated={(updatedRez) => refresh(updatedRez)}
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4 mb-4">
@@ -300,7 +307,7 @@ export default function MemberDetails({ params }: RentalAgreement) {
                                 rentalId: data.id,
                                 uploader: session?.user?.name ?? "",
                             }}
-                            onNoteCreated={() => refresh()}
+                            onNoteCreated={() => refresh(data?.reservation)}
                         />
                     </div>
 

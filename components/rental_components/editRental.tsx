@@ -48,14 +48,14 @@ const FormSchema = z.object({
     vendors: z.string().min(1, "Vendor is required."),
     pickUpLocation: z.string().min(1, "Pick Up Location is required."),
     returnLocation: z.string().optional(),
-    finalCharges: z.number().optional(),
+    finalCharges: z.string().optional(),
     canceled: z.boolean().default(false),
     verified: z.boolean().default(false),
     archived: z.boolean().default(false),
     memberId: z.number(),
     projectId: z.number(),
     returnDate: z.date().optional(),
-tolls: z.number().nullable().optional(),
+    tolls: z.string().nullable().optional(),
 
     lastUpdatedBy: z.string(),
 });
@@ -63,11 +63,11 @@ tolls: z.number().nullable().optional(),
 interface EditRentalProps {
     updatingUser: string;
     rentalData: any;
-    onNoteCreated: () => void;
+    onUpdated: (reservation: string) => void;
 }
 
 export default function EditRentalForm({
-    onNoteCreated,
+    onUpdated,
     updatingUser,
     rentalData,
 }: EditRentalProps) {
@@ -88,22 +88,22 @@ export default function EditRentalForm({
         defaultValues: {
             projectId: rentalData?.projectId,
             memberId: rentalData?.memberId,
-            rentalAgreement: rentalData?.rentalAgreement || '',
-            reservation: rentalData?.reservation || '',
+            rentalAgreement: rentalData?.rentalAgreement || "",
+            reservation: rentalData?.reservation || "",
             pickUpDate: rentalData?.pickUpDate
                 ? new Date(rentalData?.pickUpDate)
                 : new Date(),
             dueDate: rentalData?.dueDate
                 ? new Date(rentalData?.dueDate)
                 : new Date(),
-            vehicleType: rentalData?.vehicleType || '',
-            vehicleVin: rentalData?.vehicleVIN || '',
-            licensePlate: rentalData?.licensePlate || '',
+            vehicleType: rentalData?.vehicleType || "",
+            vehicleVin: rentalData?.vehicleVIN || "",
+            licensePlate: rentalData?.licensePlate || "",
             pickUpMileage: rentalData?.pickUpMileage || 0,
             dropOffMileage: rentalData?.dropOffMileage || 0,
-            vendors: rentalData?.vendors || '',
-            pickUpLocation: rentalData?.pickUpLocation || '',
-            returnLocation: rentalData?.returnLocation || '',
+            vendors: rentalData?.vendors || "",
+            pickUpLocation: rentalData?.pickUpLocation || "",
+            returnLocation: rentalData?.returnLocation || "",
             finalCharges: rentalData?.finalCharges || 0,
             canceled: rentalData?.canceled || false,
             verified: rentalData?.verified || false,
@@ -125,7 +125,8 @@ export default function EditRentalForm({
             const newData = {
                 ...values,
                 createdDate: currentDate,
-                finalCharges: values.finalCharges?.toString() ?? '',
+                tolls: values.tolls?.toString() ?? null,
+                finalCharges: values.finalCharges?.toString() ?? null,
                 vendors: values.vendors as
                     | "Hertz"
                     | "Enterprise"
@@ -137,16 +138,25 @@ export default function EditRentalForm({
                 returnDate: values.returnDate
                     ? values.returnDate.toISOString()
                     : null,
-                tolls: values.tolls !== undefined && values.tolls !== null
-                    ? values.tolls.toString()
-                    : values.tolls,
+                projectId: values.projectId,
+                memberId: values.memberId,
+                lastUpdatedBy: values.lastUpdatedBy,
+                licensePlate: values.licensePlate ?? null,
+                vehicleType: values.vehicleType ?? null,
+                vehicleVin: values.vehicleVin ?? null,
+                pickUpMileage: values.pickUpMileage ?? null,
+                dropOffMileage: values.dropOffMileage ?? null,
+                returnLocation: values.returnLocation ?? null,
+                id: rentalData.id,
             };
-            //console.log("rentalData", newData);
+            console.log("rentalData", newData);
             await updateRental(newData);
-            onNoteCreated();
             reset();
         } catch (error) {
             console.error("Error updating rental:", error);
+        } finally {
+            form.reset();
+            onUpdated(values.rentalAgreement);
         }
     }
 
@@ -225,7 +235,7 @@ export default function EditRentalForm({
                                                 <Input
                                                     {...field}
                                                     type="text"
-                                                    placeholder="Enter The Renal Agreement"
+                                                    placeholder="Update The Rental Agreement"
                                                     onChange={(e) =>
                                                         field.onChange(
                                                             e.target.value.trim()

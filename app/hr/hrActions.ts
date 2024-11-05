@@ -5,16 +5,20 @@ import {
     projectBGStatus,
     projects,
     memberNotes,
-    user_Attachments
-} from "@/db/schema/member_management";
-import { and, eq, sql, asc } from "drizzle-orm";
-import {
     NewMemberNotes,
     NewProjectBGStatus,
     NewProject,
     NewMember,
-    Members
+    Members,
+    TsaApprovals,
+    TsaNotes,
+    tsaApprovals,
+    tsaNotes,
+    NewTsaApprovals,
+    NewTsaNotes,
+    user_Attachments
 } from "@/db/schema/member_management";
+import { and, eq, sql, asc, desc } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import exp from "constants";
@@ -66,6 +70,7 @@ export async function getMember(id: string) {
                     project: true,
                 },
             },
+            tsaApprovals: true,
             attachment: true,
         },
     });
@@ -249,4 +254,17 @@ export async function deleteAttachment(resumeId: number) {
         console.error("Error deleting resume:", error);
         return false;
     }
+}
+
+
+export async function getTsaApprovals() {
+    const tsaData = await db.query.tsaApprovals.findMany({
+        orderBy: [desc(tsaApprovals.id)],
+        with: {
+            member: true,
+            tsaNotes: true,
+        },
+    });
+    console.log("tsaData", tsaData);
+    return tsaData;
 }

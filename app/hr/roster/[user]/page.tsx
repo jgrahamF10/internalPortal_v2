@@ -43,12 +43,12 @@ export default function MemberDetails({
     const [urls, setUrls] = useState<{ [key: string]: string }>({});
     const router = useRouter();
 
-    //console.log("sessionData", session);
+    //console.log("params", params.user);
 
     useEffect(() => {
         async function fetchData() {
             const fetchedMember: any = await getMember(params.user);
-            //console.log("fetchedMember", fetchedMember);
+            console.log("fetchedMember", fetchedMember);
             if (!fetchedMember) {
                 // Check for null or undefined
                 setNotFound(true);
@@ -127,7 +127,7 @@ export default function MemberDetails({
 
     if (
         !session?.roles?.some((role) =>
-            ["Managers", "Human Resources"].includes(role)
+            ["Managers", "Human Resources", "Internal Portal Admins",].includes(role)
         )
     ) {
         return <NotAuth />;
