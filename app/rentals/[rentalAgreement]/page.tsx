@@ -44,7 +44,7 @@ export default function MemberDetails({ params }: Rez) {
                 setLoading(false);
                 return;
             }
-            console.log("RentalData", fetchRental);
+            //console.log("RentalData", fetchRental);
             setData(fetchRental);
 
             // Ensure 'attachment' exists and is an array before processing
@@ -173,7 +173,7 @@ export default function MemberDetails({ params }: Rez) {
                                 >
                                     {data?.canceled === true
                                         ? "Canceled"
-                                        : data?.dropOffMileage === 0
+                                        : data?.verified === false
                                         ? "Active"
                                         : "Returned"}
                                 </span>

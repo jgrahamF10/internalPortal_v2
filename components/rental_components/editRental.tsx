@@ -32,7 +32,6 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { updateRental } from "@/app/rentals/rentalActions";
-import { getProjects, getApprovedTechs } from "@/app/hr/hrActions";
 
 // Zod schema to validate the form
 const FormSchema = z.object({
@@ -48,7 +47,7 @@ const FormSchema = z.object({
     vendors: z.string().min(1, "Vendor is required."),
     pickUpLocation: z.string().min(1, "Pick Up Location is required."),
     returnLocation: z.string().optional(),
-    finalCharges: z.string().optional(),
+    finalCharges: z.string().nullable().optional(),
     canceled: z.boolean().default(false),
     verified: z.boolean().default(false),
     archived: z.boolean().default(false),
@@ -104,7 +103,7 @@ export default function EditRentalForm({
             vendors: rentalData?.vendors || "",
             pickUpLocation: rentalData?.pickUpLocation || "",
             returnLocation: rentalData?.returnLocation || "",
-            finalCharges: rentalData?.finalCharges || 0,
+            finalCharges: (rentalData?.finalCharges || "0").toString(),
             canceled: rentalData?.canceled || false,
             verified: rentalData?.verified || false,
             archived: rentalData?.archived || false,
@@ -151,7 +150,6 @@ export default function EditRentalForm({
             };
             console.log("rentalData", newData);
             await updateRental(newData);
-            reset();
         } catch (error) {
             console.error("Error updating rental:", error);
         } finally {
@@ -562,10 +560,12 @@ export default function EditRentalForm({
                                                             !isNaN(numericValue)
                                                         ) {
                                                             field.onChange(
-                                                                numericValue
+                                                                numericValue.toString()
                                                             );
                                                         } else {
-                                                            field.onChange(0);
+                                                            field.onChange(
+                                                                "0.00"
+                                                            );
                                                         }
                                                     }}
                                                 />
@@ -604,18 +604,12 @@ export default function EditRentalForm({
                                                         }
                                                     }}
                                                     onBlur={(e) => {
-                                                        const value =
-                                                            e.target.value;
-                                                        const numericValue =
-                                                            parseFloat(value);
-                                                        if (
-                                                            !isNaN(numericValue)
-                                                        ) {
-                                                            field.onChange(
-                                                                numericValue
-                                                            );
+                                                        const value = e.target.value;
+                                                        const numericValue = parseFloat(value);
+                                                        if (!isNaN(numericValue)) {
+                                                            field.onChange(numericValue.toString());
                                                         } else {
-                                                            field.onChange(0);
+                                                            field.onChange("0.00");
                                                         }
                                                     }}
                                                 />

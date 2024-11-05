@@ -72,7 +72,7 @@ export default function Page() {
     useEffect(() => {
         async function fetchData() {
             const rentalData: any = await getRentals();
-            console.log("rentals", rentalData);
+            //console.log("rentals", rentalData);
             setRentals(rentalData);
             setLoading(false);
         }

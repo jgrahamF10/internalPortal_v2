@@ -7,7 +7,7 @@ import { eq, ne, desc } from "drizzle-orm/expressions";
 export async function getRentals() {
     const rentalData = await db.query.rentals.findMany({
         where: ne(rentals.archived, true),
-        orderBy: [desc(rentals.createdDate)],
+        orderBy: [desc(rentals.pickUpDate)],
         with: {
             memberID: true,
             project: true,
@@ -53,7 +53,7 @@ export async function createRental(data: NewRentals) {
 }
 
 export async function updateRental(data: Rentals) {
-    console.log("createRental data", data);
+    //console.log("createRental data", data);
     try {
         await db
             .update(rentals)
@@ -65,7 +65,7 @@ export async function updateRental(data: Rentals) {
 }
 
 export async function deleteAttachment(attachmentId: number) {
-    console.log("attachmentId", attachmentId);
+    //console.log("attachmentId", attachmentId);
     try {
         await db.delete(attachments).where(eq(attachments.id, attachmentId));
         return true;

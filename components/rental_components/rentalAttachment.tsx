@@ -106,7 +106,7 @@ export default function RentalAttatchment({ params }: UploadProps) {
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="file-description">
-                            File Description
+                            File Description <br /> <span className="text-red-600">Do not use pre-entered description.</span>
                         </Label>
                         <Input
                             id="file-description"
