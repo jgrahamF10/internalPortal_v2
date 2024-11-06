@@ -265,6 +265,15 @@ export async function getTsaApprovals() {
             tsaNotes: true,
         },
     });
-    console.log("tsaData", tsaData);
     return tsaData;
 }
+
+export async function createTsaApproval(data: NewTsaApprovals) {
+    console.log("createTsaApproval data", data);
+    try {
+        await db.insert(tsaApprovals).values(data);
+    } catch (error) {
+        console.error("Error creating tsa approval:", error);
+    }
+}
+    

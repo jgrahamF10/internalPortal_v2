@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import DataTable, { createTheme } from "react-data-table-component";
-import { getTsaApprovals } from "../hrActions";
+import DataTable from "react-data-table-component";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -9,10 +8,10 @@ import { EosIconsBubbleLoading } from "@/components/spinner";
 import Link from "next/link";
 import styled from "styled-components";
 import { useSession } from "next-auth/react";
-import CreateUserForm from "@/components/hr_components/newMember";
 import { ThemeColors } from "@/lib/utils";
 import NotAuth from "@/components/auth/notAuth";
-
+import TSAApprovalForm from "./newApproval";
+import { getTsaApprovals } from "../hrActions";
 
 const TextField = styled.input`
     height: 32px;
@@ -207,6 +206,10 @@ export default function Page() {
         );
     }
 
+    const refresh = () => {
+        window.location.reload();
+    };
+
     const customStyles = {
         rows: {
             style: {
@@ -280,9 +283,9 @@ export default function Page() {
                     {session?.roles?.some((role) =>
                         ["Internal Portal Admins", "Human Resources"].includes(role)
                     ) && (
-                        <CreateUserForm
-                            errorStatusChange={errorStatusChange}
+                        <TSAApprovalForm
                             creatingUser={session?.user?.name ?? ""}
+                            onCreated={() => refresh()}
                         />
                     )}
                 </div>

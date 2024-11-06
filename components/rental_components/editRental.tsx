@@ -108,7 +108,7 @@ export default function EditRentalForm({
             verified: rentalData?.verified || false,
             archived: rentalData?.archived || false,
             lastUpdatedBy: updatingUser,
-            tolls: rentalData?.tolls || 0,
+            tolls: (rentalData?.tolls|| "0").toString(),
             returnDate: rentalData?.returnDate
                 ? new Date(rentalData?.returnDate)
                 : new Date(),
