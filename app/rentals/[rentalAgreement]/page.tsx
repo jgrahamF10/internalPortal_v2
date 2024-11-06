@@ -44,7 +44,7 @@ export default function MemberDetails({ params }: Rez) {
                 setLoading(false);
                 return;
             }
-            //console.log("RentalData", fetchRental);
+            console.log("RentalData", fetchRental);
             setData(fetchRental);
 
             // Ensure 'attachment' exists and is an array before processing
@@ -261,15 +261,15 @@ export default function MemberDetails({ params }: Rez) {
                             <div className="block text-md font-bold ">
                                 Vin Number:{" "}
                                 <span>
-                                    {data?.vehicleVIN ? data.vehicleVIN : "N/A"}
+                                    {data?.vehicleVin !== "" ? data.vehicleVin : "N/A"}
                                 </span>
                             </div>
 
                             <div className="block text-md font-bold">
                                 License Plate:{" "}
                                 <span className="font-medium capitalize">
-                                    {data?.LicensePlate
-                                        ? data.LicensePlate
+                                    {data?.LicensePlate !== ""
+                                        ? data.licensePlate
                                         : "N/A"}
                                 </span>
                             </div>
