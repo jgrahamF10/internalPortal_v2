@@ -276,8 +276,8 @@ export default function MemberDetails({ params }: Rez) {
                             <div className="block text-md font-bold">
                                 Pick Up Milage:{" "}
                                 <span className="font-medium capitalize">
-                                    {data?.pickUpMilage
-                                        ? data.pickUpMilage
+                                    {data?.pickUpMilage !== ""
+                                        ? data.pickUpMileage
                                         : "N/A"}
                                 </span>
                             </div>
@@ -293,7 +293,7 @@ export default function MemberDetails({ params }: Rez) {
                                 {/* Resume label */}
                                 Tolls:{" "}
                                 <span className="font-medium underline pl-2">
-                                    ${data?.tolls ? data.tolls : "0"}
+                                    ${data?.tolls !== "" ? data.tolls : "0"}
                                 </span>
                             </div>
                         </div>

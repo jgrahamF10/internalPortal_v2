@@ -96,7 +96,7 @@ export default function EditRentalForm({
                 ? new Date(rentalData?.dueDate)
                 : new Date(),
             vehicleType: rentalData?.vehicleType || "",
-            vehicleVin: rentalData?.vehicleVIN || "",
+            vehicleVin: rentalData?.vehicleVin || "",
             licensePlate: rentalData?.licensePlate || "",
             pickUpMileage: rentalData?.pickUpMileage || 0,
             dropOffMileage: rentalData?.dropOffMileage || 0,
