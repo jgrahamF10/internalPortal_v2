@@ -28,58 +28,57 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { createTsaApproval, getRoster } from "@/app/hr/hrActions";
+import { updateTsaApproval, getRoster } from "@/app/hr/hrActions";
 import { toast } from "sonner"
-import { db } from "@/db";
+
+
 
 const FormSchema = z.object({
-    member: z.string(),
+    id: z.number(),
+    member: z.number(),
     approvalStatus: z.string(),
     piv: z.string(),
     emailSetup: z.boolean(),
     approvalDate: z.string(),
+    submittedBy: z.string(),
     submittedDate: z.string(),
+    updatedBy: z.string(),
 });
 
 interface NewApprovalFormProps {
     creatingUser: string;
+    approvalData: any;
     onCreated: () => void;
 }
 
-export default function TSAApprovalForm({
+export default function EditApprovalForm({
     creatingUser,
+    approvalData,
     onCreated,
 }: NewApprovalFormProps) {
-    const [member, setMember] = useState<any>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+
 
     const form = useForm<z.infer<typeof FormSchema>>({
         defaultValues: {
-            member: "",
-            approvalStatus: "In Progress",
-            piv: "Awaiting PIV",
-            emailSetup: false,
-            approvalDate: "",
-            submittedDate: "",
+            id: approvalData.id,
+            member: approvalData.memberId,  
+            approvalStatus: approvalData.approvalStatus,
+            piv: approvalData.piv,
+            emailSetup: approvalData.emailSetup,
+            approvalDate: approvalData.approvalDate ? new Date(approvalData.approvalDate).toISOString().split('T')[0] : '',
+            submittedDate: approvalData.submittedDate ? new Date(approvalData.submittedDate).toISOString().split('T')[0] : '',
+            submittedBy: approvalData.submittedBy,
+            updatedBy: approvalData.updatedBy,
         },
         mode: "onTouched",
         resolver: zodResolver(FormSchema),
     });
 
-    useEffect(() => {
-        async function fetchData() {
-            const fetchedMember = await getRoster();
-            setMember(fetchedMember);
-        }
-        fetchData();
-    }, []);
-
     async function onSubmit(values: z.infer<typeof FormSchema>) {
         try {
             const updatedValues = {
                 ...values,
-                memberId: parseInt(values.member),
-                submittedBy: creatingUser,
                 updatedBy: creatingUser,
                 lastActivity: new Date(),
                 createdDate: new Date(),
@@ -97,8 +96,9 @@ export default function TSAApprovalForm({
                     | "Activated"
                     | "Needs Provisioning",
                 emailSetup: values.emailSetup,
+                memberId: approvalData.memberId,
             };
-            const dbResult = await createTsaApproval(updatedValues);
+            const dbResult = await updateTsaApproval(updatedValues);
             if (dbResult === true) {
                 form.reset();
                 setIsDialogOpen(false); // Close the dialog only if submission succeeds
@@ -110,24 +110,26 @@ export default function TSAApprovalForm({
             }
         } catch (error) {
             console.error("Error creating member:", error);
+           
             // Dialog remains open if an error occurs
         }
     }
+
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} key="1">
             <DialogTrigger asChild>
                 <Button
-                    className="bg-green-700 text-white hover:bg-green-800 hover:text-black"
+                    className="bg-red-700 text-white hover:bg-red-800 hover:text-black"
                     onClick={() => setIsDialogOpen(true)}
                 >
-                    New Approval
+                    Edit
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[640px] bg-background-foreground">
                 <DialogHeader>
                     <DialogTitle className="text-2xl font-bold text-secondary">
-                        Create A New Approval
+                        Edit Approval for {approvalData.member.firstname} {approvalData.member.lastname}
                     </DialogTitle>
                 </DialogHeader>
                 <Card className="w-full max-w-xl bg-background">
@@ -135,46 +137,6 @@ export default function TSAApprovalForm({
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)}>
                                 <div className="grid gap-2">
-                                    <FormField
-                                        control={form.control}
-                                        name="member"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    <div className="pt-2 font-bold">
-                                                        Person
-                                                    </div>
-                                                </FormLabel>
-                                                <Select
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                    value={field.value}
-                                                >
-                                                    <SelectTrigger id="member">
-                                                        <SelectValue placeholder="Select Person" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {member.map(
-                                                            (person: any) => (
-                                                                <SelectItem
-                                                                    key={
-                                                                        person.id
-                                                                    }
-                                                                    value={person.id.toString()}
-                                                                >
-                                                                    {person.preferedName +
-                                                                        " " +
-                                                                        person.lastname}
-                                                                </SelectItem>
-                                                            )
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
                                     <FormField
                                         control={form.control}
                                         name="approvalStatus"
@@ -272,11 +234,10 @@ export default function TSAApprovalForm({
                                                 <Input
                                                     type="date"
                                                     {...field}
-                                                    value={field.value || ""}
+                                                    value={field.value}
                                                     onChange={(e) =>
                                                         field.onChange(
-                                                            e.target.value ||
-                                                                null
+                                                            e.target.value 
                                                         )
                                                     }
                                                 />
@@ -307,11 +268,10 @@ export default function TSAApprovalForm({
                                                 <Input
                                                     type="date"
                                                     {...field}
-                                                    value={field.value || ""}
+                                                    value={field.value}
                                                     onChange={(e) =>
                                                         field.onChange(
-                                                            e.target.value ||
-                                                                null
+                                                            e.target.value 
                                                         )
                                                     }
                                                 />

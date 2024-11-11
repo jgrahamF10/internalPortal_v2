@@ -12,6 +12,7 @@ import { ThemeColors } from "@/lib/utils";
 import NotAuth from "@/components/auth/notAuth";
 import TSAApprovalForm from "./newApproval";
 import { getTsaApprovals } from "../hrActions";
+import EditApprovalForm from "./editApproval";
 
 const TextField = styled.input`
     height: 32px;
@@ -69,7 +70,7 @@ export default function Page() {
         useState<boolean>(false);
     const { data: session } = useSession();
     const { backgroundColor, fontColor, mutedColor } = ThemeColors();
-    
+
     useEffect(() => {
         async function fetchData() {
             const members: any = await getTsaApprovals();
@@ -97,7 +98,7 @@ export default function Page() {
         // Filter by active/inactive status
         if (inactives) {
             if (user.approvalStatus !== "Rejected") return false;
-        } 
+        }
 
         // If filterText is empty, include all remaining users
         if (!filterText) return true;
@@ -169,7 +170,9 @@ export default function Page() {
             center: true,
             cell: (row: any) => (
                 <span
-                    className={row.emailSetup ? "text-green-600" : "text-red-600"}
+                    className={
+                        row.emailSetup ? "text-green-600" : "text-red-600"
+                    }
                 >
                     {row.emailSetup ? "Yes" : "No"}
                 </span>
@@ -179,16 +182,28 @@ export default function Page() {
             name: "Approval Date",
             selector: (row: any) => row.approvalDate,
             sortable: true,
-            
         },
         {
             name: "Last Activity",
             selector: (row: any) => row.lastActivity,
             sortable: true,
-            cell: (row: any) => <span>{row.lastActivity.toLocaleDateString()}</span>,
+            cell: (row: any) => (
+                <span>{row.lastActivity.toLocaleDateString()}</span>
+            ),
             center: true,
         },
-        
+        {
+            name: "Edit",
+            selector: (row: any) => row.id,
+            sortable: true,
+            cell: (row: any) => (
+                <EditApprovalForm
+                    approvalData={row}
+                    creatingUser={session?.user?.name ?? ""}
+                    onCreated={() => refresh()}
+                />
+            ),
+        },
     ];
 
     if (loading) {
@@ -250,25 +265,27 @@ export default function Page() {
                 color: fontColor,
                 fill: fontColor,
                 backgroundColor: "transparent",
-                '&:disabled': {
-				cursor: 'unset',
-				color: fontColor,
-				fill: mutedColor,
-			},
-			'&:hover:not(:disabled)': {
-				backgroundColor: '#c1f2f3',
-			},
-			'&:focus': {
-				outline: 'none',
-				backgroundColor: '#aa82f3',
-			},
+                "&:disabled": {
+                    cursor: "unset",
+                    color: fontColor,
+                    fill: mutedColor,
+                },
+                "&:hover:not(:disabled)": {
+                    backgroundColor: "#c1f2f3",
+                },
+                "&:focus": {
+                    outline: "none",
+                    backgroundColor: "#aa82f3",
+                },
             },
         },
     };
 
     if (
         !session?.roles?.some((role) =>
-            ["Managers", "Internal Portal Admins", "Human Resources"].includes(role)
+            ["Managers", "Internal Portal Admins", "Human Resources"].includes(
+                role
+            )
         )
     ) {
         return <NotAuth />;
@@ -281,7 +298,9 @@ export default function Page() {
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-semibold">TSA Approvals</h1>
                     {session?.roles?.some((role) =>
-                        ["Internal Portal Admins", "Human Resources"].includes(role)
+                        ["Internal Portal Admins", "Human Resources"].includes(
+                            role
+                        )
                     ) && (
                         <TSAApprovalForm
                             creatingUser={session?.user?.name ?? ""}
@@ -316,16 +335,6 @@ export default function Page() {
                         //theme="solarized"
                     />
                 </div>
-                <Alert
-                    variant="destructive"
-                    className={errorStatus ? "" : "hidden"}
-                >
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>
-                        That manufacturer already exists.
-                    </AlertDescription>
-                </Alert>
             </div>
         </div>
     );

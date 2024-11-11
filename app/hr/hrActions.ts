@@ -272,8 +272,23 @@ export async function createTsaApproval(data: NewTsaApprovals) {
     console.log("createTsaApproval data", data);
     try {
         await db.insert(tsaApprovals).values(data);
-    } catch (error) {
-        console.error("Error creating tsa approval:", error);
+        return true;
+    } catch (error: any) {
+        console.error("Error creating tsa approval:", error.message);
+        return error.column;
     }
 }
     
+export async function updateTsaApproval(data: TsaApprovals) {
+    console.log("updateTsaApproval data", data);
+    try {
+        await db
+            .update(tsaApprovals)
+            .set(data)
+            .where(eq(tsaApprovals.id, data.id));
+        return true;
+    } catch (error: any) {
+        console.error("Error creating tsa approval:", error.message);
+        return error.column;
+    }
+}

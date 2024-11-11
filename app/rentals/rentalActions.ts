@@ -45,10 +45,16 @@ export async function createRentalNote(data: NewNote) {
 }
 
 export async function createRental(data: NewRentals) {
+    if (!data.memberId) {
+        return "Driver";
+    }
     try {
         await db.insert(rentals).values(data);
-    } catch (error) {
-        console.error("Error creating rental:", error);
+        return true;
+    } catch (error: any) {
+        console.error("Error creating tsa approval:", error);
+        console.error("Error message:", error.message);
+        return error.column;
     }
 }
 
@@ -59,8 +65,9 @@ export async function updateRental(data: Rentals) {
             .update(rentals)
             .set(data)
             .where(eq(rentals.id, data.id));
-    } catch (error) {
-        console.error("Error updating rental:", error);
+    } catch (error: any) {
+        console.error("Error creating tsa approval:", error.message);
+        return error.column;
     }
 }
 

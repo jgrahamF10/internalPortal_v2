@@ -6,7 +6,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import SideNav from "@/components/layout/sideNav";
 import SearchBar from "@/components/layout/searchBar";
-
+import { Toaster } from "@/components/ui/sonner"
 
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -64,6 +64,7 @@ export default async function RootLayout({
                         <div className="pt-16 pl-72 pr-2 py-8">
                             {children}
                         </div>
+                        <Toaster richColors position="top-right" />
                     </ThemeProvider>
                 </Providers>
             </body>

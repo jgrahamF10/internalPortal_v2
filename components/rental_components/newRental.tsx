@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/form";
 import { createRental } from "@/app/rentals/rentalActions";
 import { getProjects, getApprovedTechs } from "@/app/hr/hrActions";
+import { toast } from "sonner"
 
 // Zod schema to validate the form
 const FormSchema = z.object({
@@ -77,6 +78,7 @@ export default function NewRentalForm({
 }: NewRentalProps) {
     const [projects, setProjects] = useState<any[]>([]);
     const [drivers, setDrivers] = useState<string[]>([]);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     // Remove these lines
     const {
@@ -160,7 +162,7 @@ export default function NewRentalForm({
     
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
-        console.log("form Values", values);
+        //console.log("form Values", values);
         try {
             const projectId = projects.find(
                 (project: { projectName: string }) =>
@@ -183,19 +185,28 @@ export default function NewRentalForm({
                 dueDate: values.dueDate.toISOString(),
                 finalCharges: values.finalCharges ? values.finalCharges.toString() : null,
             };
-            console.log("rentalData", rentalData);
-            await createRental(rentalData);
-            onNoteCreated();
-            reset(); // Reset the form after successful submission
+            //console.log("rentalData", rentalData);
+            const dbResult = await createRental(rentalData);
+            console.log("dbResult", dbResult);
+            if (dbResult === true) {
+                form.reset();
+                setIsDialogOpen(false);
+                onNoteCreated();
+            } else {
+                console.log("dbResult", dbResult);
+                toast.error(`Please enter ${dbResult} info`);
+            }
         } catch (error) {
             console.error("Error creating rental:", error);
         }
     }
    
     return (
-        <Dialog key="1">
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen} key="1">
             <DialogTrigger asChild>
-                <Button className="bg-green-700 text-white hover:bg-green-800 hover:text-black">
+                <Button className="bg-green-700 text-white hover:bg-green-800 hover:text-black"
+                    onClick={() => setIsDialogOpen(true)}
+                >
                     Create Rental
                 </Button>
             </DialogTrigger>
@@ -601,14 +612,12 @@ export default function NewRentalForm({
                                     />
                                 </div>
                                 <DialogFooter className="pt-4">
-                                    <DialogClose asChild>
-                                        <Button
-                                            className="bg-green-700 text-white hover:bg-green-800 hover:text-black"
-                                            type="submit"
-                                        >
-                                            Submit
-                                        </Button>
-                                    </DialogClose>
+                                    <Button
+                                        className="bg-green-700 text-white hover:bg-green-800 hover:text-black"
+                                        type="submit"
+                                    >
+                                        Submit
+                                    </Button>
                                 </DialogFooter>
                             </form>
                         </Form>
