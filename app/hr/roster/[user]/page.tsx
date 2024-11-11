@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { AttachmentDelete } from "@/components/hr_components/deleteResume";
 import MemberAttatchment from "@/components/hr_components/memberAttachment";
 import NoteDelete from "@/components/hr_components/deleteMemberNote";
+import { decode } from "punycode";
 
 interface UserName {
     params: { user: string };
@@ -42,12 +43,12 @@ export default function MemberDetails({
     const [resumeUrl, setResumeUrl] = useState<string>("");
     const [urls, setUrls] = useState<{ [key: string]: string }>({});
     const router = useRouter();
-
+    const decondedUser = decodeURIComponent(params.user);
     //console.log("params", params.user);
 
     useEffect(() => {
         async function fetchData() {
-            const fetchedMember: any = await getMember(params.user);
+            const fetchedMember: any = await getMember(decondedUser);
             console.log("fetchedMember", fetchedMember);
             if (!fetchedMember) {
                 // Check for null or undefined
@@ -99,7 +100,7 @@ export default function MemberDetails({
         }
 
         fetchData();
-    }, [params.user]);
+    }, [decondedUser]);
 
     const errorStatusChange = (estatus: boolean) => {
         setErrorStatus(estatus);
@@ -185,7 +186,7 @@ export default function MemberDetails({
                             ) && (
                                 <EditMember
                                     params={{
-                                        person: params.user,
+                                        person: decondedUser,
                                         editingUser: session?.user?.name ?? "",
                                     }}
                                     onNoteCreated={(updatedUser) =>
@@ -435,7 +436,7 @@ export default function MemberDetails({
                         {showProjectApproval && (
                             <ProjectApprovalModal
                                 params={{
-                                    person: params.user,
+                                    person: decondedUser,
                                     uploader: session?.user?.name ?? "",
                                 }}
                                 onNoteCreated={() => refresh()}
@@ -553,7 +554,7 @@ export default function MemberDetails({
 
                         <NewNoteModal
                             params={{
-                                person: params.user,
+                                person: decondedUser,
                                 uploader: session?.user?.name ?? "",
                             }}
                             onNoteCreated={() => refresh()}

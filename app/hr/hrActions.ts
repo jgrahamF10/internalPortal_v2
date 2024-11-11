@@ -85,6 +85,8 @@ export async function getMember(id: string) {
 export async function getMemberId(username: string) {
     const preferedName = username.split("-")[0];
     const lastname = username.split("-")[1];
+    
+    console.log("preferedName", lastname);
     const results = await db.query.members.findMany({
         where: and(
             eq(members.preferedName, preferedName),
