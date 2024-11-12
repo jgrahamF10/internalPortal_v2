@@ -188,7 +188,7 @@ export type TsaApprovals = typeof tsaApprovals.$inferSelect;
 export type NewTsaApprovals = typeof tsaApprovals.$inferInsert;
 
 export const tsaApprovals2members = relations(members, ({ many }) => ({
-    tsaApprovals: many(tsaApprovals)
+    tsaApproval: many(tsaApprovals)
 }));
 
 export const members2tsaApprovals = relations(tsaApprovals, ({ one }) => ({

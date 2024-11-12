@@ -70,7 +70,7 @@ export async function getMember(id: string) {
                     project: true,
                 },
             },
-            tsaApprovals: true,
+            tsaApproval: true,
             attachment: true,
         },
     });
@@ -85,8 +85,6 @@ export async function getMember(id: string) {
 export async function getMemberId(username: string) {
     const preferedName = username.split("-")[0];
     const lastname = username.split("-")[1];
-    
-    console.log("preferedName", lastname);
     const results = await db.query.members.findMany({
         where: and(
             eq(members.preferedName, preferedName),
@@ -122,7 +120,7 @@ export async function getMemberNotes(memberId: number) {
 
 export async function createNote(data: NewMemberNotes) {
     const userName = await getMemberUserName(data.memberId);
-    console.log("userName", userName);
+    //console.log("userName", userName);
     try {
         await db.insert(memberNotes).values(data);
     } catch (error) {
@@ -178,7 +176,7 @@ export async function createProject(data: NewProject) {
 }
 
 export async function updateProject(data: NewProject) {
-    console.log("updating project", data.projectName);
+    //console.log("updating project", data.projectName);
     try {
         await db
             .update(projects)
@@ -224,7 +222,7 @@ export async function getApprovedTechs(projectName: string) {
 }
 
 export async function editMember(data: Members) {
-   console.log("data", data);
+   //console.log("data", data);
     try {
         await db
             .update(members)
@@ -248,7 +246,7 @@ export async function deleteProjectApproval(projectId: number) {
 }
 
 export async function deleteAttachment(resumeId: number) {
-    console.log("resumeId", resumeId);
+    //console.log("resumeId", resumeId);
     try {
         await db.delete(user_Attachments).where(eq(user_Attachments.id, resumeId));
         return true;
@@ -270,8 +268,19 @@ export async function getTsaApprovals() {
     return tsaData;
 }
 
+export async function getTsaApproval(memberId: number) {
+    const tsaData = await db.query.tsaApprovals.findFirst({
+        where: eq(tsaApprovals.memberId, memberId),
+        with: {
+            member: true,
+            tsaNotes: true,
+        },
+    });
+    return tsaData;
+}
+
 export async function createTsaApproval(data: NewTsaApprovals) {
-    console.log("createTsaApproval data", data);
+    //console.log("createTsaApproval data", data);
     try {
         await db.insert(tsaApprovals).values(data);
         return true;
@@ -282,7 +291,7 @@ export async function createTsaApproval(data: NewTsaApprovals) {
 }
     
 export async function updateTsaApproval(data: TsaApprovals) {
-    console.log("updateTsaApproval data", data);
+    //console.log("updateTsaApproval data", data);
     try {
         await db
             .update(tsaApprovals)

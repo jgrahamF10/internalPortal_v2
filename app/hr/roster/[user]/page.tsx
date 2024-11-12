@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { getMember } from "../../hrActions";
+import { getMember, getTsaApproval } from "../../hrActions";
 import React, { useState, useEffect } from "react";
 import { EosIconsBubbleLoading } from "@/components/spinner";
 import { useSession } from "next-auth/react";
@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { AttachmentDelete } from "@/components/hr_components/deleteResume";
 import MemberAttatchment from "@/components/hr_components/memberAttachment";
 import NoteDelete from "@/components/hr_components/deleteMemberNote";
-import { decode } from "punycode";
+import EditApprovalForm from "../../tsa/editApproval";
 
 interface UserName {
     params: { user: string };
@@ -31,6 +31,7 @@ export default function MemberDetails({
     searchParams,
 }: UserName & SearchParamProps) {
     const [member, setMember] = useState<any>(null);
+    const [tsaApproval, setTsaApproval] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [notFound, setNotFound] = useState<boolean>(false);
     const [resume, setResume] = useState<any>(null);
@@ -56,8 +57,11 @@ export default function MemberDetails({
                 setLoading(false);
                 return;
             }
-
             setMember(fetchedMember);
+            const tsaData = await getTsaApproval(fetchedMember.id);
+            if (tsaData) {
+                setTsaApproval(tsaData);
+            }
 
             // Ensure 'attachment' exists and is an array before processing
             const attachments = fetchedMember.attachment || [];
@@ -128,7 +132,9 @@ export default function MemberDetails({
 
     if (
         !session?.roles?.some((role) =>
-            ["Managers", "Human Resources", "Internal Portal Admins",].includes(role)
+            ["Managers", "Human Resources", "Internal Portal Admins"].includes(
+                role
+            )
         )
     ) {
         return <NotAuth />;
@@ -548,6 +554,111 @@ export default function MemberDetails({
                         </table>
                     </div>
                 </div>
+                {member?.tsaApproval.length > 0 && (
+                    <div className="rounded-lg shadow-md dark:shadow-slate-700 p-6 mt-8">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-2xl font-bold mb-4">
+                                TSA Approval Status
+                            </h2>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full table-auto ">
+                                <thead className="bg-tableBoarder">
+                                    <tr>
+                                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
+                                            PIV Status
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
+                                            Email Setup
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
+                                            Submission Date
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
+                                            Approval Date
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
+                                            Updated By
+                                        </th>
+                                        <th className="px-4 py-2 text-left text-xs font-medium uppercase tracking-wider">
+                                            Edit
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   
+                                        <tr
+                                            key={tsaApproval.id}
+                                            className="border-b border-gray-200 dark:border-gray-700"
+                                        >
+                                            <td
+                                                className={
+                                                    tsaApproval.approvalStatus ===
+                                                    "Rejected"
+                                                        ? "text-red-500  underline px-8"
+                                                        : tsaApproval.approvalStatus ===
+                                                          "Approved"
+                                                        ? "text-green-700  underline px-8"
+                                                        : tsaApproval.approvalStatus ===
+                                                          "In Progress"
+                                                        ? "text-blue-700  underline px-8"
+                                                        : ""
+                                                }
+                                            >
+                                                {tsaApproval.approvalStatus}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm">
+                                                {tsaApproval.piv}
+                                            </td>
+                                            <td
+                                                className={`px-4 py-2 text-sm ${
+                                                    tsaApproval.emailSetup
+                                                        ? "text-green-600"
+                                                        : "text-red-600"
+                                                }`}
+                                            >
+                                                {tsaApproval.emailSetup
+                                                    ? "Yes"
+                                                    : "No"}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm">
+                                                {tsaApproval.submittedDate.toLocaleDateString()}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm">
+                                                {tsaApproval.approvalDate}
+                                            </td>
+                                            <td className="px-4 py-2 text-sm">
+                                                {tsaApproval.updatedBy}
+                                            </td>
+                                            {session?.roles?.some((role) =>
+                                                [
+                                                    "Internal Portal Admins",
+                                                    "Human Resources",
+                                                ].includes(role)
+                                            ) && (
+                                                <td className="px-4 py-2 text-sm">
+                                                   <EditApprovalForm 
+                                                        approvalData={tsaApproval}
+                                                        creatingUser={
+                                                            session?.user
+                                                                ?.name ?? ""
+                                                        }
+                                                        onCreated={() =>
+                                                            refresh()
+                                                        }
+                                                    />
+                                                </td>
+                                            )}
+                                        </tr>
+                              
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
                 <div className=" rounded-lg shadow-md dark:shadow-slate-700 p-6 mt-8">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-2xl font-bold mb-4">Notes</h2>
