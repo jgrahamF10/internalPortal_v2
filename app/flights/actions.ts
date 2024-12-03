@@ -38,7 +38,9 @@ export async function getFlight(hotelConfirmationNumber: string) {
         with: {
             members: true,
             project: true,
-            flightNotes: true,
+            flightNotes: {
+                where: eq(notes.noteType, "Flight"),
+            },
             airlines: true,
             credits: true,
             attachments: {

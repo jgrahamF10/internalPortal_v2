@@ -92,7 +92,7 @@ export default function SideNav() {
                             {session?.roles?.some((role) =>
                                 ["Managers", "Human Resources"].includes(role)
                             ) && (
-                                <AccordionItem value="item-2">
+                                <AccordionItem value="item-1">
                                     <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
                                         <RiTeamFill /> Tech Management
                                     </AccordionTrigger>

@@ -18,13 +18,15 @@ export async function getReservations() {
 }
 
 
-export async function getRez(hotelConfirmationNumber: string) {
+export async function getHotelRez(hotelConfirmationNumber: string) {
     const rezData = await db.query.hotelRezervations.findFirst({
         where: eq(hotelRezervations.hotelConfirmationNumber, hotelConfirmationNumber),
         with: {
             memberID: true,
             hotelChain: true,
-            hotelNotes: true,
+            hotelNotes: {
+                where: eq(notes.noteType, "Hotel"),
+            },
             project: true,
             attachments: {
                 where: eq(attachments.attachmentType, "Hotel"),

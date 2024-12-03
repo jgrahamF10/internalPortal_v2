@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { getRez } from "../actions";
+import { getHotelRez } from "../actions";
 import React, { useState, useEffect } from "react";
 import { EosIconsBubbleLoading } from "@/components/spinner";
 import { useSession } from "next-auth/react";
@@ -32,7 +32,8 @@ export default function MemberDetails({ params }: HotelRez) {
 
     useEffect(() => {
         async function fetchData() {
-            const fetchRental: any = await getRez(params.confirmation);
+            const fetchRental: any = await getHotelRez(params.confirmation);
+            console.log("fetchRental", fetchRental);
             if (!fetchRental) {
                 // Check for null or undefined
                 setNotFound(true);

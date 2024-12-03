@@ -21,7 +21,9 @@ export async function getRental(rentalAgreement: string) {
         where: eq(rentals.rentalAgreement, rentalAgreement),
         with: {
             memberID: true,
-            rentalNotes: true,
+            rentalNotes: {
+                where: eq(notes.noteType, "Rental"),
+            },
             project: true,
             attachments: {
                 where: eq(attachments.attachmentType, "Rental"),

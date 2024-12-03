@@ -3,8 +3,14 @@ import myImage from "@/public/images/bg.jpg";
 import { ModeToggle } from "@/components/themeSwitcher";
 import { JSX, SVGProps, useState } from "react";
 import { signIn, auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function Page() {
+export default async function Page() {
+    const session = await auth()
+    
+    if (session) {
+        return redirect("/dashboard");
+    }
     return (
         <div className="flex min-h-screen w-full items-center justify-center bg-background transition-colors">
             <div className="absolute inset-0 z-0">
