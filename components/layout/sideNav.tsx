@@ -107,8 +107,8 @@ export default function SideNav() {
                                         </Link>
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/hr/maps/FL">
-                                            FL Contractor Map
+                                        <Link href="/hr/maps">
+                                            Tech Map
                                         </Link>
                                     </AccordionContent>
                                 </AccordionItem>

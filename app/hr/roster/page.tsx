@@ -74,7 +74,7 @@ export default function Page() {
     useEffect(() => {
         async function fetchData() {
             const members: any = await getRoster();
-            // console.log("members", members);
+            console.log("members", members);
             setMembers(members);
             setLoading(false);
         }
@@ -147,8 +147,11 @@ export default function Page() {
                     href={`/hr/roster/${row.preferedName}-${row.lastname}`}
                     className="font-medium text-green-700 capitalize hover:underline"
                 >
+                    <span className={row.status === "Active" ? "text-green-600" : "text-red-600"}>
                     {row.preferedName} {row.lastname}
-                </Link>
+                   
+                    </span> 
+                    </Link>
             ),
             sortable: true,
         },
@@ -185,9 +188,9 @@ export default function Page() {
             sortable: true,
             cell: (row: any) => (
                 <span
-                    className={row.status ? "text-green-600" : "text-red-600"}
+                    className={row.status === "Active" ? "text-green-600" : "text-red-600"}
                 >
-                    {row.status ? "Active" : "Inactive"}
+                    {row.status === "Active"  ? "Active" : "Inactive"}
                 </span>
             ),
         },
