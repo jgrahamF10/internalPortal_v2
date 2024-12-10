@@ -87,7 +87,7 @@ export default function SideNav() {
                                 </Link>
                             </div>
                         )}
-                        <Accordion type="single" collapsible>
+                        <Accordion type="single" collapsible defaultValue="item-1">
                             {/* <--------- HR --------- */}
                             {session?.roles?.some((role) =>
                                 ["Managers", "Human Resources"].includes(role)
@@ -106,7 +106,13 @@ export default function SideNav() {
                                             TSA Approvals
                                         </Link>
                                     </AccordionContent>
+                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
+                                        <Link href="/hr/maps/FL">
+                                            FL Contractor Map
+                                        </Link>
+                                    </AccordionContent>
                                 </AccordionItem>
+                                
                             )}
                             {/* <--------- Trackers --------- */}
                             {session?.roles?.some((role) =>

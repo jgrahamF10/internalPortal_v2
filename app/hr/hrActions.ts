@@ -303,3 +303,14 @@ export async function updateTsaApproval(data: TsaApprovals) {
         return error.column;
     }
 }
+
+export async function flTechs() {
+    const allMembers = await db.query.members.findMany({
+        where: and(
+            eq(members.state, "Florida"),
+            eq(members.designation, "Contractor")
+        ),
+        orderBy: asc(members.preferedName),
+    });
+    return allMembers;
+}
