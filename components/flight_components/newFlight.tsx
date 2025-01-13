@@ -125,7 +125,7 @@ export default function NewFlightForm({
     const { control: formControl } = form;
 
     const selectedProject = FormWatch({ control: formControl });
-    console.log("selectedProject", selectedProject);
+    //console.log("selectedProject", selectedProject);
 
     useEffect(() => {
         async function fetchData() {
@@ -169,7 +169,7 @@ export default function NewFlightForm({
     }, [selectedProject]);
 
     async function onSubmit(values: z.infer<typeof FormSchema>) {
-        console.log("form Values", values);
+        //console.log("form Values", values);
         try {
             const projectId = projects.find(
                 (project: { projectName: string }) =>
@@ -195,7 +195,7 @@ export default function NewFlightForm({
                 returnDate: values.returnDate ? values.returnDate.toISOString() : undefined,
                 baggageFee: values.baggageFee.toString(),
             };
-            console.log("flightData", flightData);
+            //console.log("flightData", flightData);
             await createFlight(flightData);
             onNoteCreated();
             reset();

@@ -130,7 +130,6 @@ export const flights = pgTable(
             scale: 2,
         }).notNull(),
         totalCost: numeric("totalCost", { precision: 12, scale: 2 }).notNull(),
-        cancelled: boolean("cancelled").default(false),
         verified: boolean("verified").default(false),
         archived: boolean("archived").default(false),
         canceled: boolean("canceled").default(false),
@@ -187,6 +186,7 @@ export const flightCredits = pgTable("flightCredit", {
     id: bigserial("id", { mode: "number" }).primaryKey(),
     flightId: integer("flightId").notNull(),
     memberId: integer("memberId").notNull(),
+    airlinesID: integer("airlinesID").notNull().default(16),
     amount: real("amount").notNull(),
     expirationDate: date("expirationDate"),
     creator: varchar("creator", { length: 20 }).notNull(),
@@ -204,7 +204,7 @@ export const member2flightCredits = relations(flightCredits, ({ one }) => ({
     }),
 }));
 export const flightCredits2members = relations(members, ({ many }) => ({
-    memberId: many(flightCredits),
+    memberFlightCredit: many(flightCredits),
 }));
 
 export const credits2Flight = relations(flightCredits, ({ one }) => ({
@@ -228,12 +228,11 @@ export const creditUsage = pgTable(
     "creditUsage",
     {
         id: bigserial("id", { mode: "number" }).primaryKey(),
-        creditId: integer("flightId").notNull(),
+        creditId: integer("creditId"),
         flightId: integer("flightId").notNull(),
         memberId: integer("memberId"),
         amount: real("amount").notNull(),
-        creator: varchar("creator", { length: 20 }).notNull(),
-        
+        creator: varchar("creator", { length: 20 }).notNull(), 
         createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
     },
     (table) => ({

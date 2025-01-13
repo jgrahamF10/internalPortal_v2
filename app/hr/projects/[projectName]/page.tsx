@@ -18,6 +18,7 @@ import {
     TableCell,
 } from "@/components/ui/table";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Calendar } from './Calendar'
 import { JSX, SVGProps } from "react";
 import { getApprovedTechs } from "../../hrActions";
 import { EditProjectForm } from "@/components/hr_components/editProject";
@@ -143,7 +144,7 @@ export default function ProjectPage({ params }: Project) {
                     </div>
                 </CardContent>
             </Card>
-            <Card>
+            <Card className="mb-8">
                 <CardHeader>
                     <CardTitle>Approved Technicians</CardTitle>
                 </CardHeader>
@@ -190,6 +191,14 @@ export default function ProjectPage({ params }: Project) {
                             ))}
                         </TableBody>
                     </Table>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Calendar</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Calendar />
                 </CardContent>
             </Card>
         </div>

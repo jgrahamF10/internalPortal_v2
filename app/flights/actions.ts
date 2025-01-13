@@ -16,7 +16,8 @@ import {
     Flights,
     airline,
 } from "@/db/schema/tracker_db";
-import { eq, ne, desc, asc } from "drizzle-orm/expressions";
+import { sql } from "drizzle-orm";
+import { eq, ne, desc, asc, and } from "drizzle-orm/expressions";
 
 export async function getFlights() {
     const data = await db.query.flights.findMany({
@@ -35,21 +36,51 @@ export async function getFlights() {
 export async function getFlight(hotelConfirmationNumber: string) {
     const rezData = await db.query.flights.findFirst({
         where: eq(flights.flightConfirmationNumber, hotelConfirmationNumber),
+        
         with: {
-            members: true,
+            members: {
+                with: {
+                    memberFlightCredit: {
+                        where: and(
+                            eq(flightCredits.flightId, flights.id),
+                            eq(flightCredits.memberId, flights.memberId)
+                        ),
+                    } 
+                },
+                columns: {
+                    id: true,
+                    firstname: true,
+                    lastname: true, 
+                },
+                extras: {
+                    technician: sql<string>`concat(${members.firstname}, ' ', ${members.lastname})`.as('technician'),
+                    },
+            },
             project: true,
             flightNotes: {
                 where: eq(notes.noteType, "Flight"),
             },
             airlines: true,
-            credits: true,
             attachments: {
                 where: eq(attachments.attachmentType, "Flight"),
             },
         },
     });
     if (rezData) {
-        return rezData;
+        // console.log("rezData", rezData.airlinesID);
+        const withCredits = await db.query.flightCredits.findMany({
+            where: and(
+                eq(flightCredits.flightId, rezData.id),
+                eq(flightCredits.memberId, rezData.memberId),
+                eq(flightCredits.used, false),
+            ),
+            with: {
+                creditUsage: true,
+            }
+            
+        });
+        // console.log("withCredits", withCredits);
+        return { ...rezData, credits: withCredits };
     } else {
         return null;
     }
@@ -146,8 +177,13 @@ export async function getAllFLightCredits() {
                 },
 
             },
-            member: true,
-            //flight: true,
+            member: {
+                columns: {
+                    firstname: true,
+                    lastname: true,
+                    
+                }
+            }
         },
     });
     return creditData;

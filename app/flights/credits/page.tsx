@@ -140,7 +140,7 @@ export default function Page() {
             selector: (row: any) => row.flight.flightConfirmationNumber,
             cell: (row: any) => (
                 <Link
-                    href={`/flights/${row.flightConfirmationNumber}`}
+                    href={`/flights/${row.flight.flightConfirmationNumber}`}
                     className="font-bold text-lg text-green-700 capitalize hover:underline"
                 >
                     <span

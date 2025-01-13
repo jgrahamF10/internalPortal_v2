@@ -12,6 +12,12 @@ import { AttachmentDelete } from "@/components/flight_components/deleteAttachmen
 import FlightAttatchment from "@/components/flight_components/flightAttachment";
 import NewCreditForm from "@/components/flight_components/newCredit";
 import NoteDelete from "@/components/deleteNote";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import ApplyCredit from "../applycredits";
 
 interface FlightConfirm {
     params: { confirmation: string };
@@ -21,7 +27,7 @@ export default function MemberDetails({ params }: FlightConfirm) {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [notFound, setNotFound] = useState<boolean>(false);
-    const [availableCredit, setAvailableCredit] = useState<any>(null);
+    const [availableCredit, setAvailableCredit] = useState<number>(0);
     const [auditLogVisible, setAuditLogVisible] = useState<boolean>(false);
     const { data: session } = useSession();
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
@@ -42,12 +48,25 @@ export default function MemberDetails({ params }: FlightConfirm) {
             console.log("FlightData", fetchFlight);
             setData(fetchFlight);
             const credits = fetchFlight.credits || [];
-            const totalAvailableCredit = credits.reduce((total: number, item: { amount: number }) => {
-                const amount = item.amount;
-                // If creditType is "Credit", add the amount; if "Debit", subtract the amount
-                return total + amount;
-              }, 0);
-            setAvailableCredit(totalAvailableCredit);
+            const totalAvailableCredit = credits.reduce(
+                (total: number, item: { amount: number }) => {
+                    const amount = item.amount;
+                    // If creditType is "Credit", add the amount; if "Debit", subtract the amount
+                    return total + amount;
+                },
+                0
+            );
+            const creditUsage =
+                fetchFlight.credits[0]?.creditUsage.reduce(
+                    (total: number, item: { amount: number }) => {
+                        const amount = item.amount;
+                        return total + amount;
+                    },
+                    0
+                ) || 0;
+            console.log("total credits", totalAvailableCredit, creditUsage);
+            setAvailableCredit(totalAvailableCredit - creditUsage);
+
             // Ensure 'attachment' exists and is an array before processing
             const attachments = fetchFlight.attachments || [];
 
@@ -68,7 +87,6 @@ export default function MemberDetails({ params }: FlightConfirm) {
                     }
                 })
             );
-            console.log("urlMap", urlMap);
             // Update state with the fetched URLs
             setUrls(urlMap);
 
@@ -261,26 +279,40 @@ export default function MemberDetails({ params }: FlightConfirm) {
                                 flightNum={data?.id}
                                 memberNum={data?.members?.id}
                                 creatingUser={session?.user?.name ?? ""}
-                                onNoteCreated={() => refresh()} />
+                                onNoteCreated={() => refresh()}
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="block text-md font-bold">
-                                Available Creidts:{" "}
-                                <span className=" font-bold text-lg underline">
+                                Available Credits:{" "}
+                                <span className=" font-bold text-lg underline pr-4">
                                     {availableCredit === 0
                                         ? "No Credits"
                                         : `$${availableCredit}`}
                                 </span>
+                                {availableCredit === 0 ? (
+                                    ""
+                                ) : (
+                                    <Popover>
+                                        <PopoverTrigger>
+                                            Apply Credit
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-96">
+                                            <ApplyCredit
+                                                credit={availableCredit}
+                                                flightNum={data?.id}
+                                                creditOwnerID={data?.members?.id}
+                                                creatingUser={
+                                                    session?.user?.name ?? ""
+                                                }
+                                                    onNoteCreated={() => refresh()}
+                                                creditId = {data?.credits[0]?.id}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
                             </div>
-                            {/* 
-                            <CreditForm
-                                flightNum={data?.id}
-                                memberNum={data?.members?.id}
-                                creatingUser={session?.user?.name ?? ""}
-                                onNoteCreated={() => refresh()}
-                            />
-                            */}
                         </div>
                         {/* 
                         <div className="mt-4">

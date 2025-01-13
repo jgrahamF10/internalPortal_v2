@@ -6,11 +6,6 @@ import { useState } from "react";
 import Image from "next/image";
 import f10Logo from "@/public/f10_logo.png";
 import {
-    Collapsible,
-    CollapsibleTrigger,
-    CollapsibleContent,
-} from "@/components/ui/collapsible";
-import {
     Accordion,
     AccordionContent,
     AccordionItem,
@@ -18,6 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { useSession, signOut } from "next-auth/react";
 import { ModeToggle } from "@/components/themeSwitcher";
+import { Separator } from "@/components/ui/separator"
 
 export default function SideNav() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -132,6 +128,13 @@ export default function SideNav() {
                                             Flight Tracker
                                         </Link>
                                     </AccordionContent>
+                                    <Separator />
+                                    <AccordionContent className="flex h-9 items-center px-12 py-2 text-sm transition-colors hover:bg-gray-700">
+                                        <Link href="/flights/credits">
+                                            - Flight Credits
+                                        </Link>
+                                    </AccordionContent>
+                                    <Separator />
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
                                         <Link href="/rentals">
                                             Rental Car Tracker

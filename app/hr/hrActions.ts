@@ -18,11 +18,11 @@ import {
     NewTsaNotes,
     user_Attachments
 } from "@/db/schema/member_management";
-import { and, eq, sql, asc, desc } from "drizzle-orm";
+import { and, eq, sql, asc, desc, gte, lte } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import exp from "constants";
-import { attachments } from "@/db/schema/tracker_db";
+import { attachments, rentals } from "@/db/schema/tracker_db";
 
 export async function getProjects() {
     const fetchedProjects = await db.query.projects.findMany({
@@ -327,4 +327,19 @@ export async function TechMap(selectedState: "Alabama" | "Alaska" | "Arizona" | 
         orderBy: asc(members.preferedName),
     });
     return allMembers;
+}
+
+export async function getRentals(calQuery: { projectId: number, toDate: Date, fromDate: Date }) {
+    const rentalData = await db.query.rentals.findMany({
+        where: and(
+            gte(rentals.returnDate, calQuery.fromDate.toISOString()),
+            lte(rentals.returnDate, calQuery.toDate.toISOString())
+        ),
+        orderBy: [desc(rentals.returnDate)],
+        with: {
+            memberID: true,
+            project: {where: eq(projects.id, calQuery.projectId),}
+        },
+    });
+    return rentalData;            
 }

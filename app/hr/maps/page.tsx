@@ -220,7 +220,7 @@ export default function StateMap() {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    height: "100vh",
+                    height: "100",
                 }}
             >
                 <EosIconsBubbleLoading />
