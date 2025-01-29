@@ -72,7 +72,7 @@ export default function Page() {
     useEffect(() => {
         async function fetchData() {
             const flightData: any = await getFlights();
-            console.log("Flights", flightData);
+            //console.log("Flights", flightData);
             setData(flightData);
             setLoading(false);
         }

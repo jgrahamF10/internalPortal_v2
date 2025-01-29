@@ -67,8 +67,8 @@ export default function MemberDetails({ params }: FlightConfirm) {
                     },
                     0
                 ) || 0;
-            console.log("total credits", totalAvailableCredit, creditUsage);
-            setAvailableCredit(totalAvailableCredit - creditUsage);
+            //console.log("total credits", totalAvailableCredit, creditUsage);
+            setAvailableCredit(Number((totalAvailableCredit - creditUsage).toFixed(2)));
 
             // Ensure 'attachment' exists and is an array before processing
             const attachments = fetchFlight.attachments || [];
@@ -300,7 +300,7 @@ export default function MemberDetails({ params }: FlightConfirm) {
                                 ) : (
                                     <Popover>
                                         <PopoverTrigger>
-                                            Apply Credit
+                                            <span className="text-green-700 hover:text-green-800 hover:underline">Apply Credit</span>
                                         </PopoverTrigger>
                                         <PopoverContent className="w-96">
                                             <ApplyCredit
