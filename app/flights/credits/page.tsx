@@ -63,7 +63,7 @@ export default function Page() {
     const [data, setData] = useState<any[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
-    const [inactives, setInactives] = useState<boolean>(false);
+    const [inactives, setInactives] = useState<boolean>(true);
     const [filterText, setFilterText] = useState<string>("");
     const [resetPaginationToggle, setResetPaginationToggle] =
         useState<boolean>(false);
@@ -180,10 +180,11 @@ export default function Page() {
             name: "Credits Amount",
             selector: (row: any) => row.amount,
             sortable: true,
+            center: true,
             cell: (row: any) => (
                 <span className="text-green-700">${row.amount ?? 0}</span>
             ),
-            center: true,
+            
         },
         {
             name: "Credits Used",
@@ -221,7 +222,7 @@ export default function Page() {
                 <span
                     className={row.used ? "text-green-600" : "text-red-600"}
                 >
-                    {row.verified ? "Yes" : "No"}
+                    {row.verified ? "No" :"Yes"}
                 </span>
             ),
         },
@@ -308,7 +309,7 @@ export default function Page() {
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl min-w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold">Flight Tracker</h1>
+                    <h1 className="text-2xl font-semibold">Flight Credit Tracker</h1>
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (

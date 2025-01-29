@@ -42,7 +42,7 @@ export async function getFlight(hotelConfirmationNumber: string) {
                 with: {
                     memberFlightCredit: {
                         where: and(
-                            eq(flightCredits.flightId, flights.id),
+                            eq(flightCredits.used, false),
                             eq(flightCredits.memberId, flights.memberId)
                         ),
                     } 
@@ -151,7 +151,7 @@ export async function getFlightCredits(flightId: number) {
 }
 
 export async function createFlightCredits(data: NewFlightCredits) {
-    //console.log("createFlightCredits data", data);
+    console.log("createFlightCredits data", data);
     try {
         await db.insert(flightCredits).values(data);
     } catch (error) {
@@ -185,6 +185,7 @@ export async function getAllFLightCredits() {
                 }
             }
         },
+        
     });
     return creditData;
 }

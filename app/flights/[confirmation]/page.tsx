@@ -47,12 +47,15 @@ export default function MemberDetails({ params }: FlightConfirm) {
             }
             console.log("FlightData", fetchFlight);
             setData(fetchFlight);
-            const credits = fetchFlight.credits || [];
+            const credits = fetchFlight.members.memberFlightCredit || [];
+            console.log("Credits", credits);
             const totalAvailableCredit = credits.reduce(
-                (total: number, item: { amount: number }) => {
-                    const amount = item.amount;
-                    // If creditType is "Credit", add the amount; if "Debit", subtract the amount
-                    return total + amount;
+                (total: number, item: { amount: number; airlinesID: number }) => {
+                    // Only add amount if airlinesID is 12
+                    if (item.airlinesID === fetchFlight.airlinesID) {
+                        return total + item.amount;
+                    }
+                    return total; // If not airlinesID 12, just return the current total without adding
                 },
                 0
             );
@@ -279,6 +282,7 @@ export default function MemberDetails({ params }: FlightConfirm) {
                                 flightNum={data?.id}
                                 memberNum={data?.members?.id}
                                 creatingUser={session?.user?.name ?? ""}
+                                airlinesID={data?.airlinesID}
                                 onNoteCreated={() => refresh()}
                             />
                         </div>

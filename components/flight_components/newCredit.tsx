@@ -55,6 +55,7 @@ interface FormProps {
     creatingUser: string;
     flightNum: number;
     memberNum: number;
+    airlinesID: number;
 }
 
 export default function NewCreditForm({
@@ -62,6 +63,7 @@ export default function NewCreditForm({
     creatingUser,
     flightNum,
     memberNum,
+    airlinesID,
 }: FormProps) {
     const [projects, setProjects] = useState<any[]>([]);
     const [technicians, setTechnicians] = useState<string[]>([]);
@@ -99,6 +101,7 @@ export default function NewCreditForm({
                 flightId: flightNum,
                 creator: creatingUser,
                 createdDate: new Date(),
+                airlinesID: airlinesID,
                 amount: values.amount,
                 expirationDate: values.expirationDate.toISOString(),
             };
