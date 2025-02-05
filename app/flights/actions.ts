@@ -177,6 +177,7 @@ export async function getAllFLightCredits() {
                 },
 
             },
+            creditUsage: true,
             member: {
                 columns: {
                     firstname: true,

@@ -48,7 +48,7 @@ export default function MemberDetails({ params }: FlightConfirm) {
             console.log("FlightData", fetchFlight);
             setData(fetchFlight);
             const credits = fetchFlight.members.memberFlightCredit || [];
-            console.log("Credits", credits);
+            //console.log("Credits", credits);
             const totalAvailableCredit = credits.reduce(
                 (total: number, item: { amount: number; airlinesID: number }) => {
                     // Only add amount if airlinesID is 12

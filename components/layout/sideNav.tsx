@@ -149,7 +149,10 @@ export default function SideNav() {
                                         <GraphIcon /> Manager Tools
                                     </AccordionTrigger>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/">TBD</Link>
+                                        <Link href="/">Vehicle Check Out</Link>
+                                    </AccordionContent>
+                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
+                                        <Link href="/">Internal Inventory </Link>
                                     </AccordionContent>
                                 </AccordionItem>
                             )}

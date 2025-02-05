@@ -73,7 +73,7 @@ export default function Page() {
     useEffect(() => {
         async function fetchData() {
             const flightData: any = await getAllFLightCredits();
-            // console.log("flight credits", flightData);
+            console.log("flight credits", flightData);
             setData(flightData);
             setLoading(false);
         }
@@ -192,13 +192,13 @@ export default function Page() {
             sortable: true,
             center: true,
             cell: (row: any) => (
-                <span className="text-green-700">
-                    $
-                    {(
-                        (Number(row?.totalCost) || 0) +
-                        (Number(row?.baggageFee) || 0)
-                    ).toFixed(2)}
-                </span>
+                <div>
+            {row.creditUsage?.map((credit: any) => (
+                <div key={credit.id} className="text-red-700">
+                    ${credit.amount ?? 0}
+                </div>
+            ))}
+        </div>
             ),
         },
         {
@@ -218,13 +218,17 @@ export default function Page() {
             selector: (row: any) => row.used,
             sortable: true,
             center: true,
-            cell: (row: any) => (
-                <span
-                    className={row.used ? "text-green-600" : "text-red-600"}
-                >
-                    {row.verified ? "No" :"Yes"}
-                </span>
-            ),
+            cell: (row: any) => {
+                const totalCreditUsage = row.creditUsage?.reduce((sum: number, credit: any) => 
+                    sum + (credit.amount || 0), 0) || 0;
+                    
+                const isFullyUsed = totalCreditUsage === row.amount;
+                return (
+                    <span className={isFullyUsed ? "text-green-600" : "text-red-600"}>
+                        {isFullyUsed ? "Yes" : "No"}
+                    </span>
+                );
+            }
         },
     ];
 
