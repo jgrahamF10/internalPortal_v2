@@ -20,13 +20,13 @@ export default function ReservationDetailsModal({ reservation, onClose }: Reserv
             <strong>Vehicle:</strong> {vehicle?.name}
           </p>
           <p>
-            <strong>Type:</strong> {vehicle?.type}
+            <strong>Usage:</strong> {vehicle?.type}
           </p>
           <p>
-            <strong>Start:</strong> {reservation.start.toLocaleString()}
+            <strong>Start:</strong> {reservation.start.toLocaleDateString()}
           </p>
           <p>
-            <strong>End:</strong> {reservation.end.toLocaleString()}
+            <strong>End:</strong> {reservation.end.toLocaleDateString()}
           </p>
         </div>
       </DialogContent>

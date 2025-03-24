@@ -13,7 +13,6 @@ import CreateUserForm from "@/components/hr_components/newMember";
 import { ThemeColors } from "@/lib/utils";
 import NotAuth from "@/components/auth/notAuth";
 
-
 const TextField = styled.input`
     height: 32px;
     width: 200px;
@@ -70,7 +69,7 @@ export default function Page() {
         useState<boolean>(false);
     const { data: session } = useSession();
     const { backgroundColor, fontColor, mutedColor } = ThemeColors();
-    
+
     useEffect(() => {
         async function fetchData() {
             const members: any = await getRoster();
@@ -147,11 +146,16 @@ export default function Page() {
                     href={`/hr/roster/${row.preferedName}-${row.lastname}`}
                     className="font-medium text-green-700 capitalize hover:underline"
                 >
-                    <span className={row.status === "Active" ? "text-green-600" : "text-red-600"}>
-                    {row.preferedName} {row.lastname}
-                   
-                    </span> 
-                    </Link>
+                    <span
+                        className={
+                            row.status === "Active"
+                                ? "text-green-600"
+                                : "text-red-600"
+                        }
+                    >
+                        {row.preferedName} {row.lastname}
+                    </span>
+                </Link>
             ),
             sortable: true,
         },
@@ -188,9 +192,30 @@ export default function Page() {
             sortable: true,
             cell: (row: any) => (
                 <span
-                    className={row.status === "Active" ? "text-green-600" : "text-red-600"}
+                    className={
+                        row.status === "Active"
+                            ? "text-green-600"
+                            : "text-red-600"
+                    }
                 >
-                    {row.status === "Active"  ? "Active" : "Inactive"}
+                    {row.status === "Active" ? "Active" : "Inactive"}
+                </span>
+            ),
+        },
+        {
+            name: "Idema Cleared",
+            selector: (row: any) =>
+                row.projectIntake?.[0].bgStatus ? "Approved" : "Not Approved",
+            sortable: true,
+            cell: (row: any) => (
+                <span
+                    className={
+                        row.ProjectIntake?.[0]?.bgStatus === "Completed"
+                            ? "text-green-600"
+                            : "text-red-600"
+                    }
+                >
+                    {row.ProjectIntake?.[0]?.bgStatus === "Completed" ? "Approved" : "Not Approved"}
                 </span>
             ),
         },
@@ -251,18 +276,18 @@ export default function Page() {
                 color: fontColor,
                 fill: fontColor,
                 backgroundColor: "transparent",
-                '&:disabled': {
-				cursor: 'unset',
-				color: fontColor,
-				fill: mutedColor,
-			},
-			'&:hover:not(:disabled)': {
-				backgroundColor: '#c1f2f3',
-			},
-			'&:focus': {
-				outline: 'none',
-				backgroundColor: '#aa82f3',
-			},
+                "&:disabled": {
+                    cursor: "unset",
+                    color: fontColor,
+                    fill: mutedColor,
+                },
+                "&:hover:not(:disabled)": {
+                    backgroundColor: "#c1f2f3",
+                },
+                "&:focus": {
+                    outline: "none",
+                    backgroundColor: "#aa82f3",
+                },
             },
         },
     };
@@ -282,7 +307,9 @@ export default function Page() {
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-2xl font-semibold">Tech Roster</h1>
                     {session?.roles?.some((role) =>
-                        ["Internal Portal Admins", "Human Resources"].includes(role)
+                        ["Internal Portal Admins", "Human Resources"].includes(
+                            role
+                        )
                     ) && (
                         <CreateUserForm
                             errorStatusChange={errorStatusChange}

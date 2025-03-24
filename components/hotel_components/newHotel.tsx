@@ -116,7 +116,6 @@ export default function NewHotelForm({
     const { control: formControl } = form;
 
     const selectedProject = FormWatch({ control: formControl });
-    console.log("selectedProject", selectedProject);
 
     useEffect(() => {
         async function fetchData() {
@@ -182,7 +181,7 @@ export default function NewHotelForm({
                 departureDate: values.departureDate.toISOString(),
                 finalCharges: values.finalCharges.toString(),
             };
-            console.log("rentalData", rezData);
+           
             await createRez(rezData);
             onNoteCreated();
             reset(); // Reset the form after successful submission

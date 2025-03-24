@@ -16,10 +16,7 @@ import {
     numeric,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
-import { arch } from "os";
 import { projects, members } from "./member_management";
-import { create } from "domain";
-import { TypeOf } from "zod";
 
 export const vendors = pgEnum("vendors", [
     "Hertz",

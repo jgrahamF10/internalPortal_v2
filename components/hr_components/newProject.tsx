@@ -56,7 +56,10 @@ export function NewProjecForm({ errorStatusChange }: any) {
                                 Project
                             </Label>
                             <Input
-                                {...register("projectName", { required: true })}
+                                {...register("projectName", {
+                                    required: true,
+                                    setValueAs: (v: string) => v.trim(),
+                                })}
                                 className="col-span-2"
                                 id="name"
                                 placeholder="Enter a project name"

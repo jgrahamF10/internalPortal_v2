@@ -83,7 +83,7 @@ export default function SideNav() {
                                 </Link>
                             </div>
                         )}
-                        <Accordion type="single" collapsible defaultValue="item-1">
+                        <Accordion type="single" collapsible>
                             {/* <--------- HR --------- */}
                             {session?.roles?.some((role) =>
                                 ["Managers", "Human Resources"].includes(role)
@@ -149,7 +149,7 @@ export default function SideNav() {
                                         <GraphIcon /> Manager Tools
                                     </AccordionTrigger>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
-                                        <Link href="/">Vehicle Check Out</Link>
+                                        <Link href="/vehicles">Vehicle Check Out</Link>
                                     </AccordionContent>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
                                         <Link href="/">Internal Inventory </Link>

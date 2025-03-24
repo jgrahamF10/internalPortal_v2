@@ -3,7 +3,7 @@ import { addDays, startOfDay } from "date-fns"
 export interface Vehicle {
   id: string
   name: string
-  type: string
+  use: string
 }
 
 export interface Reservation {
@@ -15,9 +15,9 @@ export interface Reservation {
 }
 
 export const vehicles: Vehicle[] = [
-  { id: "1", name: "Toyota Camry", type: "Sedan" },
-  { id: "2", name: "Ford F-150", type: "Truck" },
-  { id: "3", name: "Honda CR-V", type: "SUV" },
+  { id: "1", name: "Toyota Camry", use: "Sedan" },
+  { id: "2", name: "Ford F-150", use: "Truck" },
+  { id: "3", name: "Honda CR-V", use: "SUV" },
 ]
 
 export const generateReservations = (count: number): Reservation[] => {

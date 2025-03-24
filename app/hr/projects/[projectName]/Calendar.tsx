@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MonthView } from './MonthView';
 import { TaskList } from './TaskList';
 import { Task } from '@/types/calendar';
@@ -8,35 +8,27 @@ import { Button } from "@/components/ui/button"
 import { CalendarIcon } from 'lucide-react'
 import { DateRange } from "react-day-picker"
 import { DateRangePicker } from "@/components/ui/date-range-picker"
+import { getTasks } from './actions';
 
-// Mock data for tasks (unchanged)
-const mockTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Fix AC Unit',
-    date: new Date(2024, 11, 15, 10, 0),
-    description: 'Repair faulty AC unit at 123 Main St.'
-  },
-  {
-    id: '2',
-    title: 'Install New Wiring',
-    date: new Date(2024, 11, 18, 14, 30),
-    description: 'Install new electrical wiring at 456 Elm St.'
-  },
-  {
-    id: '3',
-    title: 'Plumbing Inspection',
-    date: new Date(2024, 11, 22, 9, 0),
-    description: 'Conduct plumbing inspection at 789 Oak St.'
-  },
-];
 
-export function Calendar() {
+export function Calendar({ techIds }: { techIds: any[] }) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(new Date().setMonth(new Date().getMonth() + 1))
   });
+  const [tasks, setTasks] = useState<Task[]>([]);
+
+  useEffect(() => {
+    if (techIds.length > 0) {
+      const fetchData = async () => {
+        const response = await getTasks(techIds);
+        setTasks(response);
+      }
+      fetchData();
+    } 
+    }, [techIds]);
+  
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
     if (range?.from && range?.to) {
@@ -44,15 +36,28 @@ export function Calendar() {
     }
   };
 
-  console.log("dateRange", dateRange);
+ console.log("tasks", tasks);
 
-  const filteredTasks = mockTasks.filter(
-    task => dateRange?.from && dateRange?.to && task.date >= dateRange.from && task.date <= dateRange.to
-  );
+ const filteredTasks = tasks.filter(task => {
+  
+  if (!dateRange?.from || !dateRange?.to) {
+    console.log("Date range incomplete");
+    return false;
+  }
+  
+  // Convert to timestamp for reliable comparison
+  const taskTime = new Date(task.date).getTime();
+  const fromTime = dateRange.from.getTime();
+  const toTime = dateRange.to.getTime();
+  
+  const isInRange = taskTime >= fromTime && taskTime <= toTime;
+  console.log("Is in range:", isInRange);
+  return isInRange;
+});
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-lg font-bold mb-4">Date Selection</h2>
+      <h2 className="text-lg font-bold mb-4">Date Selection </h2>
       <div className="mb-4">
         <DateRangePicker
           date={dateRange}

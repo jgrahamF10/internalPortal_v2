@@ -39,6 +39,7 @@ export default function ProjectPage({ params }: Project) {
     const [project, setProject] = useState<any>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
+    const [techIds, setTechIds] = useState<any[]>([]);
 
     useEffect(() => {
         async function fetchData() {
@@ -50,6 +51,7 @@ export default function ProjectPage({ params }: Project) {
                 setTechnicians(response);
             } else if (response && "technicians" in response) {
                 setTechnicians(response.technicians);
+                setTechIds(response.technicians.map((tech: any) => tech.memberId));
                 setLoading(false);
             }
 
@@ -59,6 +61,8 @@ export default function ProjectPage({ params }: Project) {
         }
         fetchData();
     }, [projectName]);
+
+   
 
     const errorStatusChange = (estatus: boolean) => {
         setErrorStatus(estatus);
@@ -193,12 +197,15 @@ export default function ProjectPage({ params }: Project) {
                     </Table>
                 </CardContent>
             </Card>
+            
             <Card>
                 <CardHeader>
                     <CardTitle>Calendar</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <Calendar />
+                    <Calendar
+                        techIds={techIds}
+                    />
                 </CardContent>
             </Card>
         </div>

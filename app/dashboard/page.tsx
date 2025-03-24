@@ -23,10 +23,10 @@ export default function CurrentMonthOverview() {
     useEffect(() => {
         // Demo data
         const demoAssets = [
-            { assetModel: { model: "Model A" }, site: { locationGroup: { locationGroupName: "Location 1", locationGroup_id: 3 } }, installDate: new Date() },
-            { assetModel: { model: "Model B" }, site: { locationGroup: { locationGroupName: "Location 2", locationGroup_id: 4 } }, installDate: new Date() },
-            { assetModel: { model: "Model A" }, site: { locationGroup: { locationGroupName: "Location 1", locationGroup_id: 3 } }, installDate: null },
-            { assetModel: { model: "Model C" }, site: { locationGroup: { locationGroupName: "Location 3", locationGroup_id: 5 } }, installDate: new Date() },
+            { assetModel: { model: "Flights" }, site: { locationGroup: { locationGroupName: "Location 1", locationGroup_id: 3 } }, installDate: new Date() },
+            { assetModel: { model: "Rentals" }, site: { locationGroup: { locationGroupName: "Location 2", locationGroup_id: 4 } }, installDate: new Date() },
+            { assetModel: { model: "Flights" }, site: { locationGroup: { locationGroupName: "Location 1", locationGroup_id: 3 } }, installDate: null },
+            { assetModel: { model: "Hotels" }, site: { locationGroup: { locationGroupName: "Location 3", locationGroup_id: 5 } }, installDate: new Date() },
         ];
 
         setAssets(demoAssets);
@@ -93,9 +93,9 @@ export default function CurrentMonthOverview() {
         <main className="flex-1 overflow-auto h-screen-full p-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card className="md:col-span-2 lg:col-span-1">
                 <CardHeader>
-                    <CardTitle>Asset Count</CardTitle>
+                    <CardTitle>Active Rentals</CardTitle>
                     <CardDescription>
-                        Total count of Assets in the inventory
+                        Total count of rentals with technicans
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -144,9 +144,9 @@ export default function CurrentMonthOverview() {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Asset Breakdown</CardTitle>
+                    <CardTitle>Cost Breakdown</CardTitle>
                     <CardDescription>
-                        Distribution of assets brands in the inventory
+                        Distribution of cost by category
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -158,7 +158,7 @@ export default function CurrentMonthOverview() {
             </Card>
             <Card>
                 <CardHeader>
-                    <CardTitle>Location Breakdown</CardTitle>
+                    <CardTitle>Cost by Project</CardTitle>
                     <CardDescription>
                         Distribution of assets by county
                     </CardDescription>
@@ -255,9 +255,9 @@ function PieChart(props: any) {
         <div {...props}>
             <ResponsivePie
                 data={[
-                    { id: "Sig Pad", value: 100,  },
-                    { id: "Camera", value: 100 },
-                    { id: "Scanner", value: 100 },
+                    { id: "Rentals", value: 100,  },
+                    { id: "Hotels", value: 100 },
+                    { id: "Flights", value: 100 },
                 ]}
                 sortByValue
                 margin={{ top: 10, right: 10, bottom: 10, left: 10 }}

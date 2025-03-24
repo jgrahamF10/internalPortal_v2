@@ -1,6 +1,6 @@
-import VehicleReservationCalendar from "@/components/VehicleReservationCalendar"
+import VehicleReservationCalendar from "./rezCal"
 
-export default function Home() {
+export default function Vehicles() {
   return (
     <main className="min-h-screen bg-background">
       <VehicleReservationCalendar />

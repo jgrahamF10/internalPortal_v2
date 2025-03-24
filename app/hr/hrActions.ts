@@ -20,7 +20,6 @@ import {
 } from "@/db/schema/member_management";
 import { and, eq, sql, asc, desc, gte, lte } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
 import exp from "constants";
 import { attachments, rentals } from "@/db/schema/tracker_db";
 
@@ -38,6 +37,12 @@ export async function getProjects() {
 
 export async function getRoster() {
     const allMembers = await db.query.members.findMany({
+        with: {
+            ProjectIntake:
+            {
+                where: and(eq(projectBGStatus.projectId, 28), eq(projectBGStatus.bgStatus, "Completed"))
+            }
+        },
         orderBy: asc(members.preferedName),
     });
     return allMembers;

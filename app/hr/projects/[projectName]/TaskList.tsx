@@ -25,7 +25,7 @@ export function TaskList({ tasks, selectedDate }: TaskListProps) {
         <Card key={task.id}>
           <CardHeader>
             <CardTitle>{task.title}</CardTitle>
-            <CardDescription>{task.date.toLocaleTimeString()}</CardDescription>
+            <CardDescription>{task.date.toLocaleDateString()}</CardDescription>
           </CardHeader>
           <CardContent>
             <p>{task.description}</p>
