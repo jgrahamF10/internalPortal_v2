@@ -16,7 +16,7 @@ import {
 import { start } from "repl";
 
 
-export const f10Vehicles = pgTable("f10_vehicle",
+export const f10Vehicles = pgTable("f10Vehicles",
     {
         id: bigserial("id", { mode: "number" }).primaryKey(),
         vehicleName: varchar("vehicleName", { length: 20 }).notNull(),
@@ -25,6 +25,9 @@ export const f10Vehicles = pgTable("f10_vehicle",
         color: varchar("color", { length: 10 }).notNull(),
     }
 );
+
+export type F10Vehicles = typeof f10Vehicles.$inferSelect;
+export type NewF10Vehicles = typeof f10Vehicles.$inferInsert;
 
 export const f10VehiclesRezs = pgTable("f10VehiclesRez",
     {
@@ -36,8 +39,12 @@ export const f10VehiclesRezs = pgTable("f10VehiclesRez",
         reason: varchar("reason", { length: 20 }).notNull(),
         creator: varchar("creator", { length: 20 }).notNull(),
         createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
+
     }
 );
+
+export type F10VehiclesRezs = typeof f10VehiclesRezs.$inferSelect;
+export type NewF10VehiclesRezs = typeof f10VehiclesRezs.$inferInsert;
 
 export const rez2vehicles = relations(f10Vehicles, ({ many }) => ({
     checkOuts: many(f10VehiclesRezs),

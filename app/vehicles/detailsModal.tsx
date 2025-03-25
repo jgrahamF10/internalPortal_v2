@@ -1,13 +1,14 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { type Reservation, getVehicleById } from "@/lib/reservationUtils"
+import { type F10Vehicles, F10VehiclesRezs } from "@/db/schema/utilities_db";
+import { getF10VechileRezById } from "@/app/vehicles/vehicleActions";
 
 interface ReservationDetailsModalProps {
-  reservation: Reservation
+  reservation: F10VehiclesRezs
   onClose: () => void
 }
 
 export default function ReservationDetailsModal({ reservation, onClose }: ReservationDetailsModalProps) {
-  const vehicle = getVehicleById(reservation.vehicleId)
+  const rez:any = reservation;
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -17,16 +18,22 @@ export default function ReservationDetailsModal({ reservation, onClose }: Reserv
         </DialogHeader>
         <div className="mt-4">
           <p>
-            <strong>Vehicle:</strong> {vehicle?.name}
+            <strong>Vehicle:</strong> {rez?.vehicle?.vehicleName}
           </p>
           <p>
-            <strong>Usage:</strong> {vehicle?.type}
+            <strong>Driver:</strong> {rez?.driver}
           </p>
           <p>
-            <strong>Start:</strong> {reservation.start.toLocaleDateString()}
+            <strong>Usage:</strong> {rez?.reason}
           </p>
           <p>
-            <strong>End:</strong> {reservation.end.toLocaleDateString()}
+            <strong>Start:</strong> {new Date(rez.pickUpDate).toLocaleDateString()}
+          </p>
+          <p>
+            <strong>End:</strong> {rez.returnDate ? new Date(rez.returnDate).toLocaleDateString() : 'No return date'}
+          </p>
+          <p>
+            Created By {rez.creator}
           </p>
         </div>
       </DialogContent>
