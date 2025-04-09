@@ -11,25 +11,24 @@ import {
     pgEnum,
     varchar,
     date,
-    interval
+    interval,
+    index,
 } from "drizzle-orm/pg-core";
 import { start } from "repl";
 
-
-export const f10Vehicles = pgTable("f10Vehicles",
-    {
-        id: bigserial("id", { mode: "number" }).primaryKey(),
-        vehicleName: varchar("vehicleName", { length: 20 }).notNull(),
-        year: interval("year", { fields: "year" }).notNull(),
-        licensePlate: varchar("licensePlate", { length: 10 }).notNull(),
-        color: varchar("color", { length: 10 }).notNull(),
-    }
-);
+export const f10Vehicles = pgTable("f10Vehicles", {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    vehicleName: varchar("vehicleName", { length: 20 }).notNull(),
+    year: interval("year", { fields: "year" }).notNull(),
+    licensePlate: varchar("licensePlate", { length: 10 }).notNull(),
+    color: varchar("color", { length: 10 }).notNull(),
+});
 
 export type F10Vehicles = typeof f10Vehicles.$inferSelect;
 export type NewF10Vehicles = typeof f10Vehicles.$inferInsert;
 
-export const f10VehiclesRezs = pgTable("f10VehiclesRez",
+export const f10VehiclesRezs = pgTable(
+    "f10VehiclesRez",
     {
         id: bigserial("id", { mode: "number" }).primaryKey(),
         vehicle_id: integer("vehicle_id").notNull(),
@@ -39,7 +38,16 @@ export const f10VehiclesRezs = pgTable("f10VehiclesRez",
         reason: varchar("reason", { length: 20 }).notNull(),
         creator: varchar("creator", { length: 20 }).notNull(),
         createdDate: timestamp("createdDate", { mode: "date" }).notNull(),
-
+    },
+    (table) => {
+        return {
+            // Add an index to speed up overlap queries
+            vehicleDateIdx: index("vehicle_date_idx").on(
+                table.vehicle_id,
+                table.pickUpDate,
+                table.returnDate
+            ),
+        };
     }
 );
 
@@ -50,7 +58,7 @@ export const rez2vehicles = relations(f10Vehicles, ({ many }) => ({
     checkOuts: many(f10VehiclesRezs),
 }));
 
-export const vehicle2rez = relations(f10VehiclesRezs,({ one }) => ({
+export const vehicle2rez = relations(f10VehiclesRezs, ({ one }) => ({
     vehicle: one(f10Vehicles, {
         fields: [f10VehiclesRezs.vehicle_id],
         references: [f10Vehicles.id],

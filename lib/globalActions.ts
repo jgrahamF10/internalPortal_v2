@@ -37,3 +37,4 @@ export async function deleteMemberNote(memberNoteId: number) {
         return false;
     }
 }
+
