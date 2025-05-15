@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import { getProjects } from "../hrActions";
+import { getClearances } from "../hrActions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Edit } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -78,7 +78,7 @@ export default function Page(
     
     useEffect(() => {
         async function fetchData() {
-            const projects = await getProjects();
+            const projects = await getClearances();
             //console.log("projects", projects);
             setProjects(projects);
             setLoading(false);
@@ -99,8 +99,6 @@ export default function Page(
         setInactives(!inactives);
     };
 
-
-    
     
 
     const filteredAssets = projects.filter((project) => {
@@ -144,7 +142,7 @@ export default function Page(
 
     const columns = [
         {
-            name: "ProjectName",
+            name: "Name",
             selector: (row: any) => row.projectName,
             cell: (row: any) => (
                 <Link href={`/hr/projects/${row.projectName}`}>
@@ -153,18 +151,7 @@ export default function Page(
             ),
             sortable: true,
         },
-        {
-            name: "Required Technicians",
-            selector: (row: any) => (row.requiredTechnians),
-            sortable: true,
-            cell: (row: any) => (
-                <span
-                    className={row.requiredTechnians > row.projectBgStatus.length ? "text-red-600" : "text-green-700 font-medium"  }
-                >
-                    {row.requiredTechnians}
-                </span>
-            ),
-        },
+        
         {
             name: "Status",
             selector: (row: any) => (row.inactive ? "Inactive" : "Active" ),
@@ -264,11 +251,11 @@ export default function Page(
             <div className="shadow-xl p-6 rounded-md max-w-screen-xl w-full">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-2xl font-semibold">All Projects</h1>
+                    <h1 className="text-2xl font-semibold">Clerances</h1>
                     {session?.roles?.some((role) =>
                         ["Managers", "Human Resources"].includes(role)
                     ) && (
-                        <NewProjecForm errorStatusChange={errorStatusChange} project={true} />
+                        <NewProjecForm errorStatusChange={errorStatusChange} project={false} />
                         )}
 
                 </div>
@@ -282,7 +269,7 @@ export default function Page(
                         </button>
                     </h3>
                 </div>
-                <h3 className="pb-4">Displaying {filteredAssets.length} Projects</h3>
+                <h3 className="pb-4">Displaying {filteredAssets.length} Clearances</h3>
                 <div className="overflow-auto rounded-md">
                     <DataTable
                         columns={columns}

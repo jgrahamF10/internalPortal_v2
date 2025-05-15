@@ -103,6 +103,18 @@ export function EditProjectForm({
                                 defaultChecked={!!project?.inactive} // Set checkbox based on fetched data
                             />
                         </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label className="text-right" htmlFor="inactive">
+                                Clearnace
+                            </Label>
+                            <input
+                                {...register("isClearance")}
+                                type="checkbox"
+                                className="col-span-1"
+                                id="isClearance"
+                                defaultChecked={!!project?.isClearance} // Set checkbox based on fetched data
+                            />
+                        </div>
                     </div>
                     <DialogFooter>
                         <DialogClose asChild>

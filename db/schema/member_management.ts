@@ -20,6 +20,7 @@ export const projects = pgTable("project", {
     projectName: varchar("projectName", { length: 40 }).unique('projectName').notNull(),
     requiredTechnians: integer("requiredTechnians").default(1),
     inactive: boolean("inactive").default(false),
+    isClearance: boolean("isClearance").default(false),
 });
 
 export type Projects = typeof projects.$inferSelect;

@@ -67,30 +67,34 @@ export default function SideNav() {
                                 </span>
                             </Link>
                         )}
-                        {session?.roles?.some((role) =>
-                            ["Managers", "Human Resources"].includes(role)
-                        ) && (
-                            <div>
-                                <Link
-                                    href="/hr/projects"
-                                    className="flex h-12 items-center pl-4 border-b text-sm font-medium transition-colors hover:bg-gray-700"
-                                >
-                                    <CodiconProject />
-                                    <span className="text-center pl-12">
-                                        {" "}
-                                        Project Management
-                                    </span>
-                                </Link>
-                            </div>
-                        )}
                         <Accordion type="single" collapsible>
+                        {session?.roles?.some((role) =>
+                                ["Managers", "Human Resources"].includes(role)
+                            ) && (
+                                <AccordionItem value="item-1">
+                                    <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
+                                    <CodiconProject />Project Management
+                                    </AccordionTrigger>
+                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
+                                        <Link href="/hr/projects">
+                                            Projects
+                                        </Link>
+                                    </AccordionContent>
+                                    <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
+                                        <Link href="/hr/clearances">
+                                           Clearances
+                                        </Link>
+                                    </AccordionContent>
+                                    
+                                </AccordionItem>
+                            )}
                             {/* <--------- HR --------- */}
                             {session?.roles?.some((role) =>
                                 ["Managers", "Human Resources"].includes(role)
                             ) && (
                                 <AccordionItem value="item-1">
                                     <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
-                                        <RiTeamFill /> Tech Management
+                                        <RiTeamFill /> Team Management
                                     </AccordionTrigger>
                                     <AccordionContent className="flex h-9 items-center px-8 py-2 text-sm transition-colors hover:bg-gray-700">
                                         <Link href="/hr/roster">
@@ -108,7 +112,6 @@ export default function SideNav() {
                                         </Link>
                                     </AccordionContent>
                                 </AccordionItem>
-                                
                             )}
                             {/* <--------- Trackers --------- */}
                             {session?.roles?.some((role) =>
