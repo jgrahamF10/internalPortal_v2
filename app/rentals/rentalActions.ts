@@ -56,7 +56,7 @@ export async function createRental(data: NewRentals) {
     } catch (error: any) {
         console.error("Error creating tsa approval:", error);
         console.error("Error message:", error.message);
-        return error.column;
+        return error.detail;
     }
 }
 

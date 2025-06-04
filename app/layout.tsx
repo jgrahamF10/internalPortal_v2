@@ -49,6 +49,12 @@ export default async function RootLayout({
                 )}
             >
                 <Providers>
+                    <ThemeProvider
+                        attribute="class"
+                        defaultTheme="system"
+                        enableSystem
+                        disableTransitionOnChange
+                    >
                     <div className="fixed top-0 left-0 w-full z-50">
                         <SearchBar />
                     </div>
@@ -56,12 +62,7 @@ export default async function RootLayout({
                     <div className="fixed left-0 w-72 h-full z-40">
                         <SideNav />
                     </div>
-                    <ThemeProvider
-                        attribute="class"
-                        defaultTheme="system"
-                        enableSystem
-                        disableTransitionOnChange
-                    >
+                    
                         <div className="pt-16 pl-72 pr-2 py-8">{children}</div>
                         <Toaster richColors position="top-right" />
                     </ThemeProvider>
