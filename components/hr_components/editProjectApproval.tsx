@@ -45,6 +45,7 @@ import {
 } from "@/app/hr/hrActions"; // Add updateProject and getProject functions
 import { ProjectBGStatus } from "@/db/schema/member_management";
 import { DeleteProjectApproval } from "@/components/hr_components/deleteProjectApproval";
+import {EditIcon} from "@/components/icons/edit";
 
 interface EditProjectFormProps {
     errorStatusChange: (status: boolean) => void;
@@ -133,7 +134,7 @@ export default function EditProjectApproval({
         <Dialog key="1">
             <DialogTrigger asChild>
                 <Button variant={"destructive"} className="hover:text-black">
-                    Edit
+                   <EditIcon/> 
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[500px]">
