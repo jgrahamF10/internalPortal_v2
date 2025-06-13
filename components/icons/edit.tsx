@@ -1,3 +1,6 @@
+import React from 'react';
+import type { SVGProps } from 'react';
+
 export function EditIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
