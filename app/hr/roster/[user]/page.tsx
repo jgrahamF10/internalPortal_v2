@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import NotAuth from "@/components/auth/notAuth";
 import Link from "next/link";
 import ProjectApprovalModal from "@/components/hr_components/projectApproval";
+import ClearanceApprovalModal from "@/components/hr_components/clearanceApproval";
 import NewNoteModal from "@/components/hr_components/newNote";
 import EditProjectApproval from "@/components/hr_components/editProjectApproval";
 import EditMember from "@/components/hr_components/editMember";
@@ -39,6 +40,7 @@ export default function MemberDetails({
     const [intakeStatus, setIntakeStatus] = useState<any>(null);
     const { data: session } = useSession();
     const showProjectApproval = searchParams?.showProjectApproval;
+    const showProjectClearance = searchParams?.showProjectClearance;
     const newNote = searchParams?.newNote;
     const [errorStatus, setErrorStatus] = useState<boolean>(false);
     const [resumeUrl, setResumeUrl] = useState<string>("");
@@ -561,14 +563,14 @@ export default function MemberDetails({
                             Clearance Status
                         </h2>
                         <Link
-                            href={`/hr/roster/${params.user}/?showProjectApproval=true`}
+                            href={`/hr/roster/${params.user}/?showProjectClearance=true`}
                         >
                             <Button className="bg-green-700">
                                 Add Clearance
                             </Button>
                         </Link>
-                        {showProjectApproval && (
-                            <ProjectApprovalModal
+                        {showProjectClearance && (
+                            <ClearanceApprovalModal
                                 params={{
                                     person: decondedUser,
                                     uploader: session?.user?.name ?? "",
