@@ -92,7 +92,7 @@ export default function SideNav() {
                             {session?.roles?.some((role) =>
                                 ["Managers", "Human Resources"].includes(role)
                             ) && (
-                                <AccordionItem value="item-1">
+                                <AccordionItem value="item-2">
                                     <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
                                         <RiTeamFill /> Team Management
                                     </AccordionTrigger>
@@ -117,7 +117,7 @@ export default function SideNav() {
                             {session?.roles?.some((role) =>
                                 ["Managers", "Human Resources"].includes(role)
                             ) && (
-                                <AccordionItem value="item-2">
+                                <AccordionItem value="item-3">
                                     <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
                                         <AppReporting /> Trackers
                                     </AccordionTrigger>
@@ -147,7 +147,7 @@ export default function SideNav() {
                             )}
                             {/* <--------- Tech Resources --------- */}
                             {session?.roles?.includes("Managers") && (
-                                <AccordionItem value="item-3">
+                                <AccordionItem value="item-4">
                                     <AccordionTrigger className="h-12 px-4 text-sm font-medium transition-colors hover:bg-gray-700">
                                         <GraphIcon /> Manager Tools
                                     </AccordionTrigger>

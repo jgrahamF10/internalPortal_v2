@@ -49,7 +49,7 @@ interface UserName {
 }
 
 const FormSchema = z.object({
-    projectId: z.string(),
+    projectId: z.string().min(1),
     memberId: z.number(),
     bgStatus: z.enum(["In Progress", "Failed", "Completed"]),
     documentsCollected: z.boolean(),
@@ -164,6 +164,7 @@ export default function ProjectApprovalModal({
                             <FormField
                                 control={control}
                                 name="projectId"
+                                rules={{ required: "Please select a project" }}
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
